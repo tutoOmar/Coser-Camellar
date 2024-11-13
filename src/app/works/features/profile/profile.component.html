@@ -1,0 +1,124 @@
+<h1 class="font-bold text-xl text-center">Tú perfil</h1>
+<div class="worker" *ngIf="typeUser() == 'trabajadores'">
+  <div class="worker-details-container">
+    <a
+      [routerLink]="['/works/profile/edit-worker', workerSignal()?.id]"
+      class="text-blue-600 p-2"
+      >Editar perfil</a
+    >
+    <div *ngIf="workerSignal()" class="flex flex-col">
+      <!-- Estructura principal en pantallas pequeñas -->
+      <div class="worker-header-complete">
+        <div class="worker-header">
+          <div class="worker-photo">
+            <img
+              class="p-8 rounded-t-lg image"
+              [src]="
+                workerSignal()?.photo
+                  ? workerSignal()?.photo
+                  : 'https://firebasestorage.googleapis.com/v0/b/tu-chamba-cf127.appspot.com/o/avatarMan.png?alt=media&token=0df1900c-9055-4310-8fd9-6486c922bf50'
+              "
+              alt="Foto de {{ workerSignal()?.name }}"
+            />
+          </div>
+          <div class="worker-info">
+            <h2 class="mt-2">{{ workerSignal()?.name }}</h2>
+            <p class="mt-2">
+              {{ workerSignal()?.city }}, {{ workerSignal()?.country }}
+            </p>
+            <p class="text-sm text-black-500 dark:text-black-400">
+              <strong>Genero: </strong>
+              {{ translateGender(workerSignal()?.gender) }}
+            </p>
+            <p class="mt-2">
+              <strong>Teléfono:</strong> {{ workerSignal()?.phone }}
+            </p>
+          </div>
+        </div>
+        <div class="detalles mt-3 ml-2">
+          <p class="mt-2">
+            <strong>Especialidades:</strong>
+            {{ removeHyphens(workerSignal()?.specialty) }}
+          </p>
+          <p class="mt-2">
+            <strong>Máquinas que maneja:</strong>
+            {{ removeHyphens(workerSignal()?.machines) }}
+          </p>
+          <p class="mt-2">
+            <strong>Experiencia:</strong>
+            {{ removeHyphens(workerSignal()?.experience) }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div
+  class="business"
+  *ngIf="typeUser() == 'satelite' || typeUser() == 'talleres'"
+>
+  <div class="worker-details-container">
+    <div *ngIf="businessSginal()" class="flex flex-col">
+      <!-- Estructura principal en pantallas pequeñas -->
+      <div class="worker-header-complete">
+        <div class="worker-header">
+          <div class="worker-photo">
+            <img
+              class="p-8 rounded-t-lg image"
+              [src]="
+                businessSginal()?.photo
+                  ? businessSginal()?.photo
+                  : 'https://firebasestorage.googleapis.com/v0/b/tu-chamba-cf127.appspot.com/o/avatarMan.png?alt=media&token=0df1900c-9055-4310-8fd9-6486c922bf50'
+              "
+              alt="Foto de {{ businessSginal()?.name }}"
+            />
+          </div>
+          <div class="worker-info">
+            <h2 class="mt-2">{{ businessSginal()?.name }}</h2>
+            <p class="text-sm text-black-500 dark:text-black-400">
+              <strong>Responsable: </strong>{{ businessSginal()?.responsible }}
+            </p>
+            <p class="mt-2">
+              {{ businessSginal()?.city }}, {{ businessSginal()?.country }}
+            </p>
+            <p class="text-sm text-black-500 dark:text-black-400">
+              <strong>Ubicación: </strong>
+              {{ businessSginal()?.neighborhood }}
+            </p>
+            <p class="mt-2">
+              <strong>Teléfono:</strong> {{ businessSginal()?.phone }}
+            </p>
+          </div>
+        </div>
+        <div class="detalles mt-3 ml-2">
+          <p class="mt-2">
+            <strong>Especialidades:</strong>
+            {{ removeHyphens(businessSginal()?.specialty) }}
+          </p>
+          <p class="mt-2">
+            <strong>Máquinas que maneja:</strong>
+            {{ removeHyphens(businessSginal()?.machines) }}
+          </p>
+          <p class="mt-2">
+            <strong>Experiencia:</strong>
+            {{ removeHyphens(businessSginal()?.experience) }}
+          </p>
+          <p class="text-black-500 dark:text-black-400 mb-3">
+            <strong>Número colaboradores o empleados: </strong
+            >{{ businessSginal()?.numberEmployees }}
+          </p>
+        </div>
+      </div>
+      <ng-container *ngIf="businessSginal() as signal">
+        <div class="positions" *ngIf="signal.positions">
+          <h1 class="text-2xl ml-5">Estamos buscando:</h1>
+          <div class="cards-positions">
+            <div class="ml-5" *ngFor="let position of signal.positions">
+              <app-card-position [position]="position"> </app-card-position>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

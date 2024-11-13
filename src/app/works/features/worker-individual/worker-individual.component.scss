@@ -1,0 +1,95 @@
+.worker-details-container {
+  padding: 20px;
+}
+
+.worker-header {
+  display: flex;
+  flex-direction: row;
+}
+.worker-header-complete {
+  display: flex;
+}
+
+.worker-photo {
+  width: 100%;
+  max-width: 500px;
+}
+
+.worker-photo-img {
+  width: 100%;
+  height: auto;
+  border-radius: 20%;
+}
+
+.worker-info {
+  width: 100%;
+  padding: 10px;
+}
+
+.worker-info h2 {
+  font-size: 24px;
+}
+
+.worker-comments {
+  margin-top: 20px;
+}
+
+.comment-box {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+.stars svg {
+  width: 20px;
+  height: 20px;
+}
+
+.load-more-button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.add-comment-form {
+  margin-top: 20px;
+}
+
+.add-comment-form h3 {
+  font-size: 18px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+textarea,
+input[type="number"] {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:disabled {
+  background-color: #ccc;
+}
+
+@media (max-width: 425px) {
+  .worker-header-complete {
+    flex-direction: column;
+  }
+}

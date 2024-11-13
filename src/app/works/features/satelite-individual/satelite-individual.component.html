@@ -1,0 +1,131 @@
+<div class="worker-details-container">
+  <div *ngIf="sateliteSignal()" class="flex flex-col">
+    <!-- Estructura principal en pantallas pequeñas -->
+    <div class="worker-header-complete">
+      <div class="worker-header">
+        <div class="worker-photo">
+          <img
+            class="p-8 rounded-t-lg image"
+            [src]="
+              sateliteSignal()?.photo
+                ? sateliteSignal()?.photo
+                : 'https://firebasestorage.googleapis.com/v0/b/tu-chamba-cf127.appspot.com/o/talleresPhotos%2FmachineLogo.png?alt=media&token=4c581607-d6dd-4816-a3ae-e8357fd69694'
+            "
+            alt="Foto de {{ sateliteSignal()?.name }}"
+          />
+        </div>
+        <div class="worker-info">
+          <h2 class="mt-2">{{ sateliteSignal()?.name }}</h2>
+          <p class="text-sm text-black-500 dark:text-black-400">
+            <strong>Responsable: </strong>{{ sateliteSignal()?.responsible }}
+          </p>
+          <p class="mt-2">
+            {{ sateliteSignal()?.city }}, {{ sateliteSignal()?.country }}
+          </p>
+          <p class="text-sm text-black-500 dark:text-black-400">
+            <strong>Ubicación: </strong> {{ sateliteSignal()?.neighborhood }}
+          </p>
+          <p class="mt-2" *ngIf="authStateService.isAuthenticated$ | async">
+            <strong>Teléfono:</strong> {{ sateliteSignal()?.phone }}
+            <app-wa-button
+              [phoneNumber]="sateliteSignal()?.phone"
+            ></app-wa-button>
+          </p>
+        </div>
+      </div>
+      <div class="detalles mt-3 ml-2">
+        <p class="mt-2">
+          <strong>Especialidades:</strong>
+          {{ removeHyphens(sateliteSignal()?.specialty) }}
+        </p>
+        <p class="mt-2">
+          <strong>Máquinas que maneja:</strong>
+          {{ removeHyphens(sateliteSignal()?.machines) }}
+        </p>
+        <p class="mt-2">
+          <strong>Experiencia:</strong>
+          {{ removeHyphens(sateliteSignal()?.experience) }}
+        </p>
+        <p class="text-black-500 dark:text-black-400 mb-3">
+          <strong>Número colaboradores o empleados: </strong
+          >{{ sateliteSignal()?.numberEmployees }}
+        </p>
+      </div>
+    </div>
+    <ng-container *ngIf="sateliteSignal() as signal">
+      <div class="positions" *ngIf="signal.positions.length >= 0">
+        <h1 class="text-2xl ml-5">Estamos buscando:</h1>
+        <div class="cards-positions">
+          <div class="ml-5" *ngFor="let position of signal.positions">
+            <app-card-position [position]="position"> </app-card-position>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Listado de comentarios -->
+    <div class="worker-comments">
+      <h3 class="text-xl"><strong>Comentarios: </strong></h3>
+      <div *ngFor="let comment of paginatedComments" class="comment-box">
+        <p><strong>Comentario:</strong> {{ comment.comment }}</p>
+        <div class="stars flex flex-row">
+          <ng-container *ngFor="let star of [].constructor(5); let i = index">
+            <svg
+              class="star-icon"
+              [ngClass]="{
+                'text-yellow-300': i < comment.score,
+                'text-gray-200': i >= comment.score
+              }"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 22 20"
+            >
+              <path
+                d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"
+              />
+            </svg>
+          </ng-container>
+        </div>
+      </div>
+      <button
+        *ngIf="
+          sateliteSignal()?.comments &&
+          (sateliteSignal()?.comments)!.length >
+            currentCommentPage * commentsPerPage
+        "
+        (click)="nextCommentsPage()"
+        class="load-more-button"
+      >
+        Ver más comentarios
+      </button>
+    </div>
+
+    <!-- Formulario para agregar un nuevo comentario -->
+    <div class="add-comment-form">
+      <h3>¿Trabajaste con {{ sateliteSignal()?.name }}? Deja tu comentario</h3>
+      <form [formGroup]="commentForm" (ngSubmit)="addComment()">
+        <div class="form-group">
+          <textarea
+            id="comment"
+            formControlName="comment"
+            placeholder="Escribe tu comentario..."
+          ></textarea>
+        </div>
+        <div class="form-group">
+          <label for="score">Calificación:</label>
+          <input
+            type="number"
+            id="score"
+            formControlName="score"
+            min="1"
+            max="5"
+            placeholder="1 - 5"
+          />
+        </div>
+        <button type="submit" [disabled]="commentForm.invalid">
+          Agregar comentario
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

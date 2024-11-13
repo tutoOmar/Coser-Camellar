@@ -1,0 +1,217 @@
+<div
+  class="formWorker space-y-6 bg-white p-8 shadow-md rounded-lg max-w-lg mx-auto"
+>
+  <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">
+    Registro para Trabajadores
+  </h2>
+  <form
+    [formGroup]="workerForm"
+    (ngSubmit)="registerWorker()"
+    class="space-y-5"
+  >
+    <!-- Imagen -->
+    <div>
+      <!-- Input para subir imagen -->
+      <label class="block text-gray-700 font-medium"
+        >Agrega tu imagen(Opcional):</label
+      >
+      <div class="form-group">
+        <input
+          type="file"
+          (change)="onImageSelected($event)"
+          accept="image/*"
+        />
+
+        <!-- Mostrar la imagen si se ha seleccionado -->
+        <img
+          *ngIf="imagePreview()"
+          [src]="imagePreview()"
+          alt="Imagen de la noticia"
+        />
+      </div>
+    </div>
+
+    <!-- Nombre -->
+    <div>
+      <label class="block text-gray-600 font-semibold mb-2">Nombre:</label>
+      <input
+        type="text"
+        formControlName="name"
+        class="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+      />
+      <small
+        *ngIf="
+          workerForm.get('name')?.invalid && workerForm.get('name')?.touched
+        "
+        class="text-red-500"
+        >Este campo es requerido</small
+      >
+    </div>
+
+    <!-- Celular -->
+    <div>
+      <label class="block text-gray-600 font-semibold mb-2">Celular:</label>
+      <input
+        type="number"
+        formControlName="phone"
+        class="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+      />
+      <small
+        *ngIf="
+          workerForm.get('phone')?.invalid && workerForm.get('phone')?.touched
+        "
+        class="text-red-500"
+        >Campo requerido y debe ser número</small
+      >
+    </div>
+
+    <!-- Género -->
+    <div>
+      <label class="block text-gray-600 font-semibold mb-2">Género:</label>
+      <select
+        formControlName="gender"
+        class="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+      >
+        <option value="" disabled selected>Selecciona un género</option>
+        <option *ngFor="let gender of genderList" [value]="gender">
+          {{ translateGender(gender) }}
+        </option>
+      </select>
+    </div>
+    <small
+      *ngIf="
+        workerForm.get('gender')?.invalid && workerForm.get('gender')?.touched
+      "
+      class="text-red-500"
+      >Campo requerido</small
+    >
+    <!-- País y Ciudad -->
+    <div>
+      <label class="block text-gray-600 font-semibold mb-2">País:</label>
+      <select
+        formControlName="country"
+        class="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+      >
+        <option value="" disabled selected>Selecciona un país</option>
+        <option *ngFor="let country of countries" [value]="country.name">
+          {{ country.name }}
+        </option>
+      </select>
+    </div>
+    <small
+      *ngIf="
+        workerForm.get('country')?.invalid && workerForm.get('country')?.touched
+      "
+      class="text-red-500"
+      >Debes eligir un país</small
+    >
+    <div>
+      <label class="block text-gray-600 font-semibold mb-2">Ciudad:</label>
+      <select
+        formControlName="city"
+        class="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+      >
+        <option value="" disabled selected>Selecciona una ciudad</option>
+        <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
+      </select>
+    </div>
+    <small
+      *ngIf="workerForm.get('city')?.invalid && workerForm.get('city')?.touched"
+      class="text-red-500"
+      >Debes elegir una ciudad</small
+    >
+    <!-- Especialidades -->
+    <div>
+      <label class="block text-gray-600 font-semibold mb-2"
+        >Especialidades:</label
+      >
+      <select
+        (change)="addSpecialtyWorker($event, specialtySelect)"
+        #specialtySelect
+        class="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+      >
+        <option value="" disabled selected>Selecciona una especialidad</option>
+        <option
+          *ngFor="let specialty of availableSpecialties"
+          [value]="specialty"
+        >
+          {{ removeHyphens(specialty) }}
+        </option>
+      </select>
+      <div class="mt-2">
+        <label class="block text-gray-700 font-medium"
+          >Especialidades seleccionadas:</label
+        >
+        <div class="flex flex-wrap gap-2 mt-2">
+          <span
+            *ngFor="let specialty of specialtiesSignal()"
+            class="flex items-center gap-1 px-3 py-1 bg-blue-200 text-blue-700 rounded-full"
+          >
+            {{ removeHyphens(specialty) }}
+            <button
+              (click)="removeSpecialtyWorker(specialty)"
+              class="text-red-500 remove-button"
+            >
+              x
+            </button>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Máquinas -->
+    <div>
+      <label class="block text-gray-600 font-semibold mb-2">Máquinas:</label>
+      <select
+        (change)="addMachineWorker($event, machineSelect)"
+        #machineSelect
+        class="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+      >
+        <option value="" disabled selected>Selecciona una máquina</option>
+        <option *ngFor="let machine of availableMachines" [value]="machine">
+          {{ removeHyphens(machine) }}
+        </option>
+      </select>
+      <div class="flex flex-wrap gap-2 mt-2">
+        <span
+          *ngFor="let machine of machinesSignal()"
+          class="flex items-center gap-1 px-3 py-1 bg-blue-200 text-blue-700 rounded-full"
+        >
+          {{ removeHyphens(machine) }}
+          <button
+            (click)="removeMachineWorker(machine)"
+            class="text-red-500 bg-none remove-button"
+          >
+            x
+          </button>
+        </span>
+      </div>
+    </div>
+
+    <!-- Experiencia -->
+    <div>
+      <label class="block text-gray-600 font-semibold mb-2">Experiencia:</label>
+      <textarea
+        [formControl]="experienceControl"
+        class="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+        placeholder="Años de experiencia"
+      ></textarea>
+      <small
+        *ngIf="
+          workerForm.get('experience')?.invalid &&
+          workerForm.get('experience')?.touched
+        "
+        class="text-red-500"
+        >Máximo 100 caracteres</small
+      >
+    </div>
+    <!-- Botón de registro -->
+    <button
+      type="submit"
+      [disabled]="loading()"
+      class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition duration-200"
+    >
+      {{ loading() ? "Cargando" : "Actualizar mi perfil " }}
+    </button>
+  </form>
+</div>

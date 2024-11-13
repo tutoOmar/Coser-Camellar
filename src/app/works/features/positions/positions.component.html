@@ -1,0 +1,58 @@
+<h1 class="text-3xl text-blue-700 ml-6 mb-2 font-semibold mt-3">
+  ¿Buscas trabajo?
+</h1>
+<div class="search">
+  <input
+    type="text"
+    placeholder="Buscar"
+    (input)="onSearch($event)"
+    class="search_input ml-5 w-full md:w-1/2 lg:w-1/3 xl:w-1/4 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+  />
+</div>
+<div class="space-y-8 p-4">
+  <h1 class="text-xl md:text-2xl font-bold mb-4">Trabajos en satélites</h1>
+  <div
+    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+  >
+    <ng-container *ngFor="let satelite of filteredPositionSateliteSignal()">
+      <!-- Mostrar una tarjeta por cada posición en el satélite -->
+      <div
+        *ngFor="let position of satelite.positions"
+        class="card bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200 hover:shadow-xl transition duration-300 ease-in-out"
+      >
+        <div class="p-4">
+          <!-- Mostrar el nombre del satélite -->
+          <a [routerLink]="['/works/satelite', satelite.id]">
+            <h2 class="text-lg font-semibold text-gray-800 mb-2">
+              {{ satelite.name }}
+            </h2>
+          </a>
+        </div>
+        <app-card-position [position]="position"> </app-card-position>
+      </div>
+    </ng-container>
+  </div>
+
+  <h1 class="text-xl md:text-2xl font-bold mb-4">Trabajos en talleres</h1>
+  <div
+    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+  >
+    <ng-container *ngFor="let taller of filteredPositionTallerSignal()">
+      <!-- Mostrar una tarjeta por cada posición en el taller -->
+      <div
+        *ngFor="let position of taller.positions"
+        class="card bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200 hover:shadow-xl transition duration-300 ease-in-out"
+      >
+        <div class="p-4">
+          <!-- Mostrar el nombre del taller -->
+          <a [routerLink]="['/works/talleres', taller.id]">
+            <h2 class="text-lg font-semibold text-gray-800 mb-2">
+              {{ taller.name }}
+            </h2>
+          </a>
+        </div>
+        <app-card-position [position]="position"> </app-card-position>
+      </div>
+    </ng-container>
+  </div>
+</div>

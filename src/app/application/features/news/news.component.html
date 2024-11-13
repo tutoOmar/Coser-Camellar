@@ -1,0 +1,37 @@
+<div class="news-feed">
+  <div class="news-item" *ngFor="let news of newsListSignal()">
+    <div class="news-header">
+      <div class="author">{{ news.author }}</div>
+      <div class="timestamp">{{ news.timestamp | date : "short" }}</div>
+    </div>
+    <div class="news-content">
+      <h3>
+        <strong>{{ news.title }}</strong>
+      </h3>
+      <p>
+        {{
+          isExpanded[news.id]
+            ? news.content
+            : (news.content | slice : 0 : 100) + "..."
+        }}
+      </p>
+      <button (click)="toggleExpand(news.id)" class="text-blue-600">
+        {{ isExpanded[news.id] ? "Ver menos" : "Ver más" }}
+      </button>
+      <div *ngIf="news.linkUrl">
+        <a href="{{ news.linkUrl }}" target="_blank">Link Aquí</a>
+      </div>
+      <img
+        *ngIf="news.imageUrl"
+        [src]="news.imageUrl"
+        alt="Imagen de la noticia"
+      />
+    </div>
+    <div class="news-footer">
+      <button (click)="likeNews(news)">👍 {{ news.likes }} Me gusta</button>
+      <button (click)="showComments(news)">
+        💬 {{ news.comments.length }} Comentarios
+      </button>
+    </div>
+  </div>
+</div>

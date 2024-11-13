@@ -1,0 +1,23 @@
+.card {
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  background-color: #fff;
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  }
+
+  h2 {
+    color: #2d3748;
+    font-weight: 600;
+  }
+}
+
+@media (max-width: 425px) {
+  .search_input {
+    width: 80%;
+  }
+}

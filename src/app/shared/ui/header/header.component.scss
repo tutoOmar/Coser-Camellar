@@ -1,0 +1,136 @@
+.icon {
+  width: 40px;
+  height: 40px;
+  fill: currentColor; /* Esto hará que el color del ícono se ajuste al color del texto si es necesario */
+  color: #0171ff;
+}
+
+.icon-button {
+  text-align: center;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 8px;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+.icon-button:hover {
+  background-color: #6fbadd;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+.name-app {
+  display: flex;
+  flex-direction: row;
+}
+.tittle {
+  font-family: "Bevan";
+  font-size: 35px;
+  font-style: bold;
+}
+.icons-rows {
+  display: flex;
+  flex-direction: row;
+}
+
+.workers-icon {
+  display: none;
+  cursor: pointer;
+}
+.workers {
+  display: flex;
+  gap: 1rem;
+  list-style: none;
+}
+
+.main-container {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+@media (max-width: 470px) {
+  .icon {
+    width: 25px;
+    height: 25px;
+  }
+  .icon-button {
+    width: 90px;
+    display: flex;
+    margin: 0 auto;
+  }
+  .name-app-icon {
+    flex-direction: row;
+  }
+  .image-main {
+    height: 3rem;
+  }
+  .div1 {
+    margin-top: 10px;
+    margin-bottom: 20px;
+  }
+  .div2 {
+    order: 3;
+    margin-top: 15px;
+  }
+  .div3 {
+    order: 2;
+  }
+  .icons-rows {
+    display: flex;
+    flex-direction: row;
+  }
+  .workers {
+    display: none; /* Oculta el menú inicialmente */
+    flex-direction: column;
+    background-color: rgba(
+      185,
+      223,
+      238,
+      0.95
+    ); /* Fondo oscuro con transparencia */
+    position: absolute;
+    top: 20rem; /* queda debajo de los iconos */
+    padding: 1rem;
+    border-radius: 5px;
+    box-shadow: 0px 4px 8px rgba(255, 255, 255, 0.3); /* Sombra para darle efecto de profundidad */
+    width: 100vw; /*se  ajusta el ancho para móviles */
+    max-width: 90%; /* se limita el ancho máximo */
+  }
+  .workers-icon {
+    display: block;
+  }
+
+  .workers.open {
+    display: flex; /* Muestra el menú expandido */
+  }
+
+  .icon-button {
+    text-align: center;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 8px;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    width: 100%; /* Asegura que los botones ocupen el ancho completo del menú */
+  }
+
+  .icon-button:hover {
+    background-color: #6fbadd;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  .icon-button-menu {
+    flex-direction: row;
+  }
+  .icon-button-menu {
+    span {
+      font-size: 1.5rem;
+    }
+  }
+  .main-container {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 375px) {
+  .icon-button-menu {
+    span {
+      font-size: 1.2rem;
+    }
+  }
+}

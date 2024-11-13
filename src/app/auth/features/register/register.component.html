@@ -1,0 +1,655 @@
+<div
+  class="header flex flex-col items-center p-6 bg-gray-100 rounded-lg shadow-md"
+>
+  <h1 class="text-2xl font-bold mb-4 text-center">
+    ¿Qué tipo de cuenta quieres crear?
+  </h1>
+  <div class="professions flex flex-row space-x-8 justify-center">
+    <!-- Opción de trabajador -->
+    <div
+      class="flex flex-col items-center cursor-pointer transition-all transform hover:scale-105 hover:bg-blue-50 p-4 rounded-lg shadow"
+      (click)="selectType('worker')"
+    >
+      <button class="text-blue-600 focus:outline-none">
+        <svg
+          class="icon"
+          version="1.1"
+          id="Uploaded to svgrepo.com"
+          xmlns="http://www.w3.org/2000/svg"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          viewBox="0 0 32 32"
+          xml:space="preserve"
+          fill="#000000"
+        >
+          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+          <g
+            id="SVGRepo_tracerCarrier"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ></g>
+          <g id="SVGRepo_iconCarrier">
+            <path
+              class="feather_een"
+              d="M29,24V7c0-1.657-1.343-3-3-3H6C4.343,4,3,5.343,3,7v8c0,0.552,0.448,1,1,1v1c0,0.552,0.448,1,1,1h2 v1.5C7,19.776,7.224,20,7.5,20S8,19.776,8,19.5V18h2c0.552,0,1-0.448,1-1v-1c0.552,0,1-0.448,1-1h6v9H3c-1.105,0-2,0.895-2,2v1 c0,0.552,0.448,1,1,1h28c0.552,0,1-0.448,1-1v-1C31,24.895,30.105,24,29,24z M10,17H5v-1h5V17z M11,14v1H4V7c0-1.103,0.897-2,2-2h20 c1.103,0,2,0.897,2,2v17h-9V14H11z M30,27H2v-1c0-0.551,0.449-1,1-1h26c0.551,0,1,0.449,1,1V27z M16.5,7C15.119,7,14,8.119,14,9.5 c0,1.381,1.119,2.5,2.5,2.5c1.381,0,2.5-1.119,2.5-2.5C19,8.119,17.881,7,16.5,7z M16.5,11c-0.827,0-1.5-0.673-1.5-1.5 S15.673,8,16.5,8S18,8.673,18,9.5S17.327,11,16.5,11z M23.5,12c1.381,0,2.5-1.119,2.5-2.5C26,8.119,24.881,7,23.5,7 C22.119,7,21,8.119,21,9.5C21,10.881,22.119,12,23.5,12z M23.5,8C24.327,8,25,8.673,25,9.5S24.327,11,23.5,11S22,10.327,22,9.5 S22.673,8,23.5,8z M24,17h-1c-0.552,0-1,0.448-1,1v3c0,0.552,0.448,1,1,1h1c0.552,0,1-0.448,1-1v-3C25,17.448,24.552,17,24,17z M24,21h-1v-1h1V21z M24,19h-1v-1h1V19z"
+            ></path>
+          </g>
+        </svg>
+      </button>
+      <span class="text-gray-700 dark:text-white mt-2 text-center"
+        >¿Eres un trabajador?</span
+      >
+    </div>
+    <!-- Opción de negocio -->
+    <div
+      class="flex flex-col items-center cursor-pointer transition-all transform hover:scale-105 hover:bg-blue-50 p-4 rounded-lg shadow"
+      (click)="selectType('business')"
+    >
+      <button class="text-blue-600 focus:outline-none">
+        <svg
+          class="icon"
+          version="1.1"
+          id="Layer_1"
+          xmlns="http://www.w3.org/2000/svg"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          viewBox="0 0 24 24"
+          enable-background="new 0 0 24 24"
+          xml:space="preserve"
+        >
+          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+          <g
+            id="SVGRepo_tracerCarrier"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ></g>
+          <g id="SVGRepo_iconCarrier">
+            <path
+              d="M4,18v2h4v-2H4 M4,14v2h10v-2H4 M10,18v2h4v-2H10 M16,14v2h4v-2H16 M16,18v2h4v-2H16 M2,22V8l5,4V8l5,4V8l5,4l1-10h3l1,10 v10H2z"
+            ></path>
+            <rect fill="none" width="24" height="24"></rect>
+          </g>
+        </svg>
+      </button>
+      <span class="text-gray-700 dark:text-white mt-2 text-center"
+        >¿Eres un taller o Satélite?</span
+      >
+    </div>
+  </div>
+</div>
+
+<div
+  class="main-container mt-8 p-6 bg-white rounded-lg shadow-lg max-w-md mx-auto"
+>
+  <!-- Formulario para Trabajadores -->
+  <div *ngIf="selectedForm === 'worker'" class="formWorker space-y-4">
+    <h2 class="text-xl font-semibold mb-4">Registro para Trabajadores</h2>
+    <form
+      (ngSubmit)="registerWorker(workerForm, workerForm)"
+      #workerForm="ngForm"
+      class="space-y-4"
+    >
+      <!-- Campos comunes para todos los trabajadores -->
+      <!-- Input para subir imagen -->
+      <label class="block text-gray-700 font-medium"
+        >Agrega tu imagen(Opcional):</label
+      >
+      <div class="form-group">
+        <input
+          type="file"
+          (change)="onImageSelected($event)"
+          accept="image/*"
+        />
+
+        <!-- Mostrar la imagen si se ha seleccionado -->
+        <img
+          *ngIf="imagePreview"
+          [src]="imagePreview"
+          alt="Imagen de la noticia"
+        />
+      </div>
+      <div class="form-group">
+        <label class="block text-gray-700 font-medium">Nombre:</label>
+        <input
+          type="text"
+          [(ngModel)]="newWorker.name"
+          name="name"
+          (blur)="nameTouched = true"
+          required
+          class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+        />
+      </div>
+      <!-- Validación campo requerido -->
+      <small
+        *ngIf="isFieldEmpty(newWorker.name) && nameTouched"
+        class="text-red-400"
+      >
+        Este campo es requerido
+      </small>
+      <!-- Celular -->
+      <div class="form-group">
+        <label class="block text-gray-700 font-medium">Celular:</label>
+        <input
+          type="number"
+          [(ngModel)]="newWorker.phone"
+          (blur)="phoneTouched = true"
+          name="phone"
+          required
+          class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+        />
+      </div>
+      <!-- Validación campo requerido -->
+      <small
+        *ngIf="isNumber(newWorker.phone) && phoneTouched"
+        class="text-red-400"
+      >
+        Este campo es requerido
+      </small>
+      <!-- Genero -->
+      <div class="form-group">
+        <label class="block text-gray-700 font-medium">Genero:</label>
+        <select
+          name="gender"
+          [(ngModel)]="newWorker.gender"
+          class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+        >
+          <option value="" disabled selected>Selecciona un genero</option>
+          <option *ngFor="let gender of genderList" [value]="gender">
+            {{ translateGender(gender) }}
+          </option>
+        </select>
+      </div>
+      <!-- Elección país y ciudad -->
+      <div class="form-group">
+        <label class="block text-gray-700 font-medium">País:</label>
+        <!--  (change)="onCountryChange()"
+              esto se colocaría dentro del select cuando ya funcione la api de ciudades
+         -->
+        <select
+          name="country"
+          [(ngModel)]="newWorker.country"
+          required
+          (blur)="countryTouched = true"
+          class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+        >
+          <option value="" disabled selected>Selecciona un país</option>
+          <option *ngFor="let country of countries" [value]="country.name">
+            {{ country.name }}
+          </option>
+        </select>
+      </div>
+      <!-- Validación campo requerido -->
+      <small
+        *ngIf="isFieldEmpty(newWorker.country) && countryTouched"
+        class="text-red-400"
+      >
+        Debes seleccionar una opción
+      </small>
+
+      <div class="form-group" *ngIf="cities.length > 0">
+        <label class="block text-gray-700 font-medium">Ciudad:</label>
+        <select
+          name="city"
+          [(ngModel)]="newWorker.city"
+          required
+          (blur)="cityTouched = true"
+          class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+        >
+          <option value="" disabled selected>Selecciona una ciudad</option>
+          <option *ngFor="let city of cities">{{ city }}</option>
+        </select>
+      </div>
+      <!-- Validación campo requerido -->
+      <small
+        *ngIf="isFieldEmpty(newWorker.city) && cityTouched"
+        class="text-red-400"
+      >
+        Debes seleccionar una opción
+      </small>
+      <!-- Área laboral-->
+      <div class="separator">
+        <h1 class="text-xl text-center">Laboral</h1>
+      </div>
+      <div class="form-group">
+        <label class="block text-gray-700 font-medium"
+          >Elige al menos una especialidad:</label
+        >
+        <select
+          name="specialty"
+          #specialtySelect
+          (blur)="specialtiesTouched = true"
+          (change)="addSpecialtyWorker($event, specialtySelect)"
+          class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+        >
+          <option value="" disabled selected>
+            Selecciona una especialidad
+          </option>
+          <option
+            *ngFor="let specialty of availableSpecialties"
+            [value]="specialty"
+          >
+            {{ removeHyphens(specialty) }}
+          </option>
+        </select>
+      </div>
+      <!-- Validación de cantidad de seleccionados -->
+      <small
+        *ngIf="!isSelectedAtLeastOne(newWorker.specialty) && specialtiesTouched"
+        class="text-red-400"
+      >
+        Debes seleccionar al menos una especialidad.
+      </small>
+      <div class="mt-2">
+        <label class="block text-gray-700 font-medium"
+          >Especialidades seleccionadas:</label
+        >
+        <div class="flex flex-wrap gap-2 mt-2">
+          <span
+            *ngFor="let specialty of newWorker.specialty"
+            class="flex items-center gap-1 px-3 py-1 bg-blue-200 text-blue-700 rounded-full"
+          >
+            {{ removeHyphens(specialty) }}
+            <button
+              (click)="removeSpecialtyWorker(specialty)"
+              class="text-red-500"
+            >
+              x
+            </button>
+          </span>
+        </div>
+      </div>
+      <!-- Maquinas -->
+      <div class="form-group">
+        <label class="block text-gray-700 font-medium"
+          >Elige al menos una máquinas en la que te especialices:</label
+        >
+        <select
+          #machineSelect
+          (blur)="machinesTouched = true"
+          (change)="addMachineWorker($event, machineSelect)"
+          class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+        >
+          <option value="" disabled selected>Selecciona una maquina</option>
+          <option *ngFor="let machine of availableMachines" [value]="machine">
+            {{ removeHyphens(machine) }}
+          </option>
+        </select>
+      </div>
+      <!-- Validación de cantidad de seleccionados -->
+      <small
+        *ngIf="!isSelectedAtLeastOne(newWorker.machines) && machinesTouched"
+        class="text-red-400"
+      >
+        Debes seleccionar al menos una máquina en la que te especialices.
+      </small>
+      <div class="mt-2">
+        <label class="block text-gray-700 font-medium"
+          >Máquinas seleccionadas:</label
+        >
+        <div class="flex flex-wrap gap-2 mt-2">
+          <span
+            *ngFor="let machine of newWorker.machines"
+            class="flex items-center gap-1 px-3 py-1 bg-blue-200 text-blue-700 rounded-full"
+          >
+            {{ removeHyphens(machine) }}
+            <button (click)="removeMachineWorker(machine)" class="text-red-500">
+              x
+            </button>
+          </span>
+        </div>
+      </div>
+      <!-- Otros campos específicos -->
+      <div class="form-group">
+        <label for="experience" class="block text-gray-700 font-medium"
+          >Experiencia:</label
+        >
+        <textarea
+          id="experience"
+          name="experience"
+          (blur)="experienceTouched = true"
+          [(ngModel)]="newWorker.experience[0]"
+          class="w-full h-32 border border-gray-300 rounded resize-none focus:outline-none focus:ring focus:ring-blue-200 align-top p-3"
+          placeholder="Años de experiencia"
+        ></textarea>
+      </div>
+      <small
+        *ngIf="isLengthCorrect(newWorker.experience[0]) && experienceTouched"
+        class="text-red-400"
+      >
+        Debes colocar una experiencia al menos menor a 100 caracteres.
+      </small>
+      <!-- Botón de registro -->
+      <button
+        type="submit"
+        [disabled]="loading()"
+        class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition duration-200"
+      >
+        {{ loading() ? "Cargando..." : "Registrarse" }}
+      </button>
+    </form>
+  </div>
+
+  <!-- Formulario para Negocios -->
+  <div *ngIf="selectedForm === 'business'" class="formBusiness space-y-4">
+    <h2 class="text-xl font-semibold mb-4">Registro para taller o satelite</h2>
+    <form
+      (ngSubmit)="registerBusiness(businessForm)"
+      #businessForm="ngForm"
+      class="space-y-4"
+    >
+      <!-- Campos comunes para todos los trabajadores -->
+      <!-- Input para subir imagen -->
+      <label class="block text-gray-700 font-medium"
+        >Agrega tu imagen(Opcional):</label
+      >
+      <div class="form-group">
+        <input
+          type="file"
+          (change)="onImageSelected($event)"
+          accept="image/*"
+        />
+
+        <!-- Mostrar la imagen si se ha seleccionado -->
+        <img
+          *ngIf="imagePreview"
+          [src]="imagePreview"
+          alt="Imagen de tu negocio"
+        />
+      </div>
+      <div class="form-group">
+        <label class="block text-gray-700 font-medium"
+          >Nombre del negocio:</label
+        >
+        <input
+          type="text"
+          [(ngModel)]="newBusiness.name"
+          name="name"
+          (blur)="nameTouched = true"
+          required
+          class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+        />
+      </div>
+      <!-- Validación campo requerido -->
+      <small
+        *ngIf="isFieldEmpty(newBusiness.name) && nameTouched"
+        class="text-red-400"
+      >
+        Este campo es requerido
+      </small>
+      <!-- Celular -->
+      <div class="form-group">
+        <label class="block text-gray-700 font-medium">Celular:</label>
+        <input
+          type="number"
+          [(ngModel)]="newBusiness.phone"
+          (blur)="phoneTouched = true"
+          name="phone"
+          required
+          class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+        />
+      </div>
+      <!-- Validación campo requerido -->
+      <small
+        *ngIf="isNumber(newBusiness.phone) && phoneTouched"
+        class="text-red-400"
+      >
+        Este campo es requerido
+      </small>
+      <!-- REsponsable -->
+      <div class="form-group">
+        <label class="block text-gray-700 font-medium"
+          >Responsable o encargado(a):</label
+        >
+        <input
+          type="text"
+          [(ngModel)]="newBusiness.responsible"
+          name="name"
+          (blur)="responsibleTouched = true"
+          required
+          class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+        />
+      </div>
+      <!-- Validación campo requerido -->
+      <small
+        *ngIf="isFieldEmpty(newBusiness.responsible) && responsibleTouched"
+        class="text-red-400"
+      >
+        Este campo es requerido
+      </small>
+      <!-- Elección país y ciudad -->
+      <div class="form-group">
+        <label class="block text-gray-700 font-medium">País:</label>
+        <!--  (change)="onCountryChange()"
+              esto se colocaría dentro del select cuando ya funcione la api de ciudades
+         -->
+        <select
+          name="country"
+          [(ngModel)]="newBusiness.country"
+          required
+          (blur)="countryTouched = true"
+          class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+        >
+          <option value="" disabled selected>Selecciona un país</option>
+          <option *ngFor="let country of countries" [value]="country.name">
+            {{ country.name }}
+          </option>
+        </select>
+      </div>
+      <!-- Validación campo requerido -->
+      <small
+        *ngIf="isFieldEmpty(newBusiness.country) && countryTouched"
+        class="text-red-400"
+      >
+        Debes seleccionar una opción
+      </small>
+
+      <!-- Ciudad -->
+      <div class="form-group" *ngIf="cities.length > 0">
+        <label class="block text-gray-700 font-medium">Ciudad:</label>
+        <select
+          name="city"
+          [(ngModel)]="newBusiness.city"
+          required
+          (blur)="cityTouched = true"
+          class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+        >
+          <option value="" disabled selected>Selecciona una ciudad</option>
+          <option *ngFor="let city of cities">{{ city }}</option>
+        </select>
+      </div>
+      <!-- Validación campo requerido -->
+      <small
+        *ngIf="isFieldEmpty(newBusiness.city) && cityTouched"
+        class="text-red-400"
+      >
+        Debes seleccionar una opción
+      </small>
+      <!-- Barrio -->
+      <div class="form-group">
+        <label class="block text-gray-700 font-medium">Barrio:</label>
+        <input
+          type="text"
+          [(ngModel)]="newBusiness.neighborhood"
+          name="neighborhood"
+          (blur)="neiborhoodTouched = true"
+          required
+          class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+        />
+      </div>
+      <small
+        *ngIf="isFieldEmpty(newBusiness.neighborhood) && neiborhoodTouched"
+        class="text-red-400"
+      >
+        Este campo es requerido
+      </small>
+      <!-- Celular -->
+      <div class="form-group">
+        <label class="block text-gray-700 font-medium"
+          >Cantidad de empleado o colaboradores en el negocio:</label
+        >
+        <input
+          type="number"
+          [(ngModel)]="newBusiness.numberEmployees"
+          (blur)="numberEmployeesTouched = true"
+          name="employees"
+          required
+          class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+        />
+      </div>
+      <!-- Validación campo requerido -->
+      <small
+        *ngIf="isNumber(newBusiness.numberEmployees) && numberEmployeesTouched"
+        class="text-red-400"
+      >
+        Este campo es requerido
+      </small>
+      <!-- Elección entre satelite y taller -->
+      <div class="form-group">
+        <label class="block text-gray-700 font-medium"
+          >Elige el tipo de negocio
+        </label>
+        <select
+          name="typeUSer"
+          [(ngModel)]="newBusiness.typeUSer"
+          required
+          (blur)="typeUserTouched = true"
+          class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+        >
+          <option [value]="'satelite'">Satelite</option>
+          <option [value]="'talleres'" selected>Taller</option>
+        </select>
+      </div>
+      <small
+        *ngIf="isFieldEmpty(newBusiness.typeUSer) && typeUserTouched"
+        class="text-red-400"
+      >
+        Este campo es requerido
+      </small>
+      <!-- Área laboral-->
+      <div class="separator">
+        <h1 class="text-xl text-center">Laboral</h1>
+      </div>
+      <!-- Validación campo requerido -->
+
+      <div class="form-group">
+        <label class="block text-gray-700 font-medium"
+          >Elige al menos una especialidad:</label
+        >
+        <select
+          name="specialty"
+          #specialtySelect
+          (blur)="specialtiesTouched = true"
+          (change)="addSpecialtyBusiness($event, specialtySelect)"
+          class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+        >
+          <option value="" disabled selected>
+            Selecciona una especialidad
+          </option>
+          <option
+            *ngFor="let specialty of availableSpecialties"
+            [value]="specialty"
+          >
+            {{ removeHyphens(specialty) }}
+          </option>
+        </select>
+      </div>
+      <!-- Validación de cantidad de seleccionados -->
+      <small
+        *ngIf="
+          !isSelectedAtLeastOne(newBusiness.specialty) && specialtiesTouched
+        "
+        class="text-red-400"
+      >
+        Debes seleccionar al menos una especialidad.
+      </small>
+      <div class="mt-2">
+        <label class="block text-gray-700 font-medium"
+          >Especialidades seleccionadas:</label
+        >
+        <div class="flex flex-wrap gap-2 mt-2">
+          <span
+            *ngFor="let specialty of newBusiness.specialty"
+            class="flex items-center gap-1 px-3 py-1 bg-blue-200 text-blue-700 rounded-full"
+          >
+            {{ removeHyphens(specialty) }}
+            <button
+              (click)="removeSpecialtyBusiness(specialty)"
+              class="text-red-500"
+            >
+              x
+            </button>
+          </span>
+        </div>
+      </div>
+      <!-- Maquinas -->
+      <div class="form-group">
+        <label class="block text-gray-700 font-medium"
+          >Elige al menos una máquinas en la que te especialices:</label
+        >
+        <select
+          #machineSelect
+          (blur)="machinesTouched = true"
+          (change)="addMachineBusiness($event, machineSelect)"
+          class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+        >
+          <option value="" disabled selected>Selecciona una maquina</option>
+          <option *ngFor="let machine of availableMachines" [value]="machine">
+            {{ removeHyphens(machine) }}
+          </option>
+        </select>
+      </div>
+      <!-- Validación de cantidad de seleccionados -->
+      <small
+        *ngIf="!isSelectedAtLeastOne(newBusiness.machines) && machinesTouched"
+        class="text-red-400"
+      >
+        Debes seleccionar al menos una máquina en la que te especialices.
+      </small>
+      <div class="mt-2">
+        <label class="block text-gray-700 font-medium"
+          >Máquinas seleccionadas:</label
+        >
+        <div class="flex flex-wrap gap-2 mt-2">
+          <span
+            *ngFor="let machine of newBusiness.machines"
+            class="flex items-center gap-1 px-3 py-1 bg-blue-200 text-blue-700 rounded-full"
+          >
+            {{ removeHyphens(machine) }}
+            <button
+              (click)="removeMachineBusiness(machine)"
+              class="text-red-500"
+            >
+              x
+            </button>
+          </span>
+        </div>
+      </div>
+      <!-- Otros campos específicos -->
+      <div class="form-group">
+        <label for="experience" class="block text-gray-700 font-medium"
+          >Experiencia:</label
+        >
+        <textarea
+          id="experience"
+          name="experience"
+          (blur)="experienceTouched = true"
+          [(ngModel)]="newBusiness.experience[0]"
+          class="w-full h-32 border border-gray-300 rounded resize-none focus:outline-none focus:ring focus:ring-blue-200 align-top p-3"
+          placeholder="Escribe una breve descripción de las experiencias más significativas que tengas"
+        ></textarea>
+      </div>
+      <small
+        *ngIf="isLengthCorrect(newBusiness.experience[0]) && experienceTouched"
+        class="text-red-400"
+      >
+        Debes colocar una experiencia al menos menor a 100 caracteres.
+      </small>
+      <!-- Botón de registro -->
+      <button
+        type="submit"
+        [disabled]="loading()"
+        class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition duration-200"
+      >
+        {{ loading() ? "Cargando" : "Registrar mi negocio" }}
+      </button>
+    </form>
+  </div>
+</div>

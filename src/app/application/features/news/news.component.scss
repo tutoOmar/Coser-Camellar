@@ -1,0 +1,38 @@
+.news-feed {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.news-item {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+  background-color: #fff;
+}
+
+.news-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9em;
+  color: #666;
+}
+
+.news-content h3 {
+  margin-top: 0;
+  font-size: 1.2em;
+}
+
+.news-content img {
+  width: 100%;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.news-footer {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}

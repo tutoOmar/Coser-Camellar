@@ -1,0 +1,27 @@
+.cards {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(250px, 1fr)
+  ); /* Aumenta el tamaño mínimo de la card */
+  gap: 20px;
+  padding: 20px;
+}
+
+@media (max-width: 425px) {
+  .search_input {
+    width: 80%;
+  }
+}
+@media (min-width: 1024px) {
+  .cards {
+    grid-template-columns: repeat(
+      4,
+      1fr
+    ); /* Aumenta el número de columnas en pantallas grandes */
+  }
+}
+
+.card {
+  max-width: 300px; /* Controla el tamaño máximo de las cards */
+}

@@ -1,0 +1,141 @@
+<div
+  class="w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 mb-5"
+>
+  <a [routerLink]="['/works/worker', satelite()?.id]" class="title">
+    <h5
+      class="ml-5 text-xl font-semibold tracking-tight text-gray-900 dark:text-white"
+    >
+      {{ satelite()?.name }}
+    </h5>
+  </a>
+  <p class="text-sm text-gray-500 dark:text-gray-400 ml-5">
+    <strong>Responsable: </strong>{{ satelite()?.responsible }}
+  </p>
+  <p class="text-sm text-gray-500 dark:text-gray-400 ml-5">
+    <strong>Número colaboradores o empleados: </strong
+    >{{ satelite()?.numberEmployees }}
+  </p>
+  <a>
+    <img
+      class="p-8 rounded-t-lg imag"
+      [ngClass]="{
+        'dark:bg-white': !satelite()?.photo
+      }"
+      [src]="
+        satelite()?.photo
+          ? satelite()?.photo
+          : 'https://firebasestorage.googleapis.com/v0/b/tu-chamba-cf127.appspot.com/o/talleresPhotos%2FmachineLogo.png?alt=media&token=4c581607-d6dd-4816-a3ae-e8357fd69694'
+      "
+      alt="Foto de {{ satelite()?.name }}"
+    />
+  </a>
+  <div class="px-5 pb-5">
+    <p class="text-sm text-gray-500 dark:text-gray-400">
+      {{ satelite()?.country }}, {{ satelite()?.city }}
+    </p>
+    <p class="text-sm text-gray-500 dark:text-gray-400">
+      <strong>Ubicación: </strong> {{ satelite()?.neighborhood }}
+    </p>
+    <p class="text-gray-700 dark:text-gray-300">
+      <strong>Especialidades:</strong>
+      {{ removeHyphens(satelite()?.specialty) }}
+    </p>
+    <div class="flex items-center mt-2.5 mb-5">
+      <div
+        class="flex items-center space-x-1 rtl:space-x-reverse"
+        *ngIf="satelite()?.average_score"
+      >
+        <ng-container *ngFor="let star of [].constructor(5); let i = index">
+          <svg
+            class="w-4 h-4"
+            [ngClass]="{
+              'text-yellow-300': i < (satelite()?.average_score ?? 0),
+              'text-gray-200 dark:text-gray-600':
+                i >= (satelite()?.average_score ?? 0)
+            }"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor"
+            viewBox="0 0 22 20"
+          >
+            <path
+              d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"
+            />
+          </svg>
+        </ng-container>
+      </div>
+      <span
+        class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800 ms-3"
+        >{{ satelite()?.average_score }}</span
+      >
+    </div>
+    <div class="flex items-center justify-between">
+      <span
+        class="text-sm font-semibold text-gray-900 dark:text-white"
+        [ngClass]="{
+          'text-green-500': satelite()?.status === 'libre',
+          'text-red-500': satelite()?.status === 'ocupado'
+        }"
+        >{{ satelite()?.status === "libre" ? "Disponible" : "Ocupado" }}</span
+      >
+      <button
+        (click)="toggleShowMore()"
+        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+      >
+        {{ showMoreSignal ? "Ver menos" : "Ver más" }}
+      </button>
+    </div>
+  </div>
+  <div *ngIf="showMoreSignal" class="px-5 pt-3">
+    <p class="text-gray-700 dark:text-gray-300">
+      <strong>Máquinas que maneja: </strong
+      >{{ removeHyphens(satelite()?.machines) }}
+    </p>
+    <p class="text-gray-700 dark:text-gray-300 mt-2">
+      <strong>Experiencia: </strong> {{ satelite()?.experience?.join(", ") }}
+    </p>
+    <p *ngIf="authState" class="text-gray-700 dark:text-gray-300 mt-2">
+      <strong>Teléfono:</strong> {{ satelite()?.phone }}
+    </p>
+    <app-wa-button [phoneNumber]="satelite()?.phone"></app-wa-button>
+
+    <div class="bg-gray-100 rounded-lg p-4 shadow-sm mt-2 mb-2">
+      <div
+        *ngFor="let comment of satelite()?.comments?.slice(0, 2)"
+        class="mb-4"
+      >
+        <p class="text-gray-700 dark:text-gray-900">
+          <strong>Comentario:</strong> {{ comment.comment }}
+        </p>
+        <div class="flex items-center mt-2">
+          <ng-container *ngFor="let star of [].constructor(5); let i = index">
+            <svg
+              class="w-4 h-4"
+              [ngClass]="{
+                'text-yellow-300': i < (comment?.score ?? 0),
+                'text-gray-200 dark:text-gray-900': i >= (comment?.score ?? 0)
+              }"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 22 20"
+            >
+              <path
+                d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"
+              />
+            </svg>
+          </ng-container>
+          <span class="ml-2 text-gray-700 dark:text-gray-300">
+            {{ comment.score }} / 5
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <a
+      (click)="onViewMoreComments()"
+      class="text-blue-500 hover:underline text-lg mt-4"
+      >Ver más información</a
+    >
+  </div>
+</div>

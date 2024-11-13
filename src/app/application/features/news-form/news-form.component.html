@@ -1,0 +1,80 @@
+<div class="news-feed">
+  <form (ngSubmit)="addNewsItem()" #newsForm="ngForm">
+    <div class="news-item">
+      <!-- Encabezado de la noticia -->
+      <div class="news-header">
+        <input
+          type="text"
+          [(ngModel)]="newNewsItem.title"
+          name="title"
+          placeholder="Título de la noticia"
+          required
+        />
+        <input
+          type="text"
+          [(ngModel)]="newNewsItem.author"
+          name="author"
+          placeholder="Autor"
+          required
+        />
+      </div>
+
+      <!-- Contenido de la noticia -->
+      <div class="news-content">
+        <textarea
+          [(ngModel)]="newNewsItem.content"
+          name="content"
+          placeholder="Contenido de la noticia"
+          required
+        ></textarea>
+
+        <!-- Input para subir imagen -->
+        <input
+          type="file"
+          (change)="onImageSelected($event)"
+          accept="image/*"
+        />
+
+        <!-- Mostrar la imagen si se ha seleccionado -->
+        <img
+          *ngIf="imagePreview"
+          [src]="imagePreview"
+          alt="Imagen de la noticia"
+        />
+      </div>
+
+      <!-- Pie de la noticia -->
+      <div class="news-footer">
+        <!-- Etiquetas -->
+        <div class="tags">
+          <input
+            type="text"
+            [(ngModel)]="newTag"
+            name="newTag"
+            placeholder="Agregar etiqueta"
+          />
+          <button type="button" (click)="addTag()">Añadir etiqueta</button>
+          <div class="tag-list">
+            <span class="tag" *ngFor="let tag of newNewsItem.tags">
+              {{ tag }}
+              <button type="button" (click)="removeTag(tag)">×</button>
+            </span>
+          </div>
+        </div>
+
+        <!-- Enlace externo -->
+        <input
+          type="text"
+          [(ngModel)]="newNewsItem.linkUrl"
+          name="linkUrl"
+          placeholder="Enlace externo (opcional)"
+        />
+      </div>
+
+      <!-- Botón para publicar la noticia -->
+      <button type="submit" [disabled]="!newsForm.form.valid">
+        Publicar Noticia
+      </button>
+    </div>
+  </form>
+</div>

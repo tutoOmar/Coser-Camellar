@@ -1,0 +1,19 @@
+<h1 class="text-3xl text-blue-700 ml-6 mb-2 font-semibold mt-3">
+  Rematadores o patinadores(as)
+</h1>
+<div class="search">
+  <input
+    type="text"
+    placeholder="Buscar"
+    (input)="onSearch($event)"
+    class="search_input ml-5 w-full md:w-1/2 lg:w-1/3 xl:w-1/4 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+  />
+</div>
+<div class="cards">
+  <div *ngFor="let worker of filteredWorkersSignal()">
+    <app-card-calification
+      [worker]="worker"
+      (viewMoreComments)="onWorkerSelected($event)"
+    ></app-card-calification>
+  </div>
+</div>

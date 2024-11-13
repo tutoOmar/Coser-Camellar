@@ -1,0 +1,112 @@
+.news-feed {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.news-item {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+  background-color: #fff;
+}
+
+.news-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9em;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.news-header input {
+  width: 48%;
+  padding: 8px;
+  font-size: 1em;
+}
+
+.news-content textarea {
+  width: 100%;
+  height: 100px;
+  padding: 8px;
+  font-size: 1em;
+  margin-bottom: 10px;
+}
+
+.news-content input[type="text"] {
+  width: 100%;
+  padding: 8px;
+  font-size: 1em;
+  margin-bottom: 10px;
+}
+
+.news-content img {
+  width: 100%;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.news-footer {
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+.tags {
+  margin-bottom: 10px;
+}
+
+.tags input {
+  width: calc(100% - 110px);
+  padding: 8px;
+  font-size: 1em;
+}
+
+.tags button {
+  width: 100px;
+  padding: 8px;
+  font-size: 1em;
+  margin-left: 10px;
+}
+
+.tag-list {
+  margin-top: 10px;
+}
+
+.tag {
+  display: inline-block;
+  background-color: #eee;
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin-right: 5px;
+  margin-bottom: 5px;
+}
+
+.tag button {
+  background: none;
+  border: none;
+  font-size: 1em;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+.news-footer input[type="text"] {
+  width: 100%;
+  padding: 8px;
+  font-size: 1em;
+}
+
+button[type="submit"] {
+  width: 100%;
+  padding: 10px;
+  font-size: 1em;
+  margin-top: 15px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+}
+
+button[disabled] {
+  background-color: #ccc;
+}

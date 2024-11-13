@@ -1,0 +1,27 @@
+.icon {
+  width: 20px;
+  height: 20px;
+  fill: currentColor; /* Esto hará que el color del ícono se ajuste al color del texto si es necesario */
+  color: #0171ff;
+}
+
+.icon-button {
+  text-align: center;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 8px;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+.icon-button:hover {
+  background-color: #6fbadd;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.text-icon {
+  font-size: 1px;
+}
+
+select[multiple] option {
+  padding: 8px 10px;
+  cursor: pointer;
+}
