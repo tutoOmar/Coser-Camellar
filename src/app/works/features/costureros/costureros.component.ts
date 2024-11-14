@@ -1,9 +1,16 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import CardCalificationComponent from '../../../shared/ui/card-calification/card-calification.component';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { WorksService } from '../../services/works.service';
-import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import {
+  Subject,
+  debounceTime,
+  distinctUntilChanged,
+  switchMap,
+  takeUntil,
+  tap,
+} from 'rxjs';
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
 
 const COLLECTION_DATA = 'trabajadores';
@@ -16,7 +23,13 @@ const CONCEPT_FILTER = 'costura';
   templateUrl: './costureros.component.html',
   styleUrl: './costureros.component.scss',
 })
-export default class CosturerosComponent {
+export default class CosturerosComponent implements OnInit {
+  // subject para destruir el componente
+  private destroy$ = new Subject<void>(); // Controlador de destrucción
+  // Estado actual
+  private authState = inject(AuthStateService);
+  private userService = inject(WorksService);
+  currentStatusState = signal<boolean>(false);
   //Inyecciones importantes
   private _router = inject(Router);
   private searchSubject = new Subject<string>();
@@ -69,6 +82,26 @@ export default class CosturerosComponent {
   }
   /**
    *
+   */
+  ngOnInit(): void {
+    this.authState.isAuthenticated$
+      .pipe(
+        takeUntil(this.destroy$),
+        tap((authStatus) => this.currentStatusState.set(authStatus)),
+        switchMap(() => {
+          return this.userService.checkUserExists();
+        })
+      )
+      .subscribe((stateUserExist) => {
+        //Debemos validar que sí el status del usario en el registro está icimpleto pero existe ya un usuario lo reenvie al register para que finalice su registro
+        if (!stateUserExist && this.currentStatusState()) {
+          /** Esto se hace para cuando se regist pero aun no haya ingresado datos no pueda ir, es mejor manejarlo con un guard */
+          this._router.navigate(['/auth/register']);
+        }
+      });
+  }
+  /**
+   *
    * @param value
    */
   onSearch(value: any) {
@@ -76,6 +109,10 @@ export default class CosturerosComponent {
       this.searchSubject.next(value.target.value);
     }
   }
+  /**
+   *
+   * @param workerId
+   */
   onWorkerSelected(workerId: string | undefined) {
     this._router.navigate(['/works/worker', workerId]);
   }

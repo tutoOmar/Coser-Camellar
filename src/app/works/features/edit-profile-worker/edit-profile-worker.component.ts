@@ -127,14 +127,14 @@ export default class EditProfileWorkerComponent implements OnInit {
    * @param sateliteId
    */
   loadWorker(collectionName: string, workerId: string) {
-    console.log(collectionName, workerId);
+    // console.log(collectionName, workerId);
     this.wokerService
       .getUserByIdAndCollection(workerId, collectionName)
       .pipe(takeUntil(this.destroy$))
       .subscribe((worker: any) => {
         const validationUser = worker as WorkerUser;
         // Usamos patchValue para setear los valores en el formulario
-        console.log('Validando usuario', validationUser);
+        // console.log('Validando usuario', validationUser);
         this.workerForm.patchValue({
           name: validationUser.name,
           phone: validationUser.phone,
@@ -171,7 +171,7 @@ export default class EditProfileWorkerComponent implements OnInit {
           experienceFormArray.push(new FormControl(exp));
         });
 
-        console.log('YA setteado', this.workerForm.value);
+        // console.log('YA setteado', this.workerForm.value);
         this.imagePreview.set(validationUser.photo);
         this.availableSpecialties = this.availableSpecialties.filter(
           (specialty) => !validationUser.specialty.includes(specialty)

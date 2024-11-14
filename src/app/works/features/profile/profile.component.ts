@@ -21,6 +21,7 @@ import { WorkerUser } from '../models/worker.model';
 import { TallerUSer } from '../models/talleres.model';
 import { CommonModule } from '@angular/common';
 import CardPositionComponent from '../../../shared/ui/card-position/card-position.component';
+import { user } from '@angular/fire/auth';
 
 @Component({
   selector: 'app-profile',
@@ -60,21 +61,22 @@ export default class ProfileComponent implements OnInit {
             return of(null);
           }
         }),
-        tap((res) => console.log(res, 'respuesta de spues de ')),
+        // tap((res) => console.log(res, 'respuesta de spues de ')),
         mergeMap((value) => {
-          console.log('En el mergeMap', value, value instanceof Observable);
+          // console.log('En el mergeMap', value, value instanceof Observable);
           if (value instanceof Observable) {
             return value; // Esto "aplana" el Observable interno
           }
           return of(value); // Si no es un Observable, lo envolvemos en un Observable
         }),
         tap((userFound) => {
-          console.log(userFound);
-
-          this.typeUser.set(userFound[0].typeUSer);
-          const userData = userFound[0];
+          // console.log(userFound);
+          if (userFound) {
+            this.typeUser.set(userFound[0].typeUSer);
+          }
+          const userData = userFound[0] ? userFound[0] : {};
           if (userData.typeUSer === 'trabajadores') {
-            console.log('Aqui entra?');
+            // console.log('Aqui entra?');
             this.workerSignal.set(userData as WorkerUser);
           } else if (userData.typeUSer === 'talleres') {
             this.businessSginal.set(userData as TallerUSer);
@@ -82,7 +84,7 @@ export default class ProfileComponent implements OnInit {
             this.businessSginal.set(userData as SateliteUser);
           } else {
             //por defecto
-            this.workerSignal.set(userFound);
+            this.workerSignal.set(userData);
           }
         })
       )
@@ -99,23 +101,23 @@ export default class ProfileComponent implements OnInit {
    * @returns
    */
   loadWorker(collections: string[], userId: string) {
-    console.log(collections, userId);
+    // console.log(collections, userId);
     const requests = collections.map((collectionName) =>
       this.userService
         .getUserByUserIdAndCollection(userId, collectionName)
         .pipe(
-          tap((res) => console.log(res, 'respuestas')),
+          // tap((res) => console.log(res, 'respuestas')),
           catchError(() => of(null))
         )
     );
 
     return forkJoin([requests]).pipe(
-      tap((res) => console.log('al combinar', res)),
+      // tap((res) => console.log('al combinar', res)),
       switchMap((results) => {
         const foundUser = results.find((result) => result !== null);
         return foundUser ? of(foundUser) : EMPTY;
-      }),
-      tap((res) => console.log('al despues', res))
+      })
+      // tap((res) => console.log('al despues', res))
     );
   }
   /**Remueve guiónes de las palabras que normalmente las lleva*/
