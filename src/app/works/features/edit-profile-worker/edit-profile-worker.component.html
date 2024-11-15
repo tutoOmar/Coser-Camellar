@@ -4,11 +4,7 @@
   <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">
     Registro para Trabajadores
   </h2>
-  <form
-    [formGroup]="workerForm"
-    (ngSubmit)="registerWorker()"
-    class="space-y-5"
-  >
+  <form [formGroup]="workerForm" class="space-y-5">
     <!-- Imagen -->
     <div>
       <!-- Input para subir imagen -->
@@ -24,6 +20,7 @@
 
         <!-- Mostrar la imagen si se ha seleccionado -->
         <img
+          class="w-60 h-60 overflow-hidden"
           *ngIf="imagePreview()"
           [src]="imagePreview()"
           alt="Imagen de la noticia"
@@ -138,6 +135,9 @@
           {{ removeHyphens(specialty) }}
         </option>
       </select>
+      <small class="text-red-500" *ngIf="isSpecialtiesArrayInvalid()">
+        Debes colocar al menos una especialidad que tengas
+      </small>
       <div class="mt-2">
         <label class="block text-gray-700 font-medium"
           >Especialidades seleccionadas:</label
@@ -172,6 +172,10 @@
           {{ removeHyphens(machine) }}
         </option>
       </select>
+      <!-- Error message -->
+      <small class="text-red-500" *ngIf="isMachinesArrayInvalid()">
+        Debes colocar al menos una Máquina que manejes
+      </small>
       <div class="flex flex-wrap gap-2 mt-2">
         <span
           *ngFor="let machine of machinesSignal()"
@@ -204,9 +208,31 @@
         class="text-red-500"
         >Máximo 100 caracteres</small
       >
+      <small *ngIf="provisionalValidationMinLenght()" class="text-red-500">
+        No puedes dejar vacio este campo
+      </small>
+      <small *ngIf="provisionalValidationMaxLenght()" class="text-red-500">
+        Máximo puedes colocar 100 caracteres
+      </small>
     </div>
+    <!-- <label class="inline-flex items-center cursor-pointer">
+        <input     
+        *ngIf="workerForm.get('status')"
+        type="checkbox"
+        [formControl]="workerForm.get('status')"
+        [value]="['Status'].LIBRE"
+        class="sr-only peer"/>
+        <div
+          class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+        ></div>
+        <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300"
+          >Estas disponible</span
+        >
+      </label> -->
+
     <!-- Botón de registro -->
     <button
+      (click)="updateWorker()"
       type="submit"
       [disabled]="loading()"
       class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition duration-200"

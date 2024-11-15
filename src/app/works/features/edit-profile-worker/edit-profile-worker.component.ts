@@ -8,16 +8,18 @@ import {
   ReactiveFormsModule,
   FormControl,
   AbstractControl,
+  ValidatorFn,
+  ValidationErrors,
 } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
-import { LocationService } from '../../../shared/data-access/location.service';
 import { Machines } from '../models/machines.model';
 import { Specialty } from '../models/specialties.model';
 import { GenderEnum, WorkerUser } from '../models/worker.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { WorksService } from '../../services/works.service';
-
+import { toast } from 'ngx-sonner';
+import { Status } from '../models/status.model';
 @Component({
   selector: 'app-edit-profile-worker',
   standalone: true,
@@ -26,6 +28,7 @@ import { WorksService } from '../../services/works.service';
   styleUrl: './edit-profile-worker.component.scss',
 })
 export default class EditProfileWorkerComponent implements OnInit {
+  [x: string]: any;
   wokerService = inject(WorksService);
 
   private destroy$ = new Subject<void>();
@@ -37,6 +40,7 @@ export default class EditProfileWorkerComponent implements OnInit {
   genderList = Object.values(GenderEnum);
   availableSpecialties = [...this.workerSpecialties]; // Lista de especialidades disponibles para seleccionar
   availableMachines = [...this.machinesExperience];
+  userInfo!: WorkerUser;
   // Datos prefedinidos para paise sy ciudades
   //ToDo esto deberá estar vacio cuando nos conectemos a un API
   countries: any[] = [{ name: 'Colombia', code: 'CO' }];
@@ -79,8 +83,7 @@ export default class EditProfileWorkerComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private currentRoute: ActivatedRoute,
-    private locationService: LocationService
+    private currentRoute: ActivatedRoute
   ) {
     // Inicializar formularios
     this.workerForm = this.fb.group({
@@ -105,15 +108,19 @@ export default class EditProfileWorkerComponent implements OnInit {
 
       gender: ['', Validators.required],
       photo: [''],
+      status: ['', Validators.required],
     });
   }
   // Validador personalizado para asegurarse de que el FormArray tenga al menos un elemento
-  minLengthArray(min: number) {
-    return (formArray: AbstractControl) => {
+  minLengthArray(min: number): ValidatorFn {
+    return (formArray: AbstractControl): ValidationErrors | null => {
       const array = formArray as FormArray;
       return array && array.length >= min ? null : { minLengthArray: true };
     };
   }
+  /**
+   *
+   */
   ngOnInit(): void {
     const userId = this.currentRoute.snapshot.paramMap.get('id');
     if (userId) {
@@ -133,6 +140,7 @@ export default class EditProfileWorkerComponent implements OnInit {
       .pipe(takeUntil(this.destroy$))
       .subscribe((worker: any) => {
         const validationUser = worker as WorkerUser;
+        this.userInfo = validationUser;
         // Usamos patchValue para setear los valores en el formulario
         // console.log('Validando usuario', validationUser);
         this.workerForm.patchValue({
@@ -199,14 +207,16 @@ export default class EditProfileWorkerComponent implements OnInit {
     if (
       specialty &&
       this.isSpecialtyEnum(specialty) &&
-      !this.workerForm.value.specialties.includes(specialty)
+      !this.workerForm.value.specialty.includes(specialty)
     ) {
-      (this.workerForm.get('specialties') as FormArray).push(
+      (this.workerForm.get('specialty') as FormArray).push(
         new FormControl(specialty)
       );
       this.availableSpecialties = this.availableSpecialties.filter(
         (item) => item !== specialty
       );
+      const specialties = this.workerForm.value.specialty;
+      this.specialtiesSignal.set(specialties);
       specialtySelect.value = '';
     }
   }
@@ -215,12 +225,17 @@ export default class EditProfileWorkerComponent implements OnInit {
    * @param specialty
    */
   removeSpecialtyWorker(specialty: string): void {
-    const specialties = this.workerForm.get('specialties') as FormArray;
+    const specialties = this.workerForm.get('specialty') as FormArray;
     const index = specialties.value.indexOf(specialty);
     // Verificar que el índice es válido
     if (index >= 0) {
       // Remover la especialidad del FormArray
       specialties.removeAt(index);
+      this.specialtiesSignal.set(specialties.value);
+
+      if (specialties.length === 0) {
+        specialties.markAsTouched();
+      }
       // Agregar la especialidad de vuelta a la lista de disponibles, si no está ya incluida
       if (
         this.isSpecialtyEnum(specialty) &&
@@ -237,26 +252,34 @@ export default class EditProfileWorkerComponent implements OnInit {
     if (
       machine &&
       this.isMachineEnum(machine) &&
-      !this.workerForm.value.machine.includes(machine)
+      !this.workerForm.value.machines.includes(machine)
     ) {
-      (this.workerForm.get('machine') as FormArray).push(
+      (this.workerForm.get('machines') as FormArray).push(
         new FormControl(machine)
       );
       this.availableMachines = this.availableMachines.filter(
         (item) => item !== machine
       );
+      const machines = this.workerForm.value.machines;
+      this.machinesSignal.set(machines);
       machineSelect.value = '';
     }
   }
 
   // Método para quitar una máquina del FormArray
   removeMachineWorker(machine: string): void {
-    const machines = this.workerForm.get('specialties') as FormArray;
+    const machines = this.workerForm.get('machines') as FormArray;
     const index = machines.value.indexOf(machine);
     // Verificar que el índice es válido
     if (index >= 0) {
       // Remover la especialidad del FormArray
+
       machines.removeAt(index);
+      this.machinesSignal.set(machines.value);
+      //MArcamos como tocado si se vacia el
+      if (machines.length === 0) {
+        machines.markAsTouched();
+      }
       // Agregar la especialidad de vuelta a la lista de disponibles, si no está ya incluida
       if (
         this.isMachineEnum(machine) &&
@@ -268,13 +291,61 @@ export default class EditProfileWorkerComponent implements OnInit {
   }
 
   // Registro de trabajador
-  registerWorker() {
-    console.log('aquí llego', this.workerForm.value);
+  updateWorker() {
+    Object.keys(this.workerForm.controls).forEach((key) => {
+      const control = this.workerForm.get(key);
+      control?.markAsTouched();
+    });
 
-    if (this.workerForm.valid) {
+    console.log('aquí llego', this.workerForm.value);
+    //ToDo solo deberia validar el formulario pero hay fallas que se coregiran en la siguiente versión
+    if (
+      this.workerForm.valid &&
+      !this.provisionalValidationMaxLenght() &&
+      !this.provisionalValidationMinLenght()
+    ) {
       // this.loading = true;
       const newWorker: WorkerUser = this.workerForm.value;
-      console.log(newWorker);
+      const updatedUser: WorkerUser = {
+        // VAriables que no se modifican en este update
+        id: this.userInfo.id,
+        average_score: this.userInfo.average_score,
+        typeUSer: this.userInfo.typeUSer,
+        userId: this.userInfo.userId,
+        comments: this.userInfo.comments,
+        status: this.userInfo.status,
+        // Variables que se modifican en este update
+        city: newWorker.city,
+        country: newWorker.country,
+        experience: newWorker.experience,
+        machines: newWorker.machines,
+        name: newWorker.name,
+        phone: newWorker.phone,
+        photo: newWorker.photo,
+        specialty: newWorker.specialty,
+        gender: newWorker.gender,
+      };
+      console.log('VAmos a ver si se guarda', this.userInfo);
+      console.log('VAlidado', newWorker);
+      if (updatedUser && updatedUser.typeUSer) {
+        console.log('AQui entro?');
+        this.wokerService
+          .updateUser(updatedUser.typeUSer, updatedUser)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (successMessage) => {
+              // Mostrar mensaje de éxito en un toast
+
+              toast.success('Ususario actualizado con éxito');
+              // Redirigir a otra ruta
+              this.router.navigate(['/works']);
+            },
+            error: (error) => {
+              // Mostrar mensaje de error en un toast
+              toast.error('Error al actualizar usuario intente más tarde');
+            },
+          });
+      }
       // this.registerService
       //   .create(newWorker, TypeUser.TRABAJADOR, null)
       //   .pipe(takeUntil(this.destroy$))
@@ -314,6 +385,22 @@ export default class EditProfileWorkerComponent implements OnInit {
       }
     }
   }
+  //Hace un s
+  toggleStatus() {
+    if (this.status) {
+      this.status.setValue(
+        this.status.value === Status.LIBRE ? Status.OCUPADO : Status.LIBRE
+      );
+    }
+  }
+  // GEtter del status
+  get status() {
+    if (this.workerForm.get('status')) {
+      return this.workerForm.get('status');
+    } else {
+      return '';
+    }
+  }
   // Función de validación para el enum Specialty
   isSpecialtyEnum(value: string): value is Specialty {
     return Object.values(Specialty).includes(value as Specialty);
@@ -340,12 +427,6 @@ export default class EditProfileWorkerComponent implements OnInit {
       !fieldValue || !(fieldValue.length > 0) || !(fieldValue.length < 100)
     );
   }
-
-  get experienceControl(): FormControl {
-    return (this.workerForm.get('experience') as FormArray).at(
-      0
-    ) as FormControl;
-  }
   /**Remueve guiónes de las palabras que normalmente las lleva*/
   removeHyphens(wordWithHyphens: string | undefined): string {
     if (wordWithHyphens) {
@@ -356,11 +437,72 @@ export default class EditProfileWorkerComponent implements OnInit {
       return '';
     }
   }
+  // Getter de array de la máquinas
   get machines() {
     if (this.workerForm.get('machines')) {
       return this.workerForm.get('machines')?.value;
     } else {
       return [];
     }
+  }
+
+  get machinesArray() {
+    return this.workerForm.get('machines') as FormArray;
+  }
+  get specitaltiesArray() {
+    return this.workerForm.get('specialty') as FormArray;
+  }
+  isMachinesArrayInvalid(): boolean {
+    return (
+      this.machinesArray.hasError('minLengthArray') &&
+      (this.machinesArray.touched || this.machinesArray.dirty)
+    );
+  }
+  isSpecialtiesArrayInvalid(): boolean {
+    return (
+      this.specitaltiesArray.hasError('minLengthArray') &&
+      (this.specitaltiesArray.touched || this.specitaltiesArray.dirty)
+    );
+  }
+  // Getters para el FormArray y validación
+  get experienceArray() {
+    return this.workerForm.get('experience') as FormArray;
+  }
+
+  get experienceControl(): FormControl {
+    return this.experienceArray.at(0) as FormControl;
+  }
+
+  // Método para verificar errores específicos
+  getExperienceErrorMessage(): string {
+    const control = this.experienceControl;
+
+    if (control.hasError('required') && control.touched) {
+      return 'Este campo es requerido';
+    }
+    if (control.hasError('minlength')) {
+      return 'Debes escribir al menos 1 caracter';
+    }
+    if (control.hasError('maxlength')) {
+      return 'Máximo 100 caracteres';
+    }
+    return '';
+  }
+
+  // Método para verificar si hay error
+  //ESte método esta fallando aún porque no se detecta error en el formulario
+  hasExperienceError(): boolean {
+    return this.experienceControl.invalid && this.experienceControl.touched;
+  }
+  // Método provisional para mostrar un error
+  // ToDo la idea es quitar esto y hacer funcionar los reales, igual quitar en registrar cambio
+  provisionalValidationMinLenght(): boolean {
+    return this.experienceControl.value.length <= 0;
+  }
+  provisionalValidationMaxLenght(): boolean {
+    return (
+      this.experienceControl.value.length > 0 &&
+      this.experienceControl.value.length > 100
+    );
   }
 }
