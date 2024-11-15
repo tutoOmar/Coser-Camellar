@@ -43,6 +43,12 @@ export default class HeaderComponent {
   /**
    *
    */
+  goToSignUp() {
+    this._router.navigate(['/auth/sign-up']);
+  }
+  /**
+   *
+   */
   toggleMenu() {
     this.isMenuOpen = !this.isMenuOpen;
   }
