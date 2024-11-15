@@ -242,7 +242,7 @@ export class WorksService {
     const newsCollection = collection(this.firestore, 'news');
     //return from(updateDoc())
   }
-  //
+  // Método para actualizar el comentario en la base de datos de fireStore
   addComment(
     collectionSelected: string,
     user: WorkerUser | TallerUSer | SateliteUser,
@@ -279,6 +279,16 @@ export class WorksService {
     return combineLatest(checkObservables).pipe(
       map((results) => results.some((exists) => exists)) // Devuelve true si algún resultado es true
     );
+  }
+  // Método para actualizar el comentario en la base de datos de fireStore
+  updateUser(
+    collectionSelected: string,
+    user: WorkerUser | TallerUSer | SateliteUser
+  ): Observable<any> {
+    console.log('aquí llegua omitar');
+    const _collection = collection(this.firestore, collectionSelected);
+    const docRef = doc(_collection, user.id);
+    return from(updateDoc(docRef, { ...user }));
   }
 
   /////
