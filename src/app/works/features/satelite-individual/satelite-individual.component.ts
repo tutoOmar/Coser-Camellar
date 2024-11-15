@@ -195,7 +195,7 @@ export default class SateliteIndividualComponent {
    * @param position
    */
   countPosition(position: any[] | undefined) {
-    console.log(position);
+    // console.log(position);
   }
   /**
    *

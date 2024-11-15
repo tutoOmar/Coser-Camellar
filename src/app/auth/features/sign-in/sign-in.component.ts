@@ -66,7 +66,7 @@ export default class SignInComponent implements OnInit {
       .pipe(takeUntil(this.destroy$))
       .subscribe((state) => {
         if (state) {
-          this.router.navigate(['/works']);
+          this.router.navigate(['/auth/register']);
         }
       });
   }

@@ -15,12 +15,17 @@ import {
   Observable,
   Subject,
   takeUntil,
+  mergeAll,
+  concatMap,
+  first,
+  from,
 } from 'rxjs';
 import { SateliteUser } from '../models/satelite.model';
 import { WorkerUser } from '../models/worker.model';
 import { TallerUSer } from '../models/talleres.model';
 import { CommonModule } from '@angular/common';
 import CardPositionComponent from '../../../shared/ui/card-position/card-position.component';
+import { user } from '@angular/fire/auth';
 
 @Component({
   selector: 'app-profile',
@@ -37,10 +42,10 @@ export default class ProfileComponent implements OnInit {
   //
   workerSignal = signal<WorkerUser | null>(null);
   //
-  businessSginal = signal<TallerUSer | SateliteUser | null>(null);
+  businessSignal = signal<TallerUSer | SateliteUser | null>(null);
   //
   userId!: string | undefined;
-  COLLECTION_OPTIONS = ['satelite', 'talleres', 'trabajadores'];
+  COLLECTION_OPTIONS = ['satelite', 'trabajadores', 'talleres'];
   // Inyecciones de  servicios y otros necesarios
   private _auth = inject(AuthStateService);
   private currentRoute = inject(ActivatedRoute);
@@ -60,37 +65,24 @@ export default class ProfileComponent implements OnInit {
             return of(null);
           }
         }),
-        tap((res) => console.log(res, 'respuesta de spues de ')),
-        mergeMap((value) => {
-          console.log('En el mergeMap', value, value instanceof Observable);
-          if (value instanceof Observable) {
-            return value; // Esto "aplana" el Observable interno
-          }
-          return of(value); // Si no es un Observable, lo envolvemos en un Observable
-        }),
         tap((userFound) => {
-          console.log(userFound);
-
-          this.typeUser.set(userFound[0].typeUSer);
-          const userData = userFound[0];
-          if (userData.typeUSer === 'trabajadores') {
-            console.log('Aqui entra?');
-            this.workerSignal.set(userData as WorkerUser);
-          } else if (userData.typeUSer === 'talleres') {
-            this.businessSginal.set(userData as TallerUSer);
-          } else if (userData.typeUSer === 'satelite') {
-            this.businessSginal.set(userData as SateliteUser);
-          } else {
-            //por defecto
-            this.workerSignal.set(userFound);
+          if (userFound && userFound.length) {
+            const user = userFound[0];
+            if (user) {
+              const typeUser = user.typeUSer;
+              if (typeUser) {
+                this.typeUser.set(typeUser);
+              }
+              if (typeUser == 'trabajadores') {
+                this.workerSignal.set(user);
+              } else if (typeUser == 'satelite' || typeUser == 'talleres') {
+                this.businessSignal.set(user);
+              }
+            }
           }
         })
       )
       .subscribe();
-
-    if (this.userId) {
-      this.loadWorker(this.COLLECTION_OPTIONS, this.userId);
-    }
   }
   /**
    *
@@ -99,24 +91,11 @@ export default class ProfileComponent implements OnInit {
    * @returns
    */
   loadWorker(collections: string[], userId: string) {
-    console.log(collections, userId);
-    const requests = collections.map((collectionName) =>
-      this.userService
-        .getUserByUserIdAndCollection(userId, collectionName)
-        .pipe(
-          tap((res) => console.log(res, 'respuestas')),
-          catchError(() => of(null))
-        )
-    );
-
-    return forkJoin([requests]).pipe(
-      tap((res) => console.log('al combinar', res)),
-      switchMap((results) => {
-        const foundUser = results.find((result) => result !== null);
-        return foundUser ? of(foundUser) : EMPTY;
-      }),
-      tap((res) => console.log('al despues', res))
-    );
+    // console.log('Aqui paso', userId);
+    // return this.userService
+    //   .getUserInAnyCollection(userId)
+    //   .pipe(tap((res) => console.log('REspuesta', res)));
+    return this.userService.getUserInAnyCollection(userId);
   }
   /**Remueve guiónes de las palabras que normalmente las lleva*/
   removeHyphens(wordWithHyphens: string[] | undefined): string {

@@ -44,7 +44,6 @@ export class NewsService {
         (snapshot) => {
           const progress =
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log('Progreso de carga', progress);
         },
         (error) => {
           console.error('Error al cargar el archivo', error);

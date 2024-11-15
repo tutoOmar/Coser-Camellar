@@ -21,8 +21,11 @@ import {
 import {
   catchError,
   combineLatest,
+  first,
+  forkJoin,
   from,
   map,
+  merge,
   Observable,
   of,
   switchMap,
@@ -58,7 +61,6 @@ export class WorksService {
         (snapshot) => {
           const progress =
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log('Progreso de carga', progress);
         },
         (error) => {
           console.error('Error al cargar el archivo', error);
@@ -173,12 +175,44 @@ export class WorksService {
       where('userId', '==', userId),
       limit(1) // Limita a solo un documento
     );
-    console.log(userId, collectionSelected);
+    // console.log(userId, collectionSelected);
     return collectionData(userQuery, { idField: 'id' }).pipe(
       catchError((error) => {
-        console.log(error);
         return of(null);
       }) // Si hay un error (usuario no encontrado), retorna null
+    );
+  }
+  /**
+   *
+   * @param userId
+   * @returns
+   */
+  getUserInAnyCollection(
+    userId: string
+  ): Observable<WorkerUser[] | TallerUSer[] | SateliteUser[] | null[]> {
+    const workerQuery = this.getUserByUserIdAndCollection(
+      userId,
+      'trabajadores'
+    );
+    const tallerQuery = this.getUserByUserIdAndCollection(userId, 'talleres');
+    const sateliteQuery = this.getUserByUserIdAndCollection(userId, 'satelite');
+    console.log('AQui ando', workerQuery, tallerQuery);
+    return merge(
+      workerQuery.pipe(
+        tap((worker) => console.log('Worker query:', worker)),
+        map((worker) => worker as WorkerUser[])
+      ),
+      tallerQuery.pipe(
+        tap((taller) => console.log('Taller query:', taller)),
+        map((taller) => taller as TallerUSer[])
+      ),
+      sateliteQuery.pipe(
+        tap((satelite) => console.log('Satelite query:', satelite)),
+        map((satelite) => satelite as SateliteUser[])
+      )
+    ).pipe(
+      first(),
+      catchError(() => of([]))
     );
   }
   /**
@@ -214,7 +248,6 @@ export class WorksService {
     user: WorkerUser | TallerUSer | SateliteUser,
     idUser: string
   ): Observable<any> {
-    console.log('Aquí llego', user, '-- Id:', idUser, '--', collectionSelected);
     const _collection = collection(this.firestore, collectionSelected);
     const docRef = doc(_collection, idUser);
     return from(updateDoc(docRef, { ...user }));
@@ -222,7 +255,6 @@ export class WorksService {
   // Método para verificar si el usuario ya existe en alguna de las colecciones
   checkUserExists(): Observable<boolean> {
     const currentUserId = this._auth.currentUser?.uid;
-
     if (!currentUserId) {
       return of(false); // Si el usuario no está autenticado, devolvemos false
     }

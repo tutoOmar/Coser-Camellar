@@ -429,10 +429,18 @@
       <!-- Icons on the right -->
       <div class="flex space-x-4 items-center m-auto div3">
         <button
+          *ngIf="!_authState.currentUser"
+          class="focus:outline-none text-white bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 hover:bg-gradient-to-br focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+          (click)="goToSignUp()"
+        >
+          {{ "Quiero hacer parte" }}
+        </button>
+        <button
+          *ngIf="_authState.currentUser"
           class="focus:outline-none text-white bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 hover:bg-gradient-to-br focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
           (click)="logOut()"
         >
-          {{ _authState.currentUser ? "Cerrar sesión" : "Quiero hacer parte" }}
+          {{ "Cerrar sesión" }}
         </button>
 
         <div *ngIf="userState()">

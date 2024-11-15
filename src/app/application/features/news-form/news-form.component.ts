@@ -37,8 +37,6 @@ export default class NewsFormComponent {
   onImageSelected(event: any) {
     if (event.target.files && event.target.files[0]) {
       this.selectedImage = event.target.files[0];
-      console.log(this.selectedImage);
-
       // Mostrar una vista previa de la imagen
       const reader = new FileReader();
       reader.onload = (e) => (this.imagePreview = reader.result);

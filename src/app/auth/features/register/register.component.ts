@@ -15,7 +15,7 @@ import { LocationService } from '../../../shared/data-access/location.service';
 import { TallerUSer } from '../../../works/features/models/talleres.model';
 import { RegisterUserService } from '../../../shared/data-access/register-user.service';
 import { toast } from 'ngx-sonner';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
 import { WorksService } from '../../../works/services/works.service';
 
@@ -32,6 +32,7 @@ export default class RegisterComponent implements OnInit {
   private destroy$ = new Subject<void>(); // Controlador de destrucción
   // Estado actual
   private authState = inject(AuthStateService);
+  private userService = inject(WorksService);
   // Inyección del estados de la autorización
   private _auth = inject(AuthStateService);
   private usersService = inject(WorksService);
@@ -137,7 +138,12 @@ export default class RegisterComponent implements OnInit {
    */
   ngOnInit(): void {
     this.authState.isAuthenticated$
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap((res) => {
+          return this.userService.checkUserExists();
+        })
+      )
       .subscribe((state) => {
         if (state) {
           this.router.navigate(['/works']);
