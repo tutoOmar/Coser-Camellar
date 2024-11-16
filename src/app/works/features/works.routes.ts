@@ -53,6 +53,11 @@ export default [
     loadComponent: () => import('./positions/positions.component'),
   },
   {
+    path: 'positions/new',
+    loadComponent: () =>
+      import('./positions/add-position/add-position.component'),
+  },
+  {
     path: 'profile/edit-worker/:id',
     loadComponent: () =>
       import('./edit-profile-worker/edit-profile-worker.component'),

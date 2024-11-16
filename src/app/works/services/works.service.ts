@@ -295,11 +295,31 @@ export class WorksService {
   // Método para actualizar el comentario en la base de datos de fireStore
   updateUser(
     collectionSelected: string,
-    user: WorkerUser | TallerUSer | SateliteUser
+    user: WorkerUser | TallerUSer | SateliteUser,
+    image: File | null
   ): Observable<any> {
-    const _collection = collection(this.firestore, collectionSelected);
-    const docRef = doc(_collection, user.id);
-    return from(updateDoc(docRef, { ...user }));
+    if (image) {
+      // Si hay imagen, la subimos y luego creamos la noticia
+      return this.uploadImage(image).pipe(
+        switchMap((imageUrl: string) => {
+          const userWithImage = {
+            ...user,
+            photo: imageUrl,
+          };
+          const _collection = collection(this.firestore, collectionSelected);
+          const docRef = doc(_collection, user.id);
+          return from(updateDoc(docRef, { ...userWithImage }));
+        })
+      );
+    } else {
+      // Si no hay imagen, solo subimos la noticia sin la URL de imagen
+      const userWithoutImage = {
+        ...user,
+      };
+      const _collection = collection(this.firestore, collectionSelected);
+      const docRef = doc(_collection, user.id);
+      return from(updateDoc(docRef, { ...userWithoutImage }));
+    }
   }
   //
   sateliteUsers = [

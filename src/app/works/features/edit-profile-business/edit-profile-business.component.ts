@@ -309,7 +309,7 @@ export default class EditProfileBusinessComponent implements OnInit {
       !this.provisionalValidationMaxLenght() &&
       !this.provisionalValidationMinLenght()
     ) {
-      // this.loading = true;
+      this.loading.set(true);
       const newbusiness: SateliteUser | TallerUSer = this.businessForm.value;
       const status = this.businessForm.value.status
         ? Status.LIBRE
@@ -340,7 +340,7 @@ export default class EditProfileBusinessComponent implements OnInit {
       if (updatedUser && updatedUser.typeUSer) {
         console.log('Usuario a actualizar', updatedUser);
         this.wokerService
-          .updateUser(updatedUser.typeUSer, updatedUser)
+          .updateUser(updatedUser.typeUSer, updatedUser, this.selectedImage)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
             next: (successMessage) => {
@@ -348,10 +348,12 @@ export default class EditProfileBusinessComponent implements OnInit {
 
               toast.success('Ususario actualizado con éxito');
               // Redirigir a otra ruta
+              this.loading.set(false);
               this.router.navigate(['/works']);
             },
             error: (error) => {
               // Mostrar mensaje de error en un toast
+              this.loading.set(false);
               toast.error('Error al actualizar usuario intente más tarde');
             },
           });
