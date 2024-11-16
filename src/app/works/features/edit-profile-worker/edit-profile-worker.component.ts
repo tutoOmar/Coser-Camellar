@@ -28,7 +28,6 @@ import { Status } from '../models/status.model';
   styleUrl: './edit-profile-worker.component.scss',
 })
 export default class EditProfileWorkerComponent implements OnInit {
-  [x: string]: any;
   wokerService = inject(WorksService);
 
   private destroy$ = new Subject<void>();
@@ -108,7 +107,7 @@ export default class EditProfileWorkerComponent implements OnInit {
 
       gender: ['', Validators.required],
       photo: [''],
-      status: ['', Validators.required],
+      status: [true, Validators.required],
     });
   }
   // Validador personalizado para asegurarse de que el FormArray tenga al menos un elemento
@@ -134,7 +133,6 @@ export default class EditProfileWorkerComponent implements OnInit {
    * @param sateliteId
    */
   loadWorker(collectionName: string, workerId: string) {
-    // console.log(collectionName, workerId);
     this.wokerService
       .getUserByIdAndCollection(workerId, collectionName)
       .pipe(takeUntil(this.destroy$))
@@ -142,7 +140,6 @@ export default class EditProfileWorkerComponent implements OnInit {
         const validationUser = worker as WorkerUser;
         this.userInfo = validationUser;
         // Usamos patchValue para setear los valores en el formulario
-        // console.log('Validando usuario', validationUser);
         this.workerForm.patchValue({
           name: validationUser.name,
           phone: validationUser.phone,
@@ -150,6 +147,7 @@ export default class EditProfileWorkerComponent implements OnInit {
           country: validationUser.country,
           gender: validationUser.gender,
           photo: validationUser.photo,
+          status: validationUser.status === 'libre' ? true : false,
         });
         //Limpiamor los formArray y los setteamos uno a uno
         // Primero, limpia los FormArray para asegurarte de que están vacíos
@@ -178,8 +176,6 @@ export default class EditProfileWorkerComponent implements OnInit {
         validationUser.experience.forEach((exp: string) => {
           experienceFormArray.push(new FormControl(exp));
         });
-
-        // console.log('YA setteado', this.workerForm.value);
         this.imagePreview.set(validationUser.photo);
         this.availableSpecialties = this.availableSpecialties.filter(
           (specialty) => !validationUser.specialty.includes(specialty)
@@ -296,9 +292,7 @@ export default class EditProfileWorkerComponent implements OnInit {
       const control = this.workerForm.get(key);
       control?.markAsTouched();
     });
-
-    console.log('aquí llego', this.workerForm.value);
-    //ToDo solo deberia validar el formulario pero hay fallas que se coregiran en la siguiente versión
+    //ToDo: solo deberia validar el formulario pero hay fallas que se coregiran en la siguiente versión
     if (
       this.workerForm.valid &&
       !this.provisionalValidationMaxLenght() &&
@@ -306,6 +300,9 @@ export default class EditProfileWorkerComponent implements OnInit {
     ) {
       // this.loading = true;
       const newWorker: WorkerUser = this.workerForm.value;
+      const status = this.workerForm.value.status
+        ? Status.LIBRE
+        : Status.OCUPADO;
       const updatedUser: WorkerUser = {
         // VAriables que no se modifican en este update
         id: this.userInfo.id,
@@ -313,8 +310,8 @@ export default class EditProfileWorkerComponent implements OnInit {
         typeUSer: this.userInfo.typeUSer,
         userId: this.userInfo.userId,
         comments: this.userInfo.comments,
-        status: this.userInfo.status,
         // Variables que se modifican en este update
+        status: status ? status : Status.LIBRE,
         city: newWorker.city,
         country: newWorker.country,
         experience: newWorker.experience,
@@ -325,10 +322,8 @@ export default class EditProfileWorkerComponent implements OnInit {
         specialty: newWorker.specialty,
         gender: newWorker.gender,
       };
-      console.log('VAmos a ver si se guarda', this.userInfo);
-      console.log('VAlidado', newWorker);
+      // Validamos el usuario a actualizar
       if (updatedUser && updatedUser.typeUSer) {
-        console.log('AQui entro?');
         this.wokerService
           .updateUser(updatedUser.typeUSer, updatedUser)
           .pipe(takeUntil(this.destroy$))
@@ -346,18 +341,6 @@ export default class EditProfileWorkerComponent implements OnInit {
             },
           });
       }
-      // this.registerService
-      //   .create(newWorker, TypeUser.TRABAJADOR, null)
-      //   .pipe(takeUntil(this.destroy$))
-      //   .subscribe({
-      //     next: () => {
-      //       this.loading = false;
-      //       this.router.navigate(['/works']);
-      //     },
-      //     error: () => {
-      //       this.loading = false;
-      //     },
-      //   });
     }
   }
   // Traducir genero

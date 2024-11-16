@@ -26,11 +26,17 @@ import { TallerUSer } from '../models/talleres.model';
 import { CommonModule } from '@angular/common';
 import CardPositionComponent from '../../../shared/ui/card-position/card-position.component';
 import { user } from '@angular/fire/auth';
+import StartsCalificationComponent from '../../../shared/ui/starts-calification/starts-calification.component';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, CardPositionComponent, RouterModule],
+  imports: [
+    CommonModule,
+    CardPositionComponent,
+    RouterModule,
+    StartsCalificationComponent,
+  ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
 })
@@ -91,10 +97,6 @@ export default class ProfileComponent implements OnInit {
    * @returns
    */
   loadWorker(collections: string[], userId: string) {
-    // console.log('Aqui paso', userId);
-    // return this.userService
-    //   .getUserInAnyCollection(userId)
-    //   .pipe(tap((res) => console.log('REspuesta', res)));
     return this.userService.getUserInAnyCollection(userId);
   }
   /**Remueve guiónes de las palabras que normalmente las lleva*/
