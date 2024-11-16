@@ -4,7 +4,6 @@
 
 .image {
   width: 100%; /* Que ocupe el ancho completo del contenedor */
-  max-height: 300px; /* Limitar la altura máxima */
   object-fit: cover; /* Recortar la imagen si excede las dimensiones */
-  border-radius: 5px;
+  height: 22.5rem;
 }

@@ -154,9 +154,16 @@ export class WorksService {
    * @param collectionSelected
    * @returns
    */
-  public getUserByIdAndCollection(id: string, collectionSelected: string) {
+  public getUserByIdAndCollection(
+    id: string,
+    collectionSelected: string
+  ): Observable<any> {
     const docRef = doc(this.firestore, `${collectionSelected}/${id}`);
-    return docData(docRef, { idField: 'id' });
+    return docData(docRef, { idField: 'id' }).pipe(
+      catchError((error) => {
+        return of(null);
+      })
+    );
   }
   /**
    *
@@ -181,7 +188,7 @@ export class WorksService {
     );
   }
   /**
-   *
+   * Obtiene cualquier usuario en cualquier coleccion de las actuales, pero usando el filtro de userId y no el ID directo
    * @param userId
    * @returns
    */
@@ -202,6 +209,23 @@ export class WorksService {
       first(),
       catchError(() => of([]))
     );
+  }
+  /**
+   * Obtiene cualquier usuario en cualquier coleccion de las actuales,  usando el filtro ID directo
+   * @param userId
+   * @returns
+   */
+  getUserByIdInAnyCollection(
+    userId: string
+  ): Observable<WorkerUser[] | TallerUSer[] | SateliteUser[] | null[]> {
+    const workerQuery = this.getUserByIdAndCollection(userId, 'trabajadores');
+    const tallerQuery = this.getUserByIdAndCollection(userId, 'talleres');
+    const sateliteQuery = this.getUserByIdAndCollection(userId, 'satelite');
+    return merge(
+      workerQuery.pipe(map((worker) => worker as WorkerUser[])),
+      tallerQuery.pipe(map((taller) => taller as TallerUSer[])),
+      sateliteQuery.pipe(map((satelite) => satelite as SateliteUser[]))
+    ).pipe(catchError(() => of([])));
   }
   /**
    * Se obtiene el signal de trabajadores
