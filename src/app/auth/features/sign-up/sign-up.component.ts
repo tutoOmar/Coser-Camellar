@@ -100,7 +100,6 @@ export default class SignUpComponent implements OnInit {
       toast.success('usuario creado Correctamente');
       this.router.navigate(['/auth/register']);
     } catch (error: any) {
-      console.log(error.code, error.message);
       if (error.code === 'auth/email-already-in-use') {
         toast.error('Correo ya existe, inicia sesión');
       } else if (error.code === 'auth/weak-password') {
