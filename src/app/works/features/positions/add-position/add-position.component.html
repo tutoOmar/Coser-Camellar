@@ -1,0 +1,219 @@
+<div
+  class="formPosition space-y-6 bg-white p-8 shadow-md rounded-lg max-w-lg mx-auto"
+>
+  <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">
+    Crear Nueva Posición
+  </h2>
+
+  <form [formGroup]="positionForm" class="space-y-5">
+    <!-- Imagen -->
+    <div>
+      <label class="block text-gray-700 font-medium mb-2"
+        >Imagen de la posición:</label
+      >
+      <div class="form-group">
+        <input
+          type="file"
+          (change)="onImageSelected($event)"
+          accept="image/*"
+          class="w-full"
+        />
+        <img
+          *ngIf="imagePreview()"
+          [src]="imagePreview()"
+          alt="Preview"
+          class="mt-2 w-60 h-60 object-cover rounded-lg"
+        />
+      </div>
+    </div>
+
+    <!-- Nombre -->
+    <div>
+      <label class="block text-gray-600 font-semibold mb-2"
+        >Nombre de la posición:</label
+      >
+      <input
+        type="text"
+        formControlName="name"
+        class="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+      />
+      <small
+        *ngIf="
+          positionForm.get('name')?.invalid && positionForm.get('name')?.touched
+        "
+        class="text-red-500"
+        >Este campo es requerido</small
+      >
+    </div>
+
+    <!-- Descripción -->
+    <div>
+      <label class="block text-gray-600 font-semibold mb-2">Descripción:</label>
+      <textarea
+        formControlName="description"
+        rows="4"
+        class="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+      ></textarea>
+      <small
+        *ngIf="
+          positionForm.get('description')?.invalid &&
+          positionForm.get('description')?.touched
+        "
+        class="text-red-500"
+      >
+        Este campo es requerido y no debe exceder 500 caracteres
+      </small>
+    </div>
+
+    <!-- Especialidades -->
+    <div>
+      <label class="block text-gray-600 font-semibold mb-2"
+        >Especialidades:</label
+      >
+      <select
+        (change)="addSpecialty($event, specialtySelect)"
+        #specialtySelect
+        class="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+      >
+        <option value="" disabled selected>Selecciona una especialidad</option>
+        <option
+          *ngFor="let specialty of availableSpecialties"
+          [value]="specialty"
+        >
+          {{ removeHyphens(specialty) }}
+        </option>
+      </select>
+      <small *ngIf="isSpecialtiesArrayInvalid()" class="text-red-500"
+        >Debes seleccionar al menos una especialidad</small
+      >
+
+      <!-- Especialidades seleccionadas -->
+      <div class="flex flex-wrap gap-2 mt-2">
+        <span
+          *ngFor="let specialty of specialtiesSignal()"
+          class="flex items-center gap-1 px-3 py-1 bg-blue-200 text-blue-700 rounded-full"
+        >
+          {{ removeHyphens(specialty) }}
+          <button
+            type="button"
+            (click)="removeSpecialty(specialty)"
+            class="text-red-500 hover:text-red-700"
+          >
+            x
+          </button>
+        </span>
+      </div>
+    </div>
+
+    <!-- Experiencia -->
+    <div>
+      <label class="block text-gray-600 font-semibold mb-2"
+        >Experiencia requerida:</label
+      >
+      <textarea
+        formControlName="experience"
+        class="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+      ></textarea>
+      <small
+        *ngIf="
+          positionForm.get('experience')?.invalid &&
+          positionForm.get('experience')?.touched
+        "
+        class="text-red-500"
+      >
+        Este campo es requerido y no debe exceder 100 caracteres
+      </small>
+    </div>
+
+    <!-- Tipo de Pago -->
+    <div>
+      <label class="block text-gray-600 font-semibold mb-2"
+        >Tipo de pago:</label
+      >
+      <select
+        formControlName="typePayment"
+        class="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+      >
+        <option value="" disabled selected>Selecciona el tipo de pago</option>
+        <option *ngFor="let type of paymentTypes" [value]="type">
+          {{ removeHyphens(type) }}
+        </option>
+      </select>
+      <small
+        *ngIf="
+          positionForm.get('typePayment')?.invalid &&
+          positionForm.get('typePayment')?.touched
+        "
+        class="text-red-500"
+        >Debes seleccionar un tipo de pago</small
+      >
+    </div>
+
+    <!-- Ciudad -->
+    <div>
+      <label class="block text-gray-600 font-semibold mb-2">Ciudad:</label>
+      <select
+        formControlName="city"
+        class="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+      >
+        <option value="" disabled selected>Selecciona una ciudad</option>
+        <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
+      </select>
+      <small
+        *ngIf="
+          positionForm.get('city')?.invalid && positionForm.get('city')?.touched
+        "
+        class="text-red-500"
+        >Debes seleccionar una ciudad</small
+      >
+    </div>
+
+    <!-- Barrio -->
+    <div>
+      <label class="block text-gray-600 font-semibold mb-2">Barrio:</label>
+      <input
+        type="text"
+        formControlName="neighborhood"
+        class="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+      />
+      <small
+        *ngIf="
+          positionForm.get('neighborhood')?.invalid &&
+          positionForm.get('neighborhood')?.touched
+        "
+        class="text-red-500"
+        >Este campo es requerido</small
+      >
+    </div>
+
+    <!-- Teléfono -->
+    <div>
+      <label class="block text-gray-600 font-semibold mb-2"
+        >Teléfono de contacto:</label
+      >
+      <input
+        type="tel"
+        formControlName="phone"
+        class="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+      />
+      <small
+        *ngIf="
+          positionForm.get('phone')?.invalid &&
+          positionForm.get('phone')?.touched
+        "
+        class="text-red-500"
+        >Ingrese un número de teléfono válido</small
+      >
+    </div>
+
+    <!-- Botón de envío -->
+    <button
+      type="submit"
+      (click)="submitPosition()"
+      [disabled]="loading()"
+      class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition duration-200 disabled:bg-blue-300"
+    >
+      {{ loading() ? "Creando posición..." : "Crear posición" }}
+    </button>
+  </form>
+</div>

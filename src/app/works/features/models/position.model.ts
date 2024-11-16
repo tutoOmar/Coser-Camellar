@@ -14,13 +14,13 @@ export interface Position {
   statusPosition: StatusPositionEnum;
 }
 
-enum PaymentEnum {
+export enum PaymentEnum {
   DESTAJO = 'destajo',
   SALARIO = 'salario',
   CONTRATO = 'contrato',
 }
 
-enum StatusPositionEnum {
+export enum StatusPositionEnum {
   ACTIVO = 'activo',
   INACTIVO = 'inactivo',
 }

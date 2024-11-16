@@ -298,7 +298,7 @@ export default class EditProfileWorkerComponent implements OnInit {
       !this.provisionalValidationMaxLenght() &&
       !this.provisionalValidationMinLenght()
     ) {
-      // this.loading = true;
+      this.loading.set(true);
       const newWorker: WorkerUser = this.workerForm.value;
       const status = this.workerForm.value.status
         ? Status.LIBRE
@@ -325,7 +325,7 @@ export default class EditProfileWorkerComponent implements OnInit {
       // Validamos el usuario a actualizar
       if (updatedUser && updatedUser.typeUSer) {
         this.wokerService
-          .updateUser(updatedUser.typeUSer, updatedUser)
+          .updateUser(updatedUser.typeUSer, updatedUser, this.selectedImage)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
             next: (successMessage) => {
@@ -333,10 +333,12 @@ export default class EditProfileWorkerComponent implements OnInit {
 
               toast.success('Ususario actualizado con éxito');
               // Redirigir a otra ruta
+              this.loading.set(false);
               this.router.navigate(['/works']);
             },
             error: (error) => {
               // Mostrar mensaje de error en un toast
+              this.loading.set(false);
               toast.error('Error al actualizar usuario intente más tarde');
             },
           });
