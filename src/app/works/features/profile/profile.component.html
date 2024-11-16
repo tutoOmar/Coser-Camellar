@@ -6,6 +6,11 @@
       class="text-blue-600 p-2"
       >Editar perfil</a
     >
+    <div *ngIf="workerSignal()?.average_score as userScore" class="mt-5 ml-4">
+      <strong>Tu calificación:</strong>
+      <app-starts-calification [rating]="userScore"></app-starts-calification>
+    </div>
+
     <div *ngIf="workerSignal()" class="flex flex-col">
       <!-- Estructura principal en pantallas pequeñas -->
       <div class="worker-header-complete">
@@ -59,6 +64,27 @@
 >
   <div class="worker-details-container">
     <div *ngIf="businessSignal()" class="flex flex-col">
+      <button
+        type="button"
+        [routerLink]="['/works/profile/edit-business', businessSignal()?.id]"
+        class="w-64 text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+      >
+        Editar pefil
+      </button>
+      <button
+        type="button"
+        class="w-64 text-white bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+      >
+        Agregar una nueva posición
+      </button>
+
+      <div
+        *ngIf="businessSignal()?.average_score as userScore"
+        class="mt-5 ml-4"
+      >
+        <strong>Tu calificación:</strong>
+        <app-starts-calification [rating]="userScore"></app-starts-calification>
+      </div>
       <!-- Estructura principal en pantallas pequeñas -->
       <div class="worker-header-complete">
         <div class="worker-header">

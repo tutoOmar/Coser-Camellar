@@ -6,7 +6,11 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { hasEmailError, isRequired } from '../../utils/validators';
+import {
+  hasEmailError,
+  isRequired,
+  hasMinLength,
+} from '../../utils/validators';
 import { AuthService } from '../../data-access/auth.service';
 import { toast } from 'ngx-sonner';
 import { Router, RouterLink } from '@angular/router';
@@ -50,12 +54,19 @@ export default class SignUpComponent implements OnInit {
   /**
    *
    */
+  isMinLength() {
+    return hasMinLength('password', this.form);
+  }
+  /**
+   *
+   */
   constructor(private authService: AuthService, private router: Router) {}
   form = this._formBuilder.group<FormSingUp>({
     password: this._formBuilder.control('', Validators.required),
     email: this._formBuilder.control('', [
       Validators.required,
       Validators.email,
+      Validators.minLength(6),
     ]),
   });
   /**
@@ -88,8 +99,12 @@ export default class SignUpComponent implements OnInit {
       });
       toast.success('usuario creado Correctamente');
       this.router.navigate(['/auth/register']);
-    } catch (error) {
-      toast.error('ocurrio un error');
+    } catch (error: any) {
+      if (error.code === 'auth/email-already-in-use') {
+        toast.error('Correo ya existe, inicia sesión');
+      } else if (error.code === 'auth/weak-password') {
+        toast.error('Contraseña debil, intenta con una contraseña más fuerte');
+      }
     }
   }
   /**

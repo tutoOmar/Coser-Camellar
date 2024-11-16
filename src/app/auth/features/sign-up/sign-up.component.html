@@ -69,6 +69,10 @@
             />
             @if (isRequired('password')) {
             <small class="text-red-400">Este campo es requerido</small>
+            } @if (isMinLength()){
+            <small class="text-red-400"
+              >La contraseña debe tener mínimo 6 caracteres</small
+            >
             }
           </div>
           <button

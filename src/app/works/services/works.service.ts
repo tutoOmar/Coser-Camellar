@@ -63,7 +63,6 @@ export class WorksService {
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         },
         (error) => {
-          console.error('Error al cargar el archivo', error);
           observer.error(error);
         },
         async () => {
@@ -175,7 +174,6 @@ export class WorksService {
       where('userId', '==', userId),
       limit(1) // Limita a solo un documento
     );
-    // console.log(userId, collectionSelected);
     return collectionData(userQuery, { idField: 'id' }).pipe(
       catchError((error) => {
         return of(null);
@@ -196,20 +194,10 @@ export class WorksService {
     );
     const tallerQuery = this.getUserByUserIdAndCollection(userId, 'talleres');
     const sateliteQuery = this.getUserByUserIdAndCollection(userId, 'satelite');
-    console.log('AQui ando', workerQuery, tallerQuery);
     return merge(
-      workerQuery.pipe(
-        tap((worker) => console.log('Worker query:', worker)),
-        map((worker) => worker as WorkerUser[])
-      ),
-      tallerQuery.pipe(
-        tap((taller) => console.log('Taller query:', taller)),
-        map((taller) => taller as TallerUSer[])
-      ),
-      sateliteQuery.pipe(
-        tap((satelite) => console.log('Satelite query:', satelite)),
-        map((satelite) => satelite as SateliteUser[])
-      )
+      workerQuery.pipe(map((worker) => worker as WorkerUser[])),
+      tallerQuery.pipe(map((taller) => taller as TallerUSer[])),
+      sateliteQuery.pipe(map((satelite) => satelite as SateliteUser[]))
     ).pipe(
       first(),
       catchError(() => of([]))
@@ -285,13 +273,11 @@ export class WorksService {
     collectionSelected: string,
     user: WorkerUser | TallerUSer | SateliteUser
   ): Observable<any> {
-    console.log('aquí llegua omitar');
     const _collection = collection(this.firestore, collectionSelected);
     const docRef = doc(_collection, user.id);
     return from(updateDoc(docRef, { ...user }));
   }
-
-  /////
+  //
   sateliteUsers = [
     {
       id: 'TU001',

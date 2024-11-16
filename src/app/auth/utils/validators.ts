@@ -14,3 +14,13 @@ export const isFieldRequired = (field: string, form: FormGroup) => {
   const control = form.get(field);
   return control && control.touched && control.hasError('required');
 };
+
+export const hasMinLength = (field: string, form: FormGroup) => {
+  const control = form.get(field);
+  return (
+    control &&
+    control.touched &&
+    control.value.length > 0 &&
+    control.value.length <= 5
+  );
+};
