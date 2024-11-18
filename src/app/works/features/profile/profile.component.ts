@@ -97,7 +97,7 @@ export default class ProfileComponent implements OnInit {
    * @returns
    */
   loadWorker(collections: string[], userId: string) {
-    return this.userService.getUserInAnyCollection(userId);
+    return this.userService.getUserByUserIdInAnyCollection(userId);
   }
   /**Remueve guiónes de las palabras que normalmente las lleva*/
   removeHyphens(wordWithHyphens: string[] | undefined): string {

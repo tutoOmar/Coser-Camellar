@@ -33,9 +33,6 @@ export default class RegisterComponent implements OnInit {
   // Estado actual
   private authState = inject(AuthStateService);
   private userService = inject(WorksService);
-  // Inyección del estados de la autorización
-  private _auth = inject(AuthStateService);
-  private usersService = inject(WorksService);
   // Subject para manejar la suscripción
   // Signal de loadging
   loading = signal<boolean>(false);

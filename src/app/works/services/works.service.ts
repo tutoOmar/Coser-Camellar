@@ -181,6 +181,7 @@ export class WorksService {
       where('userId', '==', userId),
       limit(1) // Limita a solo un documento
     );
+
     return collectionData(userQuery, { idField: 'id' }).pipe(
       catchError((error) => {
         return of(null);
@@ -192,7 +193,7 @@ export class WorksService {
    * @param userId
    * @returns
    */
-  getUserInAnyCollection(
+  getUserByUserIdInAnyCollection(
     userId: string
   ): Observable<WorkerUser[] | TallerUSer[] | SateliteUser[] | null[]> {
     const workerQuery = this.getUserByUserIdAndCollection(
@@ -201,13 +202,15 @@ export class WorksService {
     );
     const tallerQuery = this.getUserByUserIdAndCollection(userId, 'talleres');
     const sateliteQuery = this.getUserByUserIdAndCollection(userId, 'satelite');
-    return merge(
-      workerQuery.pipe(map((worker) => worker as WorkerUser[])),
-      tallerQuery.pipe(map((taller) => taller as TallerUSer[])),
-      sateliteQuery.pipe(map((satelite) => satelite as SateliteUser[]))
-    ).pipe(
-      first(),
-      catchError(() => of([]))
+    return combineLatest([workerQuery, tallerQuery, sateliteQuery]).pipe(
+      map(([workers, tallers, satelites]) => [
+        ...workers,
+        ...tallers,
+        ...satelites,
+      ]),
+      catchError((error) => {
+        return of([]);
+      })
     );
   }
   /**
@@ -292,7 +295,7 @@ export class WorksService {
       map((results) => results.some((exists) => exists)) // Devuelve true si algún resultado es true
     );
   }
-  // Método para actualizar el comentario en la base de datos de fireStore
+  // Método para actualizar el usuario en la base de datos de fireStore
   updateUser(
     collectionSelected: string,
     user: WorkerUser | TallerUSer | SateliteUser,
