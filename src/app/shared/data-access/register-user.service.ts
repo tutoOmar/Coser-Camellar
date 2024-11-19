@@ -39,14 +39,6 @@ export class RegisterUserService {
     const _collection = collection(this._firestore, path);
     const docRef = doc(_collection, newId);
     return getDoc(docRef);
-    /**
-     * esto de momento no se usa, es más para separar listas y solo
-      traiga lo que requerimos si hacer peticiones innecesarias, se utilizará en contenido personalizado que aún no tenemos 
-    */
-    // const _query = query(
-    //   _collection,
-    //   where('userId', '==', this._authState.currentUser?.uid)
-    // );
   }
   /**
    * REgistro de usuarios ya sean talleres, satelites o trabajadores

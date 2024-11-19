@@ -27,6 +27,9 @@ import { CommonModule } from '@angular/common';
 import CardPositionComponent from '../../../shared/ui/card-position/card-position.component';
 import { user } from '@angular/fire/auth';
 import StartsCalificationComponent from '../../../shared/ui/starts-calification/starts-calification.component';
+import { PositionsService } from '../../services/positions.service';
+import { toast } from 'ngx-sonner';
+import { Position, StatusPositionEnum } from '../models/position.model';
 
 @Component({
   selector: 'app-profile',
@@ -41,14 +44,15 @@ import StartsCalificationComponent from '../../../shared/ui/starts-calification/
   styleUrl: './profile.component.scss',
 })
 export default class ProfileComponent implements OnInit {
-  //
+  // Señal donde guardaremos el tipo de usuario para mostrar
   typeUser = signal<string>('');
   //
   private destroy$: Subject<void> = new Subject<void>();
-  //
+  //Señal donde guardaremos si es un trabajador
   workerSignal = signal<WorkerUser | null>(null);
-  //
+  // Señal donde guardaremos si es un satelite o un taller
   businessSignal = signal<TallerUSer | SateliteUser | null>(null);
+  positionStatus = signal<boolean>(false);
   //
   userId!: string | undefined;
   COLLECTION_OPTIONS = ['satelite', 'trabajadores', 'talleres'];
@@ -56,6 +60,7 @@ export default class ProfileComponent implements OnInit {
   private _auth = inject(AuthStateService);
   private currentRoute = inject(ActivatedRoute);
   private userService = inject(WorksService);
+  private positionService = inject(PositionsService);
   /**
    *
    */
@@ -97,7 +102,7 @@ export default class ProfileComponent implements OnInit {
    * @returns
    */
   loadWorker(collections: string[], userId: string) {
-    return this.userService.getUserInAnyCollection(userId);
+    return this.userService.getUserByUserIdInAnyCollection(userId);
   }
   /**Remueve guiónes de las palabras que normalmente las lleva*/
   removeHyphens(wordWithHyphens: string[] | undefined): string {
@@ -125,6 +130,44 @@ export default class ProfileComponent implements OnInit {
         return 'Otro';
       default:
         return 'Error en genero';
+    }
+  }
+  /**
+   *
+   */
+  deletePosition(positionId: string) {
+    const user = this.businessSignal();
+    const typeUser = user?.typeUSer;
+    if (user && typeUser) {
+      this.positionService.deletePosition(typeUser, user, positionId);
+    }
+  }
+  /**
+   *
+   */
+  onToggleChange(event: Event, positionId: string): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    const user = this.businessSignal();
+    const userType = user?.typeUSer;
+    if (user && userType) {
+      user.positions.forEach((position: Position) => {
+        if (position.id === positionId) {
+          console.log(checked);
+          if (checked) {
+            position.statusPosition = StatusPositionEnum.ACTIVO;
+          } else {
+            position.statusPosition = StatusPositionEnum.INACTIVO;
+          }
+        }
+      });
+      //ToDo: Toca analizar porque al conectar el backend molesta el estado
+      // this.positionService
+      //   .updateStatusPosition(userType, user)
+      //   .pipe(
+      //     takeUntil(this.destroy$),
+      //     tap((res) => console.log('resouesta', res))
+      //   )
+      //   .subscribe();
     }
   }
   /**

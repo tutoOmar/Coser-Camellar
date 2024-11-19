@@ -7,6 +7,7 @@
 
   <form [formGroup]="positionForm" class="space-y-5">
     <!-- Imagen -->
+    <!-- Aquí se comentó este html porque de momento no se puede agregar posiciones con imagenes es un ToDo -->
     <div>
       <label class="block text-gray-700 font-medium mb-2"
         >Imagen de la posición:</label
@@ -16,13 +17,13 @@
           type="file"
           (change)="onImageSelected($event)"
           accept="image/*"
-          class="w-full"
         />
+
+        <!-- Mostrar la imagen si se ha seleccionado -->
         <img
-          *ngIf="imagePreview()"
-          [src]="imagePreview()"
-          alt="Preview"
-          class="mt-2 w-60 h-60 object-cover rounded-lg"
+          *ngIf="imagePreview"
+          [src]="imagePreview"
+          alt="Imagen de la noticia"
         />
       </div>
     </div>
@@ -213,7 +214,7 @@
       [disabled]="loading()"
       class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition duration-200 disabled:bg-blue-300"
     >
-      {{ loading() ? "Creando posición..." : "Crear posición" }}
+      {{ loading() ? "Cargando..." : "Crear posición" }}
     </button>
   </form>
 </div>
