@@ -77,4 +77,17 @@ export class PositionsService {
       return from(updateDoc(docRef, { ...userWithoutImageInPosition }));
     }
   }
+  //Método para eliminar un posición
+  deletePosition(
+    collectionSelected: string,
+    user: TallerUSer | SateliteUser,
+    positionId: string
+  ): Observable<any> {
+    user.positions = user.positions.filter(
+      (position) => position.id !== positionId
+    );
+    const _collection = collection(this.firestore, collectionSelected);
+    const docRef = doc(_collection, user.id);
+    return from(updateDoc(docRef, { ...user }));
+  }
 }

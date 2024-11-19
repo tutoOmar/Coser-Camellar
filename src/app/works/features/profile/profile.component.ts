@@ -27,6 +27,7 @@ import { CommonModule } from '@angular/common';
 import CardPositionComponent from '../../../shared/ui/card-position/card-position.component';
 import { user } from '@angular/fire/auth';
 import StartsCalificationComponent from '../../../shared/ui/starts-calification/starts-calification.component';
+import { PositionsService } from '../../services/positions.service';
 
 @Component({
   selector: 'app-profile',
@@ -56,6 +57,7 @@ export default class ProfileComponent implements OnInit {
   private _auth = inject(AuthStateService);
   private currentRoute = inject(ActivatedRoute);
   private userService = inject(WorksService);
+  private positionService = inject(PositionsService);
   /**
    *
    */
@@ -125,6 +127,16 @@ export default class ProfileComponent implements OnInit {
         return 'Otro';
       default:
         return 'Error en genero';
+    }
+  }
+  /**
+   *
+   */
+  deletePosition(positionId: string) {
+    const user = this.businessSignal();
+    const typeUser = user?.typeUSer;
+    if (user && typeUser) {
+      this.positionService.deletePosition(typeUser, user, positionId);
     }
   }
   /**
