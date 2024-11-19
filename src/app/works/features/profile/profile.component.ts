@@ -30,6 +30,7 @@ import StartsCalificationComponent from '../../../shared/ui/starts-calification/
 import { PositionsService } from '../../services/positions.service';
 import { toast } from 'ngx-sonner';
 import { Position, StatusPositionEnum } from '../models/position.model';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-profile',
@@ -39,6 +40,8 @@ import { Position, StatusPositionEnum } from '../models/position.model';
     CardPositionComponent,
     RouterModule,
     StartsCalificationComponent,
+    FormsModule,
+    ReactiveFormsModule,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -153,21 +156,21 @@ export default class ProfileComponent implements OnInit {
       user.positions.forEach((position: Position) => {
         if (position.id === positionId) {
           console.log(checked);
-          if (checked) {
-            position.statusPosition = StatusPositionEnum.ACTIVO;
-          } else {
-            position.statusPosition = StatusPositionEnum.INACTIVO;
-          }
+          position.statusPosition = checked
+            ? StatusPositionEnum.ACTIVO
+            : StatusPositionEnum.INACTIVO;
         }
       });
+      // Actualiza el signal para notificar el cambio a Angular
+      this.businessSignal.set({ ...user });
       //ToDo: Toca analizar porque al conectar el backend molesta el estado
-      // this.positionService
-      //   .updateStatusPosition(userType, user)
-      //   .pipe(
-      //     takeUntil(this.destroy$),
-      //     tap((res) => console.log('resouesta', res))
-      //   )
-      //   .subscribe();
+      this.positionService
+        .updateStatusPosition(userType, user)
+        .pipe(
+          takeUntil(this.destroy$),
+          tap((res) => console.log('resouesta', res))
+        )
+        .subscribe();
     }
   }
   /**

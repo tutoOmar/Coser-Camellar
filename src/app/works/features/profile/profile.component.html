@@ -147,6 +147,7 @@
                   <input
                     type="checkbox"
                     class="sr-only peer"
+                    [(ngModel)]="position.statusPosition"
                     (change)="onToggleChange($event, position.id)"
                   />
                   <div
