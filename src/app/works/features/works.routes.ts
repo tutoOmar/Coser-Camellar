@@ -1,6 +1,11 @@
 import { Routes } from '@angular/router';
+import { privateGuard } from '../../core/auth.guard';
 
 export default [
+  {
+    path: 'main',
+    loadComponent: () => import('./main/main.component'),
+  },
   {
     path: 'costureros',
     loadComponent: () => import('./costureros/costureros.component'),
@@ -47,6 +52,7 @@ export default [
   {
     path: 'profile',
     loadComponent: () => import('./profile/profile.component'),
+    canActivate: [privateGuard],
   },
   {
     path: 'positions',
@@ -69,6 +75,6 @@ export default [
   },
   {
     path: '**',
-    loadComponent: () => import('./costureros/costureros.component'),
+    loadComponent: () => import('./main/main.component'),
   },
 ] as Routes;

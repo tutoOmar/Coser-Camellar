@@ -93,7 +93,7 @@ export default class CosturerosComponent implements OnInit {
         })
       )
       .subscribe((stateUserExist) => {
-        //Debemos validar que sí el status del usario en el registro está icimpleto pero existe ya un usuario lo reenvie al register para que finalice su registro
+        //Debemos validar que sí el status del usario en el registro está incompleto pero existe ya un usuario lo reenvie al register para que finalice su registro
         if (!stateUserExist && this.currentStatusState()) {
           /** Esto se hace para cuando se regist pero aun no haya ingresado datos no pueda ir, es mejor manejarlo con un guard */
           this._router.navigate(['/auth/register']);

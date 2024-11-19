@@ -1,0 +1,24 @@
+<h1 class="text-3xl text-blue-700 ml-6 mb-4 font-semibold">Marketplace</h1>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mx-6">
+  <div
+    *ngFor="let item of filteredItems()"
+    class="border rounded-lg shadow-md p-4"
+  >
+    <img
+      [src]="item.image"
+      alt="{{ item.title }}"
+      class="w-full h-48 object-cover rounded-md mb-4"
+    />
+    <h2 class="text-lg font-semibold mb-2">{{ item.title }}</h2>
+    <p class="text-gray-600 mb-2">{{ item.description }}</p>
+    <p class="text-blue-600 font-bold text-lg mb-4">
+      $ {{ item.price | number : "1.0-0" }}
+    </p>
+    <button
+      (click)="onBuy(item.id)"
+      class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+    >
+      Comprar
+    </button>
+  </div>
+</div>
