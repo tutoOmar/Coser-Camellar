@@ -38,7 +38,7 @@ export default class HeaderComponent {
    */
   async logOut() {
     await this._authState.logOut();
-    this._router.navigate(['/auth/sign-in']);
+    this._router.navigate(['/auth/sign-up']);
   }
   /**
    *

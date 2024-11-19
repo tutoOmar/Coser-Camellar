@@ -338,14 +338,12 @@ export default class EditProfileBusinessComponent implements OnInit {
       };
       // Validamos el usuario a actualizar
       if (updatedUser && updatedUser.typeUSer) {
-        console.log('Usuario a actualizar', updatedUser);
         this.wokerService
           .updateUser(updatedUser.typeUSer, updatedUser, this.selectedImage)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
             next: (successMessage) => {
               // Mostrar mensaje de éxito en un toast
-
               toast.success('Ususario actualizado con éxito');
               // Redirigir a otra ruta
               this.loading.set(false);

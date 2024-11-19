@@ -77,6 +77,17 @@ export class PositionsService {
       return from(updateDoc(docRef, { ...userWithoutImageInPosition }));
     }
   }
+  // Método para actualizar el usuario en la base de datos de fireStore
+  // Dado que las positions están dentro del usuario toca actualizar todo el usuario
+  updateStatusPosition(
+    collectionSelected: string,
+    user: TallerUSer | SateliteUser
+  ): Observable<any> {
+    console.log(user);
+    const _collection = collection(this.firestore, collectionSelected);
+    const docRef = doc(_collection, user.id);
+    return from(updateDoc(docRef, { ...user }));
+  }
   //Método para eliminar un posición
   deletePosition(
     collectionSelected: string,
