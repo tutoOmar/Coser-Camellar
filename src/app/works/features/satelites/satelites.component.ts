@@ -85,7 +85,4 @@ export default class SatelitesComponent {
   onWorkerSelected(workerId: string | undefined) {
     this._router.navigate(['/works/satelite', workerId]);
   }
-  createUsers() {
-    this.service.addSpecificUser();
-  }
 }

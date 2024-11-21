@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  inject,
+  OnInit,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TypeUser } from '../../../works/features/models/type-user.model';
@@ -57,6 +64,21 @@ export default class RegisterComponent implements OnInit {
   // Lista que se present disponible en el select
   availableSpecialties = [...this.workerSpecialties]; // Lista de especialidades disponibles para seleccionar
   availableMachines = [...this.machinesExperience];
+  tempSelectedSpecialties: string[] = []; // Nuevo array para selección temporal
+  tempSelectedMachines: string[] = []; // Nuevo array para selección temporal
+  tempSelectedSpecialtiesWorker: string[] = []; // Nuevo array para selección temporal
+  tempSelectedMachinesWorker: string[] = []; // Nuevo array para selección temporal
+  // Modified select element to allow multiple selections
+  @ViewChild('specialtySelect') specialtySelect: ElementRef | undefined;
+  // Modified select element to allow multiple selections
+  @ViewChild('machineSelect') machineSelect: ElementRef | undefined;
+  // Datos prefedinidos para paise sy ciudades
+  // Modified select element to allow multiple selections
+  @ViewChild('specialtySelectWorker') specialtySelectWorker:
+    | ElementRef
+    | undefined;
+  // Modified select element to allow multiple selections
+  @ViewChild('machineSelectWorker') machineSelectWorker: ElementRef | undefined;
   // Datos prefedinidos para paise sy ciudades
   //ToDo esto deberá estar vacio cuando nos conectemos a un API
   countries: any[] = [{ name: 'Colombia', code: 'CO' }];
@@ -195,6 +217,127 @@ export default class RegisterComponent implements OnInit {
       toast.error('Debes llenar todos los campos');
     }
   }
+  /* ===========================================================================================
+   * Funciones para añadir opciones a los trabajadores
+   =============================================================================================*/
+
+  // Método para agregar una especialidad a un trabajador
+  addSpecialtyWorkerToTemp(event: any) {
+    const specialty = event.target.value;
+
+    if (
+      specialty &&
+      this.isSpecialtyEnum(specialty) &&
+      !this.newWorker.specialty.includes(specialty)
+    ) {
+      this.tempSelectedSpecialtiesWorker.push(specialty); // Añadir a la lista de especialidades seleccionadas
+    }
+  }
+
+  // New method to confirm selections
+  confirmWorkerSpecialties() {
+    // Remove selected specialties from available list
+    this.tempSelectedSpecialtiesWorker.forEach((specialty) => {
+      this.availableSpecialties = this.availableSpecialties.filter(
+        (item) => item !== specialty
+      );
+    });
+    const validatedSpecialties = this.tempSelectedSpecialtiesWorker
+      .map((specialty) => {
+        if (this.isSpecialtyEnum(specialty)) {
+          return specialty;
+        } else {
+          return null;
+        }
+      })
+      .filter((specialty) => specialty !== null);
+    // // Add all temp selections to main specialty list
+    this.newWorker.specialty = [
+      ...this.newWorker.specialty,
+      ...validatedSpecialties,
+    ];
+
+    // Clear temporary selections
+    this.tempSelectedSpecialtiesWorker = [];
+
+    // Reset select input
+    if (this.specialtySelectWorker) {
+      this.specialtySelectWorker.nativeElement.selectedIndex = 0;
+    }
+  }
+
+  // Método para quitar una especialidad
+  removeSpecialtyWorker(specialty: string) {
+    this.newWorker.specialty = this.newWorker.specialty.filter(
+      (item) => item !== specialty
+    ); // Remover de la lista de seleccionadas
+    if (this.isSpecialtyEnum(specialty)) {
+      this.availableSpecialties.push(specialty); // Añadir de nuevo a la lista de disponibles
+    }
+  }
+  // Clear temporary selections
+  clearTempSelectionsWorkerSpecialties() {
+    this.tempSelectedSpecialtiesWorker = [];
+  }
+
+  // Método para agregar una especialidad
+  addMachineWorkerToTemp(event: any) {
+    const machine = event.target.value;
+    if (
+      machine &&
+      this.isMachineEnum(machine) &&
+      !this.tempSelectedMachinesWorker.includes(machine)
+    ) {
+      this.tempSelectedMachinesWorker.push(machine); // Añadir a la lista de especialidades seleccionadas
+    }
+  }
+  // New method to confirm selections
+  confirmWorkersMachines() {
+    // Remove selected specialties from available list
+    this.tempSelectedMachinesWorker.forEach((machine) => {
+      this.availableMachines = this.availableMachines.filter(
+        (item) => item !== machine
+      );
+    });
+    const validatedMachines = this.tempSelectedMachinesWorker
+      .map((machine) => {
+        if (this.isMachineEnum(machine)) {
+          return machine;
+        } else {
+          return null;
+        }
+      })
+      .filter((machine) => machine !== null);
+    // // Add all temp selections to main machine list
+    this.newWorker.machines = [
+      ...this.newWorker.machines,
+      ...validatedMachines,
+    ];
+
+    // Clear temporary selections
+    this.tempSelectedMachinesWorker = [];
+
+    // Reset select input
+    if (this.machineSelectWorker) {
+      this.machineSelectWorker.nativeElement.selectedIndex = 0;
+    }
+  }
+  // Método para quitar una especialidad
+  removeMachineWorker(machine: string) {
+    this.newWorker.machines = this.newWorker.machines.filter(
+      (item) => item !== machine
+    ); // Remover de la lista de seleccionadas
+    if (this.isMachineEnum(machine)) {
+      this.availableMachines.push(machine); // Añadir de nuevo a la lista de disponibles
+    }
+  }
+  // Clear temporary selections
+  clearTempSelectionsWorkersMachines() {
+    this.tempSelectedMachines = [];
+  }
+  /* ===========================================================================================
+   * Funciones para añadir opciones a los negocios como satelites o talleres
+   =============================================================================================*/
 
   // Método para registrar un negocio
   registerBusiness(businessForm: any) {
@@ -241,99 +384,110 @@ export default class RegisterComponent implements OnInit {
       this.loading.set(false);
       toast.error('Debes llenar todos los campos');
     }
-
-    // Navegar a otra ruta o mostrar una confirmación
-    //this.router.navigate(['/aplication']);
   }
-  // Método para agregar una especialidad a un trabajador
-  addSpecialtyWorker(event: any, specialtySelect: HTMLSelectElement) {
+  // Se añade especialidad temporal
+  addSpecialtyBusinessToTemp(event: any) {
     const specialty = event.target.value;
 
     if (
       specialty &&
       this.isSpecialtyEnum(specialty) &&
-      !this.newWorker.specialty.includes(specialty)
+      !this.tempSelectedSpecialties.includes(specialty)
     ) {
-      this.newWorker.specialty.push(specialty); // Añadir a la lista de especialidades seleccionadas
+      this.tempSelectedSpecialties.push(specialty);
+    }
+  }
+  // New method to confirm selections
+  confirmBusinessSpecialties() {
+    // Remove selected specialties from available list
+    this.tempSelectedSpecialties.forEach((specialty) => {
       this.availableSpecialties = this.availableSpecialties.filter(
         (item) => item !== specialty
-      ); // Remover de la lista disponible
-      specialtySelect.value = '';
+      );
+    });
+    const validatedSpecialties = this.tempSelectedSpecialties
+      .map((specialty) => {
+        if (this.isSpecialtyEnum(specialty)) {
+          return specialty;
+        } else {
+          return null;
+        }
+      })
+      .filter((specialty) => specialty !== null);
+    // // Add all temp selections to main specialty list
+    this.newBusiness.specialty = [
+      ...this.newBusiness.specialty,
+      ...validatedSpecialties,
+    ];
+
+    // Clear temporary selections
+    this.tempSelectedSpecialties = [];
+
+    // Reset select input
+    if (this.specialtySelect) {
+      this.specialtySelect.nativeElement.selectedIndex = 0;
     }
   }
 
-  // Método para quitar una especialidad
-  removeSpecialtyWorker(specialty: string) {
-    this.newWorker.specialty = this.newWorker.specialty.filter(
-      (item) => item !== specialty
-    ); // Remover de la lista de seleccionadas
-    if (this.isSpecialtyEnum(specialty)) {
-      this.availableSpecialties.push(specialty); // Añadir de nuevo a la lista de disponibles
-    }
-  }
-  // Método para agregar una especialidad
-  addMachineWorker(event: any, machineSelect: HTMLSelectElement) {
-    const machine = event.target.value;
-    if (this.isMachineEnum(machine)) {
-      if (machine && !this.newWorker.machines.includes(machine)) {
-        this.newWorker.machines.push(machine); // Añadir a la lista de especialidades seleccionadas
-        this.availableMachines = this.availableMachines.filter(
-          (item) => item !== machine
-        ); // Remover de la lista disponible
-      }
-      machineSelect.value = '';
-    }
-  }
-
-  // Método para quitar una especialidad
-  removeMachineWorker(machine: string) {
-    this.newWorker.machines = this.newWorker.machines.filter(
-      (item) => item !== machine
-    ); // Remover de la lista de seleccionadas
-    if (this.isMachineEnum(machine)) {
-      this.availableMachines.push(machine); // Añadir de nuevo a la lista de disponibles
-    }
-  }
-  // Método para agregar una especialidad a un trabajador
-  addSpecialtyBusiness(event: any, specialtySelect: HTMLSelectElement) {
-    const specialty = event.target.value;
-
-    if (
-      specialty &&
-      this.isSpecialtyEnum(specialty) &&
-      !this.newBusiness.specialty.includes(specialty)
-    ) {
-      this.newBusiness.specialty.push(specialty); // Añadir a la lista de especialidades seleccionadas
-      this.availableSpecialties = this.availableSpecialties.filter(
-        (item) => item !== specialty
-      ); // Remover de la lista disponible
-      specialtySelect.value = '';
-    }
-  }
-
-  // Método para quitar una especialidad
+  // Modified remove method
   removeSpecialtyBusiness(specialty: string) {
     this.newBusiness.specialty = this.newBusiness.specialty.filter(
       (item) => item !== specialty
-    ); // Remover de la lista de seleccionadas
+    );
+
+    // Add back to available specialties if it's a valid specialty
     if (this.isSpecialtyEnum(specialty)) {
-      this.availableSpecialties.push(specialty); // Añadir de nuevo a la lista de disponibles
+      this.availableSpecialties.push(specialty);
     }
   }
-  // Método para agregar una especialidad
-  addMachineBusiness(event: any, machineSelect: HTMLSelectElement) {
-    const machine = event.target.value;
-    if (this.isMachineEnum(machine)) {
-      if (machine && !this.newBusiness.machines.includes(machine)) {
-        this.newBusiness.machines.push(machine); // Añadir a la lista de especialidades seleccionadas
-        this.availableMachines = this.availableMachines.filter(
-          (item) => item !== machine
-        ); // Remover de la lista disponible
-      }
-      machineSelect.value = '';
-    }
+  // Clear temporary selections
+  clearTempSelections() {
+    this.tempSelectedSpecialties = [];
   }
 
+  // Método para agregar una especialidad
+  addMachineBusinessToTemp(event: any) {
+    const machine = event.target.value;
+
+    if (
+      machine &&
+      this.isMachineEnum(machine) &&
+      !this.tempSelectedMachines.includes(machine)
+    ) {
+      this.tempSelectedMachines.push(machine); // Añadir a la lista de especialidades seleccionadas
+    }
+  }
+  // New method to confirm selections
+  confirmBusinessMachines() {
+    // Remove selected specialties from available list
+    this.tempSelectedMachines.forEach((machine) => {
+      this.availableMachines = this.availableMachines.filter(
+        (item) => item !== machine
+      );
+    });
+    const validatedMachines = this.tempSelectedMachines
+      .map((machine) => {
+        if (this.isMachineEnum(machine)) {
+          return machine;
+        } else {
+          return null;
+        }
+      })
+      .filter((machine) => machine !== null);
+    // // Add all temp selections to main machine list
+    this.newBusiness.machines = [
+      ...this.newBusiness.machines,
+      ...validatedMachines,
+    ];
+
+    // Clear temporary selections
+    this.tempSelectedMachines = [];
+
+    // Reset select input
+    if (this.machineSelect) {
+      this.machineSelect.nativeElement.selectedIndex = 0;
+    }
+  }
   // Método para quitar una especialidad
   removeMachineBusiness(machine: string) {
     this.newBusiness.machines = this.newBusiness.machines.filter(
@@ -342,6 +496,10 @@ export default class RegisterComponent implements OnInit {
     if (this.isMachineEnum(machine)) {
       this.availableMachines.push(machine); // Añadir de nuevo a la lista de disponibles
     }
+  }
+  // Clear temporary selections
+  clearTempSelectionsMachines() {
+    this.tempSelectedMachines = [];
   }
   /**Remueve guiónes de las palabras que normalmente las lleva*/
   removeHyphens(wordWithHyphens: string | undefined): string {
