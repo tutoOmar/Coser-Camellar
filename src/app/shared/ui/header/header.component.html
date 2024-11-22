@@ -20,84 +20,6 @@
       <!-- Icons in the middle -->
       <div class="flex space-x-6 m-auto div2">
         <div class="icons-rows">
-          <div class="news">
-            <div
-              class="flex items-center space-x-3 rtl:space-x-reverse flex-col icon-button"
-              [routerLink]="['/aplication']"
-            >
-              <button class="text-blue-600 focus:outline-none">
-                <svg
-                  class="icon items-center"
-                  viewBox="0 0 48 48"
-                  id="b"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                  <g
-                    id="SVGRepo_tracerCarrier"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  ></g>
-                  <g id="SVGRepo_iconCarrier">
-                    <defs>
-                      <style>
-                        .g {
-                          fill: none;
-                          stroke: #0171ff;
-                          stroke-linecap: round;
-                          stroke-linejoin: round;
-                        }
-                      </style>
-                    </defs>
-                    <path
-                      id="c"
-                      class="g"
-                      d="m40.5,5.5H7.5c-1.1046,0-2,.8954-2,2v33c0,1.1046.8954,2,2,2h33c1.1046,0,2-.8954,2-2V7.5c0-1.1046-.8954-2-2-2Z"
-                    ></path>
-                    <g>
-                      <path
-                        id="d"
-                        class="g"
-                        d="m20.373,11.5005h16.502v5h-16.502v-5Z"
-                      ></path>
-                      <path
-                        id="e"
-                        class="g"
-                        d="m20.373,21.5h16.502v5h-16.502v-5Z"
-                      ></path>
-                      <path
-                        id="f"
-                        class="g"
-                        d="m20.373,31.4995h16.502v5h-16.502v-5Z"
-                      ></path>
-                      <rect
-                        class="g"
-                        x="11.125"
-                        y="11.5005"
-                        width="5"
-                        height="5"
-                      ></rect>
-                      <rect
-                        class="g"
-                        x="11.125"
-                        y="21.5"
-                        width="5"
-                        height="5"
-                      ></rect>
-                      <rect
-                        class="g"
-                        x="11.125"
-                        y="31.4995"
-                        width="5"
-                        height="5"
-                      ></rect>
-                    </g>
-                  </g>
-                </svg>
-              </button>
-              <span class="text-gray-700 dark:text-white">Noticias</span>
-            </div>
-          </div>
           <div #workersMenuButton class="workers-icon" (click)="toggleMenu()">
             <div
               class="flex items-center space-x-3 rtl:space-x-reverse flex-col icon-button"
@@ -142,7 +64,7 @@
           </div>
           <ul #workersMenu class="workers" [class.open]="isMenuOpen">
             <li
-              class="flex items-center space-x-3 rtl:space-x-reverse flex-col icon-button icon-button-menu"
+              class="flex items-center space-x-3 rtl:space-x-reverse flex-col icon-button icon-button-menu m-3"
               [routerLink]="['/works/main']"
               (click)="closeMenu()"
             >
@@ -479,10 +401,10 @@
             </div>
           </div>
           <div
-            class="flex items-center space-x-3 rtl:space-x-reverse flex-col icon-button"
+            class="flex items-center space-x-3 rtl:space-x-reverse flex-col icon-button max-w-32"
             [routerLink]="['/aplication/marketplace']"
           >
-            <button class="text-gray-500 focus:outline-none">
+            <button class="text-gray-500 focus:outl ine-none">
               <svg
                 class="icon items-center"
                 viewBox="0 0 24 24"
@@ -540,7 +462,6 @@
                 xmlns:xlink="http://www.w3.org/1999/xlink"
                 viewBox="0 0 512 512"
                 xml:space="preserve"
-                fill="#000000"
               >
                 <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                 <g
@@ -568,6 +489,84 @@
               </svg>
             </button>
             <span class="text-gray-700 dark:text-white">Mi perfil</span>
+          </div>
+        </div>
+        <div class="news">
+          <div
+            class="flex items-center space-x-3 rtl:space-x-reverse flex-col icon-button"
+            [routerLink]="['/aplication']"
+          >
+            <button class="text-blue-600 focus:outline-none">
+              <svg
+                class="icon items-center"
+                viewBox="0 0 48 48"
+                id="b"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                <g
+                  id="SVGRepo_tracerCarrier"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></g>
+                <g id="SVGRepo_iconCarrier">
+                  <defs>
+                    <style>
+                      .g {
+                        fill: none;
+                        stroke: #0171ff;
+                        stroke-linecap: round;
+                        stroke-linejoin: round;
+                      }
+                    </style>
+                  </defs>
+                  <path
+                    id="c"
+                    class="g"
+                    d="m40.5,5.5H7.5c-1.1046,0-2,.8954-2,2v33c0,1.1046.8954,2,2,2h33c1.1046,0,2-.8954,2-2V7.5c0-1.1046-.8954-2-2-2Z"
+                  ></path>
+                  <g>
+                    <path
+                      id="d"
+                      class="g"
+                      d="m20.373,11.5005h16.502v5h-16.502v-5Z"
+                    ></path>
+                    <path
+                      id="e"
+                      class="g"
+                      d="m20.373,21.5h16.502v5h-16.502v-5Z"
+                    ></path>
+                    <path
+                      id="f"
+                      class="g"
+                      d="m20.373,31.4995h16.502v5h-16.502v-5Z"
+                    ></path>
+                    <rect
+                      class="g"
+                      x="11.125"
+                      y="11.5005"
+                      width="5"
+                      height="5"
+                    ></rect>
+                    <rect
+                      class="g"
+                      x="11.125"
+                      y="21.5"
+                      width="5"
+                      height="5"
+                    ></rect>
+                    <rect
+                      class="g"
+                      x="11.125"
+                      y="31.4995"
+                      width="5"
+                      height="5"
+                    ></rect>
+                  </g>
+                </g>
+              </svg>
+            </button>
+            <span class="text-gray-700 dark:text-white">Noticias</span>
           </div>
         </div>
       </div>
