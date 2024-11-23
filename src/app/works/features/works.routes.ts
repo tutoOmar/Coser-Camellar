@@ -64,14 +64,19 @@ export default [
       import('./positions/add-position/add-position.component'),
   },
   {
+    path: 'positions/edit/:id',
+    loadComponent: () =>
+      import('./positions/edit-position/edit-position.component'),
+  },
+  {
     path: 'profile/edit-worker/:id',
     loadComponent: () =>
-      import('./edit-profile-worker/edit-profile-worker.component'),
+      import('./profile/edit-profile-worker/edit-profile-worker.component'),
   },
   {
     path: 'profile/edit-business/:id',
     loadComponent: () =>
-      import('./edit-profile-business/edit-profile-business.component'),
+      import('./profile/edit-profile-business/edit-profile-business.component'),
   },
   {
     path: '**',

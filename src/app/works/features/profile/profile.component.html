@@ -77,7 +77,7 @@
         [routerLink]="['/works/positions/new']"
         class="w-64 text-white bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
       >
-        Agregar una nueva posición
+        Crear un nueva oferta laboral
       </button>
 
       <div
@@ -141,7 +141,10 @@
         <div class="positions" *ngIf="signal.positions">
           <h1 class="text-2xl ml-5">Ofertas laborales activas:</h1>
           <div class="cards-positions">
-            <div class="ml-5" *ngFor="let position of signal.positions">
+            <div
+              class="ml-5 position-card"
+              *ngFor="let position of signal.positions"
+            >
               <div class="status">
                 <label class="inline-flex items-center cursor-pointer">
                   <input
@@ -165,12 +168,20 @@
                 </label>
               </div>
               <app-card-position [position]="position"> </app-card-position>
-              <button
-                class="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
-                (click)="deletePosition(position.id)"
-              >
-                Borrar oferta laboral
-              </button>
+              <div>
+                <button
+                  class="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+                  (click)="deletePosition(position.id)"
+                >
+                  Borrar oferta laboral
+                </button>
+                <a
+                  [routerLink]="['/works/positions/edit', position.id]"
+                  class="text-blue-600 hover:underline text-sm font-medium"
+                >
+                  Editar oferta
+                </a>
+              </div>
             </div>
           </div>
         </div>

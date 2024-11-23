@@ -12,7 +12,7 @@ import {
 import { toast } from 'ngx-sonner';
 import { catchError, of, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { Specialty } from '../../models/specialties.model';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   PaymentEnum,
   Position,
@@ -25,17 +25,18 @@ import { TallerUSer } from '../../models/talleres.model';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { PositionsService } from '../../../services/positions.service';
 @Component({
-  selector: 'app-add-position',
+  selector: 'app-edit-position',
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
-  templateUrl: './add-position.component.html',
-  styleUrl: './add-position.component.scss',
+  templateUrl: './edit-position.component.html',
+  styleUrl: './edit-position.component.scss',
 })
-export default class AddPositionComponent implements OnInit {
+export default class EditPositionComponent {
   // Inyeccion de los servicios
   private authService = inject(AuthStateService);
   private worksService = inject(WorksService);
   private positionsService = inject(PositionsService);
+  private currentRoute = inject(ActivatedRoute);
   // Subject para desturir componente
   private destroy$ = new Subject<void>();
   // Variables de control
@@ -45,9 +46,11 @@ export default class AddPositionComponent implements OnInit {
   specialtiesSignal = signal<Specialty[] | null>(null);
   loading = signal<boolean>(false);
   userData = signal<SateliteUser | TallerUSer | null>(null);
+  positionData = signal<Position | null>(null);
+  currentPositionId = '';
   // variables para manejar la imagenes
   selectedImage: File | null = null;
-  imagePreview: string | ArrayBuffer | null = null;
+  imagePreview = signal<string | ArrayBuffer | null>('');
   isUploading: boolean = false;
   //ToDo esto deberá estar vacio cuando nos conectemos a un API
   cities: any[] = [
@@ -92,6 +95,7 @@ export default class AddPositionComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    const positionId = this.currentRoute.snapshot.paramMap.get('id');
     this.authService.authState$
       .pipe(
         takeUntil(this.destroy$),
@@ -109,9 +113,52 @@ export default class AddPositionComponent implements OnInit {
         }),
         tap((userData) => {
           if (userData) {
-            const userUniqueData = userData[0];
+            const userUniqueData: SateliteUser | TallerUSer | null =
+              userData[0] as SateliteUser | TallerUSer;
             if (userUniqueData) {
-              this.userData.set(userUniqueData as SateliteUser | TallerUSer);
+              const positionToEdit = userUniqueData.positions.filter(
+                (position) => position.id === positionId
+              );
+              if (positionToEdit) {
+                this.positionData.set(positionToEdit[0]);
+                const positionDatas = positionToEdit[0];
+                if (positionDatas) {
+                  this.userData.set(userUniqueData);
+                  console.log(positionDatas);
+                  this.positionForm.patchValue({
+                    name: positionDatas.name,
+                    description: positionDatas.description,
+                    experience: positionDatas.experience,
+                    photo: positionDatas.photo,
+                    typePayment: positionDatas.typePayment,
+                    city: positionDatas.city,
+                    neighborhood: positionDatas.neighborhood,
+                    phone: positionDatas.phone,
+                    statusPosition: positionDatas.statusPosition,
+                  });
+                  //Limpiamor los formArray y los setteamos uno a uno
+                  // Primero, limpia los FormArray para asegurarte de que están vacíos
+                  const specialtyFormArray = this.positionForm.get(
+                    'specialty'
+                  ) as FormArray;
+                  specialtyFormArray.clear();
+                  // Para machines, specialty y experience, añade cada valor al FormArray correspondiente
+                  positionDatas.specialty.forEach((specialty: string) => {
+                    specialtyFormArray.push(new FormControl(specialty));
+                  });
+                  if (positionDatas.photo) {
+                    this.imagePreview.set(positionDatas.photo);
+                  }
+                  this.availableSpecialties = this.availableSpecialties.filter(
+                    (specialty) => !positionDatas.specialty.includes(specialty)
+                  );
+
+                  if (positionDatas.specialty) {
+                    this.specialtiesSignal.set(positionDatas.specialty);
+                  }
+                  this.currentPositionId = positionDatas.id;
+                }
+              }
             }
           }
         })
@@ -160,42 +207,41 @@ export default class AddPositionComponent implements OnInit {
       this.selectedImage = event.target.files[0];
       // Mostrar una vista previa de la imagen
       const reader = new FileReader();
-      reader.onload = (e) => (this.imagePreview = reader.result);
+      reader.onload = (e) => this.imagePreview.set(reader.result);
       if (this.selectedImage) {
         reader.readAsDataURL(this.selectedImage);
       }
     }
   }
-  // Form submission
+  // Se actualiza la posición
   submitPosition() {
+    console.log(this.positionForm, this.positionForm.valid);
     if (this.positionForm.valid) {
       this.loading.set(true);
-      const newPosition: Position = {
+      const updatedPosition: Position = {
         ...this.positionForm.value,
-        id: crypto.randomUUID(), // You might want to handle this differently
+        id: this.currentPositionId,
       };
       const currentUser = this.userData();
       if (currentUser && currentUser.typeUSer) {
         //currentUser.positions.push(newPosition);
         this.positionsService
-          .updateUserNewPosition(
+          .updateUserExistPosition(
             currentUser.typeUSer,
             currentUser,
-            newPosition,
+            updatedPosition,
             this.selectedImage
           )
           .pipe(
             catchError((error) => {
               this.loading.set(false);
-              toast.error(
-                'Error while creating position, please try again later'
-              );
+              toast.error('Error al editar la oferta, intenta más tarde');
               return of(null);
             })
           )
           .subscribe({
             next: (successMessage) => {
-              toast.success('Posición creada con éxisto con éxito');
+              toast.success('Oferta editada con éxito ');
               // Redirigir a otra ruta
               this.loading.set(false);
               this.router.navigate(['/works/profile']);
@@ -204,7 +250,7 @@ export default class AddPositionComponent implements OnInit {
               // Mostrar mensaje de error en un toast
               this.loading.set(false);
               toast.error(
-                'Error al crear la nueva posición usuario intente más tarde'
+                'Error al crear la nueva oferta usuario intente más tarde'
               );
             },
           });
@@ -212,9 +258,6 @@ export default class AddPositionComponent implements OnInit {
         this.loading.set(false);
         toast.error('Completa toda la información de la posición');
       }
-      // Mock success
-      // toast.success('Posición creada exitosamente');
-      // this.router.navigate(['/positions']);
       this.loading.set(false);
     } else {
       Object.keys(this.positionForm.controls).forEach((key) => {
