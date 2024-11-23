@@ -7,15 +7,22 @@ import {
   Subject,
   debounceTime,
   distinctUntilChanged,
+  switchMap,
   takeUntil,
   tap,
 } from 'rxjs';
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
+import LoadingComponent from '../../../shared/ui/loading/loading.component';
 
 @Component({
   selector: 'app-main',
   standalone: true,
-  imports: [CardCalificationComponent, CommonModule, RouterModule],
+  imports: [
+    CardCalificationComponent,
+    CommonModule,
+    RouterModule,
+    LoadingComponent,
+  ],
   templateUrl: './main.component.html',
   styleUrl: './main.component.scss',
 })
@@ -24,12 +31,12 @@ export default class MainComponent implements OnInit {
   private authState = inject(AuthStateService);
   private userService = inject(WorksService);
   private _router = inject(Router);
+  workersListSignal = inject(WorksService).getWorkersSignal('trabajadores');
   readonly MAX_DISPLAY_COUNT = 5;
 
   currentStatusState = signal<boolean>(false);
   searchValueSignal = signal<string>('');
-  workersListSignal = inject(WorksService).getWorkersSignal('trabajadores');
-
+  isLoading = signal<boolean>(true);
   // Categorías disponibles
   categories = ['costura', 'corte', 'patinaje', 'arreglo', 'patronaje'];
 
@@ -79,9 +86,19 @@ export default class MainComponent implements OnInit {
     this.authState.isAuthenticated$
       .pipe(
         takeUntil(this.destroy$),
-        tap((authStatus) => this.currentStatusState.set(authStatus))
+        tap((authStatus) => this.currentStatusState.set(authStatus)),
+        switchMap(() => {
+          return this.userService.checkUserExists();
+        })
       )
-      .subscribe();
+      .subscribe((stateUserExist) => {
+        //Debemos validar que sí el status del usario en el registro está incompleto pero existe ya un usuario lo reenvie al register para que finalice su registro
+        if (!stateUserExist && this.currentStatusState()) {
+          /** Esto se hace para cuando se regist pero aun no haya ingresado datos no pueda ir, es mejor manejarlo con un guard */
+          this._router.navigate(['/auth/register']);
+        }
+        this.isLoading.set(false);
+      });
   }
 
   onSearch(value: any) {

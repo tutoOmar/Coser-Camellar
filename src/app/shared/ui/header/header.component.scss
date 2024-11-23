@@ -22,8 +22,9 @@
 }
 .tittle {
   font-family: "Bevan";
-  font-size: 35px;
+  font-size: 25px;
   font-style: bold;
+  margin-left: 20px;
 }
 .icons-rows {
   display: flex;
@@ -45,6 +46,13 @@
   justify-content: space-between;
   align-items: center;
 }
+.logo {
+  width: 10px;
+  height: 10px;
+}
+/*
+* Para celulares muy pequeños 
+*/
 @media (max-width: 470px) {
   .icon {
     width: 25px;
@@ -126,11 +134,17 @@
     flex-direction: column;
   }
 }
-
+/**
+ * Para celulares pequeños 
+ **/
 @media (max-width: 375px) {
   .icon-button-menu {
     span {
-      font-size: 1.2rem;
+      font-size: 0.7rem;
     }
+  }
+  .icon {
+    width: 20px;
+    height: 20px;
   }
 }
