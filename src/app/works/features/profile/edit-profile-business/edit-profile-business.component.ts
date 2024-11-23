@@ -12,34 +12,37 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
-import { Machines } from '../models/machines.model';
-import { Specialty } from '../models/specialties.model';
-import { GenderEnum, WorkerUser } from '../models/worker.model';
+import { Machines } from '../../models/machines.model';
+import { Specialty } from '../../models/specialties.model';
+import { GenderEnum, WorkerUser } from '../../models/worker.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { WorksService } from '../../services/works.service';
+import { WorksService } from '../../../services/works.service';
 import { toast } from 'ngx-sonner';
-import { Status } from '../models/status.model';
+import { Status } from '../../models/status.model';
+import { TallerUSer } from '../../models/talleres.model';
+import { SateliteUser } from '../../models/satelite.model';
+
 @Component({
-  selector: 'app-edit-profile-worker',
+  selector: 'app-edit-profile-business',
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
-  templateUrl: './edit-profile-worker.component.html',
-  styleUrl: './edit-profile-worker.component.scss',
+  templateUrl: './edit-profile-business.component.html',
+  styleUrl: './edit-profile-business.component.scss',
 })
-export default class EditProfileWorkerComponent implements OnInit {
+export default class EditProfileBusinessComponent implements OnInit {
   wokerService = inject(WorksService);
 
   private destroy$ = new Subject<void>();
 
   selectedForm: string = '';
-  workerForm: FormGroup;
+  businessForm: FormGroup;
   workerSpecialties = Object.values(Specialty);
   machinesExperience = Object.values(Machines);
   genderList = Object.values(GenderEnum);
   availableSpecialties = [...this.workerSpecialties]; // Lista de especialidades disponibles para seleccionar
   availableMachines = [...this.machinesExperience];
-  userInfo!: WorkerUser;
+  userInfo!: SateliteUser | TallerUSer;
   // Datos prefedinidos para paise sy ciudades
   //ToDo esto deberá estar vacio cuando nos conectemos a un API
   countries: any[] = [{ name: 'Colombia', code: 'CO' }];
@@ -85,12 +88,14 @@ export default class EditProfileWorkerComponent implements OnInit {
     private currentRoute: ActivatedRoute
   ) {
     // Inicializar formularios
-    this.workerForm = this.fb.group({
+    this.businessForm = this.fb.group({
       name: ['', Validators.required],
       phone: ['', Validators.required],
       country: ['', Validators.required],
       city: ['', Validators.required],
-
+      responsible: ['', Validators.required],
+      neighborhood: ['', Validators.required],
+      numberEmployees: [0, Validators.required],
       experience: this.fb.array(
         [
           this.fb.control('', [
@@ -105,7 +110,6 @@ export default class EditProfileWorkerComponent implements OnInit {
       machines: this.fb.array([], this.minLengthArray(1)), // Validador personalizado para al menos un elemento
       specialty: this.fb.array([], this.minLengthArray(1)), // Validador personalizado para al menos un elemento
 
-      gender: ['', Validators.required],
       photo: [''],
       status: [true, Validators.required],
     });
@@ -123,7 +127,7 @@ export default class EditProfileWorkerComponent implements OnInit {
   ngOnInit(): void {
     const userId = this.currentRoute.snapshot.paramMap.get('id');
     if (userId) {
-      this.loadWorker('trabajadores', userId);
+      this.loadBusiness(userId);
     }
   }
 
@@ -132,59 +136,65 @@ export default class EditProfileWorkerComponent implements OnInit {
    * @param collectionName
    * @param sateliteId
    */
-  loadWorker(collectionName: string, workerId: string) {
+  loadBusiness(businessId: string) {
     this.wokerService
-      .getUserByIdAndCollection(workerId, collectionName)
+      .getUserByIdInAnyCollection(businessId)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((worker: any) => {
-        const validationUser = worker as WorkerUser;
+      .subscribe((business: any) => {
+        const validationUser = business as SateliteUser | TallerUSer;
         this.userInfo = validationUser;
-        // Usamos patchValue para setear los valores en el formulario
-        this.workerForm.patchValue({
-          name: validationUser.name,
-          phone: validationUser.phone,
-          city: validationUser.city,
-          country: validationUser.country,
-          gender: validationUser.gender,
-          photo: validationUser.photo,
-          status: validationUser.status === 'libre' ? true : false,
-        });
-        //Limpiamor los formArray y los setteamos uno a uno
-        // Primero, limpia los FormArray para asegurarte de que están vacíos
-        const machinesFormArray = this.workerForm.get('machines') as FormArray;
-        machinesFormArray.clear();
+        if (validationUser) {
+          // Usamos patchValue para setear los valores en el formulario
+          this.businessForm.patchValue({
+            name: validationUser.name,
+            phone: validationUser.phone,
+            city: validationUser.city,
+            country: validationUser.country,
+            responsible: validationUser.responsible,
+            neighborhood: validationUser.neighborhood,
+            numberEmployees: validationUser.numberEmployees,
+            photo: validationUser.photo,
+            status: validationUser.status === 'libre' ? true : false,
+          });
+          //Limpiamor los formArray y los setteamos uno a uno
+          // Primero, limpia los FormArray para asegurarte de que están vacíos
+          const machinesFormArray = this.businessForm.get(
+            'machines'
+          ) as FormArray;
+          machinesFormArray.clear();
 
-        const specialtyFormArray = this.workerForm.get(
-          'specialty'
-        ) as FormArray;
-        specialtyFormArray.clear();
+          const specialtyFormArray = this.businessForm.get(
+            'specialty'
+          ) as FormArray;
+          specialtyFormArray.clear();
 
-        const experienceFormArray = this.workerForm.get(
-          'experience'
-        ) as FormArray;
-        experienceFormArray.clear();
+          const experienceFormArray = this.businessForm.get(
+            'experience'
+          ) as FormArray;
+          experienceFormArray.clear();
 
-        // Para machines, specialty y experience, añade cada valor al FormArray correspondiente
-        validationUser.machines.forEach((machine: string) => {
-          machinesFormArray.push(new FormControl(machine));
-        });
+          // Para machines, specialty y experience, añade cada valor al FormArray correspondiente
+          validationUser.machines.forEach((machine: string) => {
+            machinesFormArray.push(new FormControl(machine));
+          });
 
-        validationUser.specialty.forEach((specialty: string) => {
-          specialtyFormArray.push(new FormControl(specialty));
-        });
+          validationUser.specialty.forEach((specialty: string) => {
+            specialtyFormArray.push(new FormControl(specialty));
+          });
 
-        validationUser.experience.forEach((exp: string) => {
-          experienceFormArray.push(new FormControl(exp));
-        });
-        this.imagePreview.set(validationUser.photo);
-        this.availableSpecialties = this.availableSpecialties.filter(
-          (specialty) => !validationUser.specialty.includes(specialty)
-        );
-        this.availableMachines = this.availableMachines.filter(
-          (machine) => !validationUser.machines.includes(machine)
-        );
-        this.machinesSignal.set(validationUser.machines);
-        this.specialtiesSignal.set(validationUser.specialty);
+          validationUser.experience.forEach((exp: string) => {
+            experienceFormArray.push(new FormControl(exp));
+          });
+          this.imagePreview.set(validationUser.photo);
+          this.availableSpecialties = this.availableSpecialties.filter(
+            (specialty) => !validationUser.specialty.includes(specialty)
+          );
+          this.availableMachines = this.availableMachines.filter(
+            (machine) => !validationUser.machines.includes(machine)
+          );
+          this.machinesSignal.set(validationUser.machines);
+          this.specialtiesSignal.set(validationUser.specialty);
+        }
       });
   }
   ngOnDestroy(): void {
@@ -203,15 +213,15 @@ export default class EditProfileWorkerComponent implements OnInit {
     if (
       specialty &&
       this.isSpecialtyEnum(specialty) &&
-      !this.workerForm.value.specialty.includes(specialty)
+      !this.businessForm.value.specialty.includes(specialty)
     ) {
-      (this.workerForm.get('specialty') as FormArray).push(
+      (this.businessForm.get('specialty') as FormArray).push(
         new FormControl(specialty)
       );
       this.availableSpecialties = this.availableSpecialties.filter(
         (item) => item !== specialty
       );
-      const specialties = this.workerForm.value.specialty;
+      const specialties = this.businessForm.value.specialty;
       this.specialtiesSignal.set(specialties);
       specialtySelect.value = '';
     }
@@ -221,7 +231,7 @@ export default class EditProfileWorkerComponent implements OnInit {
    * @param specialty
    */
   removeSpecialtyWorker(specialty: string): void {
-    const specialties = this.workerForm.get('specialty') as FormArray;
+    const specialties = this.businessForm.get('specialty') as FormArray;
     const index = specialties.value.indexOf(specialty);
     // Verificar que el índice es válido
     if (index >= 0) {
@@ -248,15 +258,15 @@ export default class EditProfileWorkerComponent implements OnInit {
     if (
       machine &&
       this.isMachineEnum(machine) &&
-      !this.workerForm.value.machines.includes(machine)
+      !this.businessForm.value.machines.includes(machine)
     ) {
-      (this.workerForm.get('machines') as FormArray).push(
+      (this.businessForm.get('machines') as FormArray).push(
         new FormControl(machine)
       );
       this.availableMachines = this.availableMachines.filter(
         (item) => item !== machine
       );
-      const machines = this.workerForm.value.machines;
+      const machines = this.businessForm.value.machines;
       this.machinesSignal.set(machines);
       machineSelect.value = '';
     }
@@ -264,7 +274,7 @@ export default class EditProfileWorkerComponent implements OnInit {
 
   // Método para quitar una máquina del FormArray
   removeMachineWorker(machine: string): void {
-    const machines = this.workerForm.get('machines') as FormArray;
+    const machines = this.businessForm.get('machines') as FormArray;
     const index = machines.value.indexOf(machine);
     // Verificar que el índice es válido
     if (index >= 0) {
@@ -288,39 +298,42 @@ export default class EditProfileWorkerComponent implements OnInit {
 
   // Registro de trabajador
   updateWorker() {
-    Object.keys(this.workerForm.controls).forEach((key) => {
-      const control = this.workerForm.get(key);
+    Object.keys(this.businessForm.controls).forEach((key) => {
+      const control = this.businessForm.get(key);
       control?.markAsTouched();
     });
     //ToDo: solo deberia validar el formulario pero hay fallas que se coregiran en la siguiente versión
     if (
-      this.workerForm.valid &&
+      this.businessForm.valid &&
       !this.provisionalValidationMaxLenght() &&
       !this.provisionalValidationMinLenght()
     ) {
       this.loading.set(true);
-      const newWorker: WorkerUser = this.workerForm.value;
-      const status = this.workerForm.value.status
+      const newbusiness: SateliteUser | TallerUSer = this.businessForm.value;
+      const status = this.businessForm.value.status
         ? Status.LIBRE
         : Status.OCUPADO;
-      const updatedUser: WorkerUser = {
+      const updatedUser: SateliteUser | TallerUSer = {
         // VAriables que no se modifican en este update
         id: this.userInfo.id,
         average_score: this.userInfo.average_score,
         typeUSer: this.userInfo.typeUSer,
         userId: this.userInfo.userId,
         comments: this.userInfo.comments,
+        positions: this.userInfo.positions,
         // Variables que se modifican en este update
         status: status ? status : Status.LIBRE,
-        city: newWorker.city,
-        country: newWorker.country,
-        experience: newWorker.experience,
-        machines: newWorker.machines,
-        name: newWorker.name,
-        phone: newWorker.phone,
-        photo: newWorker.photo,
-        specialty: newWorker.specialty,
-        gender: newWorker.gender,
+        city: newbusiness.city,
+        country: newbusiness.country,
+        experience: newbusiness.experience,
+        machines: newbusiness.machines,
+        name: newbusiness.name,
+        phone: newbusiness.phone,
+        photo: newbusiness.photo,
+        specialty: newbusiness.specialty,
+        responsible: newbusiness.responsible,
+        neighborhood: newbusiness.neighborhood,
+        numberEmployees: newbusiness.numberEmployees,
       };
       // Validamos el usuario a actualizar
       if (updatedUser && updatedUser.typeUSer) {
@@ -330,7 +343,6 @@ export default class EditProfileWorkerComponent implements OnInit {
           .subscribe({
             next: (successMessage) => {
               // Mostrar mensaje de éxito en un toast
-
               toast.success('Ususario actualizado con éxito');
               // Redirigir a otra ruta
               this.loading.set(false);
@@ -380,8 +392,8 @@ export default class EditProfileWorkerComponent implements OnInit {
   }
   // GEtter del status
   get status() {
-    if (this.workerForm.get('status')) {
-      return this.workerForm.get('status');
+    if (this.businessForm.get('status')) {
+      return this.businessForm.get('status');
     } else {
       return '';
     }
@@ -424,18 +436,18 @@ export default class EditProfileWorkerComponent implements OnInit {
   }
   // Getter de array de la máquinas
   get machines() {
-    if (this.workerForm.get('machines')) {
-      return this.workerForm.get('machines')?.value;
+    if (this.businessForm.get('machines')) {
+      return this.businessForm.get('machines')?.value;
     } else {
       return [];
     }
   }
 
   get machinesArray() {
-    return this.workerForm.get('machines') as FormArray;
+    return this.businessForm.get('machines') as FormArray;
   }
   get specitaltiesArray() {
-    return this.workerForm.get('specialty') as FormArray;
+    return this.businessForm.get('specialty') as FormArray;
   }
   isMachinesArrayInvalid(): boolean {
     return (
@@ -451,7 +463,7 @@ export default class EditProfileWorkerComponent implements OnInit {
   }
   // Getters para el FormArray y validación
   get experienceArray() {
-    return this.workerForm.get('experience') as FormArray;
+    return this.businessForm.get('experience') as FormArray;
   }
 
   get experienceControl(): FormControl {

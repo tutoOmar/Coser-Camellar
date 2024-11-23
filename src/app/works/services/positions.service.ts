@@ -43,9 +43,9 @@ export class PositionsService {
       );
     });
   }
-  // Método para actualizar el usuario en la base de datos de fireStore
+  // Método para actualizar el usuario en la base de datos de fireStore con la nueva oferta laboral
   // Dado que las positions están dentro del usuario toca actualizar todo el usuario
-  updateUserPosition(
+  updateUserNewPosition(
     collectionSelected: string,
     user: TallerUSer | SateliteUser,
     position: Position,
@@ -69,6 +69,53 @@ export class PositionsService {
     } else {
       // Si no hay imagen, solo subimos la noticia sin la URL de imagen
       user.positions.push(position);
+      const userWithoutImageInPosition = {
+        ...user,
+      };
+      const _collection = collection(this.firestore, collectionSelected);
+      const docRef = doc(_collection, user.id);
+      return from(updateDoc(docRef, { ...userWithoutImageInPosition }));
+    }
+  }
+  // Método para actualizar el usuario en la base de datos de fireStore con la oferta laboral editada
+  // Dado que las positions están dentro del usuario toca actualizar todo el usuario
+  updateUserExistPosition(
+    collectionSelected: string,
+    user: TallerUSer | SateliteUser,
+    position: Position,
+    image: File | null
+  ): Observable<any> {
+    if (image) {
+      // Si hay imagen, la subimos y luego creamos la noticia
+      return this.uploadImage(image).pipe(
+        switchMap((imageUrl: string) => {
+          const positionWithImage = {
+            ...position,
+            photo: imageUrl,
+          };
+
+          user.positions = user.positions.map((currentPosition) => {
+            if (currentPosition.id === positionWithImage.id) {
+              return positionWithImage;
+            } else {
+              return currentPosition;
+            }
+          });
+          const userUpdated = user;
+          const _collection = collection(this.firestore, collectionSelected);
+          const docRef = doc(_collection, user.id);
+          return from(updateDoc(docRef, { ...userUpdated }));
+        })
+      );
+    } else {
+      user.positions = user.positions.map((currentPosition) => {
+        if (currentPosition.id === position.id) {
+          return position;
+        } else {
+          return currentPosition;
+        }
+      });
+      // Si no hay imagen, solo subimos la oferta sin la URL de imagen
       const userWithoutImageInPosition = {
         ...user,
       };

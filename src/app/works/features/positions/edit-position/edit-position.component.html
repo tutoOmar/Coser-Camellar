@@ -10,7 +10,7 @@
     <!-- Aquí se comentó este html porque de momento no se puede agregar posiciones con imagenes es un ToDo -->
     <div>
       <label class="block text-gray-700 font-medium mb-2"
-        >Imagen de la oferta laboral (Opcional):</label
+        >Imagen de la oferta laboral(Opcional):</label
       >
       <div class="form-group">
         <input
@@ -22,8 +22,8 @@
         <!-- Mostrar la imagen si se ha seleccionado -->
         <img
           *ngIf="imagePreview"
-          [src]="imagePreview"
-          alt="Imagen de la noticia"
+          [src]="imagePreview()"
+          alt="Imagen de la posición"
         />
       </div>
     </div>
@@ -214,7 +214,7 @@
       [disabled]="loading()"
       class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition duration-200 disabled:bg-blue-300"
     >
-      {{ loading() ? "Cargando..." : "Crear posición" }}
+      {{ loading() ? "Cargando..." : "Editar posición" }}
     </button>
   </form>
 </div>
