@@ -1,187 +1,210 @@
 <h1 class="font-bold text-xl text-center">Tú perfil</h1>
-<div class="worker" *ngIf="typeUser() == 'trabajadores'">
-  <div class="worker-details-container">
-    <button
-      [routerLink]="['/works/profile/edit-worker', workerSignal()?.id]"
-      class="w-64 text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
-    >
-      Editar perfil
-    </button>
-    <div *ngIf="workerSignal()?.average_score as userScore" class="mt-5 ml-4">
-      <strong>Tu calificación:</strong>
-      <app-starts-calification [rating]="userScore"></app-starts-calification>
-    </div>
-
-    <div *ngIf="workerSignal()" class="flex flex-col">
-      <!-- Estructura principal en pantallas pequeñas -->
-      <div class="worker-header-complete">
-        <div class="worker-header">
-          <div class="worker-photo">
-            <img
-              class="p-8 rounded-t-lg image"
-              [src]="
-                workerSignal()?.photo
-                  ? workerSignal()?.photo
-                  : 'https://firebasestorage.googleapis.com/v0/b/tu-chamba-cf127.appspot.com/o/avatarMan.png?alt=media&token=0df1900c-9055-4310-8fd9-6486c922bf50'
-              "
-              alt="Foto de {{ workerSignal()?.name }}"
-            />
-          </div>
-          <div class="worker-info">
-            <h2 class="mt-2">{{ workerSignal()?.name }}</h2>
-            <p class="mt-2">
-              {{ workerSignal()?.city }}, {{ workerSignal()?.country }}
-            </p>
-            <p class="text-sm text-black-500 dark:text-black-400">
-              <strong>Genero: </strong>
-              {{ translateGender(workerSignal()?.gender) }}
-            </p>
-            <p class="mt-2">
-              <strong>Teléfono:</strong> {{ workerSignal()?.phone }}
-            </p>
-          </div>
-        </div>
-        <div class="detalles mt-3 ml-2">
-          <p class="mt-2">
-            <strong>Especialidades:</strong>
-            {{ removeHyphens(workerSignal()?.specialty) }}
-          </p>
-          <p class="mt-2">
-            <strong>Máquinas que maneja:</strong>
-            {{ removeHyphens(workerSignal()?.machines) }}
-          </p>
-          <p class="mt-2">
-            <strong>Experiencia:</strong>
-            {{ removeHyphens(workerSignal()?.experience) }}
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
+<div *ngIf="isLoadingPage(); else showWorkers" class="mt-3">
+  <app-loading></app-loading>
 </div>
-<div
-  class="business"
-  *ngIf="typeUser() == 'satelite' || typeUser() == 'talleres'"
->
-  <div class="worker-details-container">
-    <div *ngIf="businessSignal()" class="flex flex-col">
+
+<ng-template #showWorkers>
+  <div class="worker" *ngIf="typeUser() == 'trabajadores'">
+    <div class="worker-details-container">
       <button
-        type="button"
-        [routerLink]="['/works/profile/edit-business', businessSignal()?.id]"
+        [routerLink]="['/works/profile/edit-worker', workerSignal()?.id]"
         class="w-64 text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
       >
         Editar perfil
       </button>
-      <button
-        type="button"
-        [routerLink]="['/works/positions/new']"
-        class="w-64 text-white bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
-      >
-        Crear un nueva oferta laboral
-      </button>
-
-      <div
-        *ngIf="businessSignal()?.average_score as userScore"
-        class="mt-5 ml-4"
-      >
+      <div *ngIf="workerSignal()?.average_score as userScore" class="mt-5 ml-4">
         <strong>Tu calificación:</strong>
         <app-starts-calification [rating]="userScore"></app-starts-calification>
       </div>
-      <!-- Estructura principal en pantallas pequeñas -->
-      <div class="worker-header-complete">
-        <div class="worker-header">
-          <div class="worker-photo">
-            <img
-              class="p-8 rounded-t-lg image"
-              [src]="
-                businessSignal()?.photo
-                  ? businessSignal()?.photo
-                  : 'https://firebasestorage.googleapis.com/v0/b/tu-chamba-cf127.appspot.com/o/avatarMan.png?alt=media&token=0df1900c-9055-4310-8fd9-6486c922bf50'
-              "
-              alt="Foto de {{ businessSignal()?.name }}"
-            />
+      <div *ngIf="workerSignal()" class="flex flex-col">
+        <!-- Estructura principal en pantallas pequeñas -->
+        <div class="worker-header-complete">
+          <div class="worker-header">
+            <div class="worker-photo">
+              <img
+                class="p-8 rounded-t-lg image"
+                [src]="
+                  workerSignal()?.photo
+                    ? workerSignal()?.photo
+                    : 'https://firebasestorage.googleapis.com/v0/b/tu-chamba-cf127.appspot.com/o/avatarMan.png?alt=media&token=0df1900c-9055-4310-8fd9-6486c922bf50'
+                "
+                alt="Foto de {{ workerSignal()?.name }}"
+              />
+            </div>
+            <div class="worker-info">
+              <h2 class="mt-2">{{ workerSignal()?.name }}</h2>
+              <p class="mt-2">
+                {{ workerSignal()?.city }}, {{ workerSignal()?.country }}
+              </p>
+              <p class="text-sm text-black-500 dark:text-black-400">
+                <strong>Genero: </strong>
+                {{ translateGender(workerSignal()?.gender) }}
+              </p>
+              <p class="mt-2">
+                <strong>Teléfono:</strong> {{ workerSignal()?.phone }}
+              </p>
+            </div>
           </div>
-          <div class="worker-info">
-            <h2 class="mt-2">{{ businessSignal()?.name }}</h2>
-            <p class="text-sm text-black-500 dark:text-black-400">
-              <strong>Responsable: </strong>{{ businessSignal()?.responsible }}
+          <div class="detalles mt-3 ml-2">
+            <p class="mt-2">
+              <strong>Especialidades:</strong>
+              {{ removeHyphens(workerSignal()?.specialty) }}
             </p>
             <p class="mt-2">
-              {{ businessSignal()?.city }}, {{ businessSignal()?.country }}
-            </p>
-            <p class="text-sm text-black-500 dark:text-black-400">
-              <strong>Ubicación: </strong>
-              {{ businessSignal()?.neighborhood }}
+              <strong>Máquinas que maneja:</strong>
+              {{ removeHyphens(workerSignal()?.machines) }}
             </p>
             <p class="mt-2">
-              <strong>Teléfono:</strong> {{ businessSignal()?.phone }}
+              <strong>Experiencia:</strong>
+              {{ removeHyphens(workerSignal()?.experience) }}
             </p>
           </div>
-        </div>
-        <div class="detalles mt-3 ml-2">
-          <p class="mt-2">
-            <strong>Especialidades:</strong>
-            {{ removeHyphens(businessSignal()?.specialty) }}
-          </p>
-          <p class="mt-2">
-            <strong>Máquinas que maneja:</strong>
-            {{ removeHyphens(businessSignal()?.machines) }}
-          </p>
-          <p class="mt-2">
-            <strong>Experiencia:</strong>
-            {{ removeHyphens(businessSignal()?.experience) }}
-          </p>
-          <p class="text-black-500 dark:text-black-400 mb-3">
-            <strong>Número colaboradores o empleados: </strong
-            >{{ businessSignal()?.numberEmployees }}
-          </p>
         </div>
       </div>
-      <ng-container *ngIf="businessSignal() as signal">
-        <div class="positions" *ngIf="signal.positions">
-          <h1 class="text-2xl ml-5">Ofertas laborales activas:</h1>
-          <div class="cards-positions">
-            <div
-              class="ml-5 position-card"
-              *ngFor="let position of signal.positions"
-            >
-              <div class="status">
-                <label class="inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    class="sr-only peer"
-                    [checked]="isPositionActive(position)"
-                    (change)="onToggleChange($event, position.id)"
-                  />
-                  <div
-                    class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 checked"
-                  ></div>
-                  <span
-                    class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300"
+    </div>
+  </div>
+
+  <div
+    class="business"
+    *ngIf="typeUser() == 'satelite' || typeUser() == 'talleres'"
+  >
+    <div class="worker-details-container">
+      <div *ngIf="businessSignal()" class="flex flex-col">
+        <button
+          type="button"
+          [routerLink]="['/works/profile/edit-business', businessSignal()?.id]"
+          class="w-64 text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+        >
+          Editar perfil
+        </button>
+        <button
+          type="button"
+          [routerLink]="['/works/positions/new']"
+          class="w-64 text-white bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+        >
+          Crear un nueva oferta laboral
+        </button>
+
+        <div
+          *ngIf="businessSignal()?.average_score as userScore"
+          class="mt-5 ml-4"
+        >
+          <strong>Tu calificación:</strong>
+          <app-starts-calification
+            [rating]="userScore"
+          ></app-starts-calification>
+        </div>
+        <!-- Estructura principal en pantallas pequeñas -->
+        <div class="worker-header-complete">
+          <div class="worker-header">
+            <div class="worker-photo">
+              <img
+                class="p-8 rounded-t-lg image"
+                [src]="
+                  businessSignal()?.photo
+                    ? businessSignal()?.photo
+                    : 'https://firebasestorage.googleapis.com/v0/b/tu-chamba-cf127.appspot.com/o/avatarMan.png?alt=media&token=0df1900c-9055-4310-8fd9-6486c922bf50'
+                "
+                alt="Foto de {{ businessSignal()?.name }}"
+              />
+            </div>
+            <div class="worker-info">
+              <h2 class="mt-2">{{ businessSignal()?.name }}</h2>
+              <p class="text-sm text-black-500 dark:text-black-400">
+                <strong>Responsable: </strong
+                >{{ businessSignal()?.responsible }}
+              </p>
+              <p class="mt-2">
+                {{ businessSignal()?.city }}, {{ businessSignal()?.country }}
+              </p>
+              <p class="text-sm text-black-500 dark:text-black-400">
+                <strong>Ubicación: </strong>
+                {{ businessSignal()?.neighborhood }}
+              </p>
+              <p class="mt-2">
+                <strong>Teléfono:</strong> {{ businessSignal()?.phone }}
+              </p>
+            </div>
+          </div>
+          <div class="detalles mt-3 ml-2">
+            <p class="mt-2">
+              <strong>Especialidades:</strong>
+              {{ removeHyphens(businessSignal()?.specialty) }}
+            </p>
+            <p class="mt-2">
+              <strong>Máquinas que maneja:</strong>
+              {{ removeHyphens(businessSignal()?.machines) }}
+            </p>
+            <p class="mt-2">
+              <strong>Experiencia:</strong>
+              {{ removeHyphens(businessSignal()?.experience) }}
+            </p>
+            <p class="text-black-500 dark:text-black-400 mb-3">
+              <strong>Número colaboradores o empleados: </strong
+              >{{ businessSignal()?.numberEmployees }}
+            </p>
+          </div>
+        </div>
+
+        <ng-container *ngIf="businessSignal() as signal">
+          <div
+            class="positions"
+            *ngIf="
+              signal.positions && signal.positions.length > 0;
+              else noPosition
+            "
+          >
+            <h1 class="text-2xl ml-5">Ofertas laborales activas:</h1>
+            <div class="cards-positions">
+              <div
+                class="ml-5 position-card"
+                *ngFor="let position of signal.positions"
+              >
+                <div class="status">
+                  <label class="inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      class="sr-only peer"
+                      [checked]="isPositionActive(position)"
+                      (change)="onToggleChange($event, position.id)"
+                    />
+                    <div
+                      class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 checked"
+                    ></div>
+                    <span
+                      class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300"
+                    >
+                      {{ isPositionActive(position) ? "Activa" : "Inactiva" }}
+                    </span>
+                  </label>
+                </div>
+                <app-card-position [position]="position"> </app-card-position>
+                <div>
+                  <button
+                    class="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+                    (click)="deletePosition(position.id)"
                   >
-                    {{ isPositionActive(position) ? "Activa" : "Inactiva" }}
-                  </span>
-                </label>
-              </div>
-              <app-card-position [position]="position"> </app-card-position>
-              <div>
-                <button
-                  class="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
-                  (click)="deletePosition(position.id)"
-                >
-                  Borrar oferta laboral
-                </button>
-                <a
-                  [routerLink]="['/works/positions/edit', position.id]"
-                  class="text-blue-600 hover:underline text-sm font-medium"
-                >
-                  Editar oferta
-                </a>
+                    Borrar oferta laboral
+                  </button>
+                  <a
+                    [routerLink]="['/works/positions/edit', position.id]"
+                    class="text-blue-600 hover:underline text-sm font-medium"
+                  >
+                    Editar oferta
+                  </a>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </ng-container>
+          <ng-template #noPosition>
+            <h1 class="text-2xl ml-5">Ofertas laborales activas:</h1>
+            <div class="ml-5">
+              No tienes ofertas laborales activas en este momento, da clic en
+              "Crear una nueva oferta laboral para buscar talento"
+            </div>
+          </ng-template>
+        </ng-container>
+      </div>
     </div>
   </div>
-</div>
+</ng-template>

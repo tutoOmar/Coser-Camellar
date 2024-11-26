@@ -10,6 +10,7 @@
 
 <div
   class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mx-6"
+  *ngIf="filteredItems().length > 0; else noWorkers"
 >
   <div
     *ngFor="let item of filteredItems(); let i = index"
@@ -57,6 +58,13 @@
   </div>
 </div>
 
+<ng-template #noWorkers>
+  <div
+    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mx-6"
+  >
+    No tienes productos en venta actualmente
+  </div></ng-template
+>
 <!-- Modal -->
 <div
   *ngIf="selectedImage"

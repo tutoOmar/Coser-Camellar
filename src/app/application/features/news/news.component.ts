@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Firestore } from '@angular/fire/firestore';
 import { NewsService } from '../../services/news.service';
+import LoadingComponent from '../../../shared/ui/loading/loading.component';
 
 interface News {
   id: string;
@@ -21,13 +22,14 @@ interface News {
 @Component({
   selector: 'app-news',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LoadingComponent],
   templateUrl: './news.component.html',
   styleUrl: './news.component.scss',
 })
 export default class NewsComponent {
   newsListSignal = inject(NewsService).getNewsSignal();
   isExpanded: { [id: string]: boolean } = {}; // Control de expansión para cada noticia
+  isLoadingPage = signal<boolean>(true);
 
   constructor(private firestore: Firestore) {}
 
