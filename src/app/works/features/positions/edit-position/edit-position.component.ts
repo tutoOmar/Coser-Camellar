@@ -124,7 +124,6 @@ export default class EditPositionComponent {
                 const positionDatas = positionToEdit[0];
                 if (positionDatas) {
                   this.userData.set(userUniqueData);
-                  console.log(positionDatas);
                   this.positionForm.patchValue({
                     name: positionDatas.name,
                     description: positionDatas.description,
@@ -215,9 +214,9 @@ export default class EditPositionComponent {
   }
   // Se actualiza la posición
   submitPosition() {
-    console.log(this.positionForm, this.positionForm.valid);
+    this.loading.set(true);
+
     if (this.positionForm.valid) {
-      this.loading.set(true);
       const updatedPosition: Position = {
         ...this.positionForm.value,
         id: this.currentPositionId,
@@ -258,7 +257,6 @@ export default class EditPositionComponent {
         this.loading.set(false);
         toast.error('Completa toda la información de la posición');
       }
-      this.loading.set(false);
     } else {
       Object.keys(this.positionForm.controls).forEach((key) => {
         const control = this.positionForm.get(key);

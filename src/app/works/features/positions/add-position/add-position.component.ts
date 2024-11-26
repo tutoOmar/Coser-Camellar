@@ -168,8 +168,8 @@ export default class AddPositionComponent implements OnInit {
   }
   // Form submission
   submitPosition() {
+    this.loading.set(true);
     if (this.positionForm.valid) {
-      this.loading.set(true);
       const newPosition: Position = {
         ...this.positionForm.value,
         id: crypto.randomUUID(), // You might want to handle this differently

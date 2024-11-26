@@ -130,7 +130,6 @@ export class PositionsService {
     collectionSelected: string,
     user: TallerUSer | SateliteUser
   ): Observable<any> {
-    console.log(user);
     const _collection = collection(this.firestore, collectionSelected);
     const docRef = doc(_collection, user.id);
     return from(updateDoc(docRef, { ...user }));

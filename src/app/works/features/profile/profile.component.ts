@@ -155,7 +155,6 @@ export default class ProfileComponent implements OnInit {
     if (user && userType) {
       user.positions.forEach((position: Position) => {
         if (position.id === positionId) {
-          console.log(checked);
           position.statusPosition = checked
             ? StatusPositionEnum.ACTIVO
             : StatusPositionEnum.INACTIVO;
@@ -166,12 +165,17 @@ export default class ProfileComponent implements OnInit {
       //ToDo: Toca analizar porque al conectar el backend molesta el estado
       this.positionService
         .updateStatusPosition(userType, user)
-        .pipe(
-          takeUntil(this.destroy$),
-          tap((res) => console.log('resouesta', res))
-        )
+        .pipe(takeUntil(this.destroy$))
         .subscribe();
     }
+  }
+  /**
+   *
+   * @param position
+   * @returns
+   */
+  isPositionActive(position: Position): boolean {
+    return position.statusPosition === StatusPositionEnum.ACTIVO;
   }
   /**
    *
