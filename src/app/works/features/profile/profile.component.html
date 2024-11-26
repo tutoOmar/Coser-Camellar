@@ -150,7 +150,7 @@
                   <input
                     type="checkbox"
                     class="sr-only peer"
-                    [(ngModel)]="position.statusPosition"
+                    [checked]="isPositionActive(position)"
                     (change)="onToggleChange($event, position.id)"
                   />
                   <div
@@ -159,11 +159,7 @@
                   <span
                     class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300"
                   >
-                    {{
-                      position.statusPosition !== "activo"
-                        ? "Inactiva"
-                        : "Activa"
-                    }}
+                    {{ isPositionActive(position) ? "Activa" : "Inactiva" }}
                   </span>
                 </label>
               </div>

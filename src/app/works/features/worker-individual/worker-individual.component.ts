@@ -132,8 +132,7 @@ export default class WorkerIndividualComponent implements OnInit {
               .addComment('trabajadores', workerUserData, this.workerId)
               .subscribe({
                 next: (res) => res,
-                error: (err) =>
-                  console.error('Error al actualizar el documento', err),
+                error: (err) => toast.error('Error al actualizar el documento'),
               });
 
             toast.success('Calificación hecho con éxito ');
