@@ -31,6 +31,7 @@ import { PositionsService } from '../../services/positions.service';
 import { toast } from 'ngx-sonner';
 import { Position, StatusPositionEnum } from '../models/position.model';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import LoadingComponent from '../../../shared/ui/loading/loading.component';
 
 @Component({
   selector: 'app-profile',
@@ -42,6 +43,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     StartsCalificationComponent,
     FormsModule,
     ReactiveFormsModule,
+    LoadingComponent,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -56,12 +58,11 @@ export default class ProfileComponent implements OnInit {
   // Señal donde guardaremos si es un satelite o un taller
   businessSignal = signal<TallerUSer | SateliteUser | null>(null);
   positionStatus = signal<boolean>(false);
+  isLoadingPage = signal<boolean>(true);
   //
   userId!: string | undefined;
-  COLLECTION_OPTIONS = ['satelite', 'trabajadores', 'talleres'];
   // Inyecciones de  servicios y otros necesarios
   private _auth = inject(AuthStateService);
-  private currentRoute = inject(ActivatedRoute);
   private userService = inject(WorksService);
   private positionService = inject(PositionsService);
   /**
@@ -74,7 +75,7 @@ export default class ProfileComponent implements OnInit {
         switchMap((state: any) => {
           if (state && state.uid) {
             const userId = state.uid;
-            return this.loadWorker(this.COLLECTION_OPTIONS, userId);
+            return this.loadWorker(userId);
           } else {
             return of(null);
           }
@@ -88,9 +89,11 @@ export default class ProfileComponent implements OnInit {
                 this.typeUser.set(typeUser);
               }
               if (typeUser == 'trabajadores') {
+                this.isLoadingPage.set(false);
                 this.workerSignal.set(user);
               } else if (typeUser == 'satelite' || typeUser == 'talleres') {
                 this.businessSignal.set(user);
+                this.isLoadingPage.set(false);
               }
             }
           }
@@ -104,7 +107,7 @@ export default class ProfileComponent implements OnInit {
    * @param userId
    * @returns
    */
-  loadWorker(collections: string[], userId: string) {
+  loadWorker(userId: string) {
     return this.userService.getUserByUserIdInAnyCollection(userId);
   }
   /**Remueve guiónes de las palabras que normalmente las lleva*/

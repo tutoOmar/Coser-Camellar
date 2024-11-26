@@ -5,6 +5,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
+  FacebookAuthProvider,
 } from '@angular/fire/auth';
 
 export interface User {
@@ -38,8 +39,21 @@ export class AuthService {
   signIn(user: User) {
     return signInWithEmailAndPassword(this._auth, user.email, user.password);
   }
+  /**
+   * Se inicia sesión con google
+   * @returns una promesa
+   */
   signWithGoogle() {
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    return signInWithPopup(this._auth, provider);
+  }
+  /**
+   * Se inicia sesión con google
+   * @returns una promesa
+   */
+  signWithFacebook() {
+    const provider = new FacebookAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
     return signInWithPopup(this._auth, provider);
   }

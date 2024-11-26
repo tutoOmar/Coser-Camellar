@@ -14,51 +14,52 @@
   </button>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mx-6">
-  <div
-    *ngFor="let item of filteredItems()"
-    class="border rounded-lg shadow-md p-4"
-  >
-    <img
-      [src]="item.image"
-      alt="{{ item.title }}"
-      class="w-full h-48 object-cover rounded-md mb-4 cursor-pointer"
-      (click)="openImage(item.image)"
-    />
-    <h2 class="text-lg font-semibold mb-2">{{ item.title }}</h2>
-    <p class="text-gray-600 mb-2">{{ item.description }}</p>
-    <p class="text-blue-600 font-bold text-lg mb-2">
-      $ {{ item.price | number : "1.0-0" }}
-    </p>
-    <p class="text-sm font-medium mb-4">
-      Estado: {{ translateState(item.state) }}
-    </p>
-    <button
-      (click)="onBuy(item.id)"
-      class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-    >
-      Comprar
-    </button>
-  </div>
+<div *ngIf="isLoadingPage(); else showWorkers" class="mt-3">
+  <app-loading></app-loading>
 </div>
 
-<!-- Modal -->
-<div
-  *ngIf="selectedImage"
-  class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
-  (click)="closeImage()"
->
-  <div class="relative" (click)="$event.stopPropagation()">
-    <img
-      [src]="selectedImage"
-      alt="Full Image"
-      class="max-w-full max-h-screen rounded-md"
-    />
-    <button
-      (click)="closeImage()"
-      class="absolute top-2 right-2 bg-blue-600 text-white rounded-full p-2 hover:bg-red-600"
+<ng-template #showWorkers>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mx-6">
+    <div
+      *ngFor="let item of filteredItems()"
+      class="border rounded-lg shadow-md p-4"
     >
-      Cerrar <span class="text-red-400">X</span>
-    </button>
+      <img
+        [src]="item.image"
+        alt="{{ item.title }}"
+        class="w-full h-48 object-cover rounded-md mb-4 cursor-pointer"
+        (click)="openImage(item.image)"
+      />
+      <h2 class="text-lg font-semibold mb-2">{{ item.title }}</h2>
+      <p class="text-gray-600 mb-2">{{ item.description }}</p>
+      <p class="text-blue-600 font-bold text-lg mb-2">
+        $ {{ item.price | number : "1.0-0" }}
+      </p>
+      <p class="text-sm font-medium mb-4">
+        Estado: {{ translateState(item.state) }}
+      </p>
+      <!-- <app-wa-button [phoneNumber]="item.price"></app-wa-button> -->
+    </div>
   </div>
-</div>
+
+  <!-- Modal -->
+  <div
+    *ngIf="selectedImage"
+    class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+    (click)="closeImage()"
+  >
+    <div class="relative" (click)="$event.stopPropagation()">
+      <img
+        [src]="selectedImage"
+        alt="Full Image"
+        class="max-w-full max-h-screen rounded-md"
+      />
+      <button
+        (click)="closeImage()"
+        class="absolute top-2 right-2 bg-blue-600 text-white rounded-full p-2 hover:bg-red-600"
+      >
+        Cerrar <span class="text-red-400">X</span>
+      </button>
+    </div>
+  </div>
+</ng-template>

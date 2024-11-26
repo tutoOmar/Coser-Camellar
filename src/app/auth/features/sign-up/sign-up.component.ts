@@ -17,6 +17,7 @@ import { Router, RouterLink } from '@angular/router';
 import { GoogleButtonComponent } from '../../ui/google-button/google-button.component';
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
 import { Subject, takeUntil } from 'rxjs';
+import { FacebookButtonComponent } from '../../ui/facebook-button/facebook-button.component';
 
 interface FormSingUp {
   email: FormControl<string | null>;
@@ -26,7 +27,12 @@ interface FormSingUp {
 @Component({
   selector: 'app-sign-up',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, GoogleButtonComponent],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    GoogleButtonComponent,
+    FacebookButtonComponent,
+  ],
   templateUrl: './sign-up.component.html',
   styles: ``,
 })
@@ -114,6 +120,22 @@ export default class SignUpComponent implements OnInit {
     try {
       await this.authService.signWithGoogle();
       toast.success('Usuario creado Correctamente');
+      this.router.navigate(['/auth/register']);
+    } catch (error: any) {
+      if (error.code === 'auth/account-exists-with-different-credential') {
+        toast.error('Ya existe una cuenta con esta cuenta de Facebook');
+      } else {
+        toast.error('ocurrio un error');
+      }
+    }
+  }
+  /**
+   *  funcion que se encarga de manejar eventos del inicio de sesión con cuenta de facebook
+   */
+  async submitWithFacebook() {
+    try {
+      await this.authService.signWithFacebook();
+      toast.success('Inicio de sesión exitosa');
       this.router.navigate(['/auth/register']);
     } catch (error) {
       toast.error('ocurrio un error');
