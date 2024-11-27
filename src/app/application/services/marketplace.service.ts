@@ -72,9 +72,7 @@ export class MarketplaceService {
           createdAt: new Date(),
         };
         const productCollection = collection(this.firestore, PATH);
-        return from(addDoc(productCollection, productWithImage)).pipe(
-          tap((res) => console.log('respuesta', res))
-        ); // Subimos el producto
+        return from(addDoc(productCollection, productWithImage)); // Subimos el producto
       })
     );
   }
@@ -140,6 +138,7 @@ export class MarketplaceService {
       map((data: T) => ({ ...data, id: idProduct })) // Agregamos el ID manualmente
     );
   }
+
   /**
    * Se obtiene el signal de noticias
    * @returns
