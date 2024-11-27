@@ -204,11 +204,9 @@ export class WorksService {
     const tallerQuery = this.getUserByUserIdAndCollection(userId, 'talleres');
     const sateliteQuery = this.getUserByUserIdAndCollection(userId, 'satelite');
     return combineLatest([workerQuery, tallerQuery, sateliteQuery]).pipe(
-      map(([workers, tallers, satelites]) => [
-        ...workers,
-        ...tallers,
-        ...satelites,
-      ]),
+      map(([workers, tallers, satelites]) => {
+        return [...workers, ...tallers, ...satelites];
+      }),
       catchError((error) => {
         return of([]);
       })
@@ -225,11 +223,32 @@ export class WorksService {
     const workerQuery = this.getUserByIdAndCollection(userId, 'trabajadores');
     const tallerQuery = this.getUserByIdAndCollection(userId, 'talleres');
     const sateliteQuery = this.getUserByIdAndCollection(userId, 'satelite');
-    return merge(
-      workerQuery.pipe(map((worker) => worker as WorkerUser[])),
-      tallerQuery.pipe(map((taller) => taller as TallerUSer[])),
-      sateliteQuery.pipe(map((satelite) => satelite as SateliteUser[]))
-    ).pipe(catchError(() => of([])));
+    return combineLatest([workerQuery, tallerQuery, sateliteQuery]).pipe(
+      map(([workers, tallers, satelites]) => {
+        return [...workers, ...tallers, ...satelites];
+      }),
+      catchError((error) => {
+        return of([]);
+      })
+    );
+  }
+  /**
+   * Obtiene usuarios únicos de las tres colecciones basado en sus IDs
+   * @param userIds Array de IDs de usuario
+   * @returns Observable de un array de usuarios combinados
+   */
+  getUsersByIds(
+    userIds: string[]
+  ): Observable<(WorkerUser | TallerUSer | SateliteUser)[]> {
+    const userObservables = userIds.map((userId) =>
+      this.getUserByUserIdInAnyCollection(userId).pipe(
+        map((users) => users?.[0] || null), // Selecciona el primer usuario encontrado o null
+        catchError(() => of(null)) // Maneja errores devolviendo null
+      )
+    );
+    return combineLatest(userObservables).pipe(
+      map((results) => results.filter((user) => user !== null)) // Filtra los usuarios no encontrados
+    );
   }
   /**
    * Se obtiene el signal de trabajadores

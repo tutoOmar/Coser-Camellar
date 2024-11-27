@@ -198,7 +198,7 @@ export default class TallerIndividualComponent {
    * @param position
    */
   countPosition(position: any[] | undefined) {
-    console.log(position);
+    //console.log(position);
   }
   /**
    *

@@ -38,7 +38,10 @@
       <p class="text-sm font-medium mb-4">
         Estado: {{ translateState(item.state) }}
       </p>
-      <!-- <app-wa-button [phoneNumber]="item.price"></app-wa-button> -->
+      <app-wa-button
+        [messageToSend]="personalizeMessage(item.title)"
+        [phoneNumber]="item.userPhone ? item.userPhone : ''"
+      ></app-wa-button>
     </div>
   </div>
 

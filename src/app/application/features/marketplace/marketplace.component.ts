@@ -2,13 +2,24 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Product } from '../../models/product.model';
 import { MarketplaceService } from '../../services/marketplace.service';
-import { forkJoin, merge, of, Subject, switchMap, takeUntil, tap } from 'rxjs';
+import {
+  forkJoin,
+  map,
+  merge,
+  of,
+  Subject,
+  switchMap,
+  takeUntil,
+  tap,
+} from 'rxjs';
 import { StateProductEnum } from '../../models/state-product.enum';
 import { Router, RouterModule } from '@angular/router';
 import LoadingComponent from '../../../shared/ui/loading/loading.component';
 import WaButtonComponent from '../../../shared/ui/wa-button/wa-button.component';
 import { WorksService } from '../../../works/services/works.service';
-
+interface ProductWithPhone extends Product {
+  userPhone: string | null; // null si no hay usuario asociado
+}
 @Component({
   selector: 'app-marketplace',
   standalone: true,
@@ -23,7 +34,7 @@ export default class MarketplaceComponent {
   private productService = inject(MarketplaceService);
   private userService = inject(WorksService);
   // Datos de los productos
-  private products = signal<Product[]>([]);
+  private products = signal<ProductWithPhone[]>([]);
   // Computed signal para filtrar y procesar productos si es necesario
   isLoadingPage = signal<boolean>(true);
 
@@ -60,28 +71,36 @@ export default class MarketplaceComponent {
       .loadProducts<Product[]>()
       .pipe(
         takeUntil(this.destroy$),
-        tap((product: Product[]) => this.products.set(product)),
         tap(() => this.isLoadingPage.set(false)),
         switchMap((products) => {
-          if (!products) {
+          if (!products || products.length === 0) {
             return of();
           }
-          const usersIds = products.map((product) => {
-            return product.userId;
-          });
-          const uniqueIds = Array.from(new Set(usersIds));
-          const usersData = uniqueIds.map((userId) => {
-            const userArray =
-              this.userService.getUserByIdInAnyCollection(userId);
-            const usersUnion = merge([userArray]);
-            return usersUnion;
-          });
-          return merge([usersData]);
-        })
-        /**#
-         * queda mucho por hacer para traer los datos
+          const uniqueUserIds = Array.from(
+            new Set(products.map((product) => product.userId))
+          ); // Elimina IDs duplicados
+          return this.userService.getUsersByIds(uniqueUserIds).pipe(
+            map((users) => {
+              // Crea un Map para una búsqueda eficiente de usuarios por userId
+              const userMap = new Map(users.map((user) => [user.userId, user]));
+              // Asocia cada producto con el teléfono del usuario correspondiente
+              const productsWithPhone = products.map((product) => {
+                const user = userMap.get(product.userId); // Busca al usuario directamente por userId
+                return {
+                  ...product,
+                  userPhone: user ? user.phone : null, // Agrega el teléfono del usuario o null si no se encuentra
+                };
+              });
+              return productsWithPhone; // Devuelve el arreglo actualizado
+            })
+          );
+        }),
+        /**
+         * Se setter la signal con los productos pero ahora con el telfono del usuario
          */
-        //tap((user) => console.log('Datos', user))
+        tap((productWithPhone) => {
+          this.products.set(productWithPhone);
+        })
         //Se quita la pantalla de carga
       )
       .subscribe();
@@ -96,6 +115,18 @@ export default class MarketplaceComponent {
       default:
         return '';
     }
+  }
+  /**
+   * Mensaje personalizado de WhatsApp
+   */
+  personalizeMessage(title: string): string {
+    return (
+      'Hola vi que ofrecias el siguiente producto en Coser&Camellar: ' +
+      '*' +
+      title +
+      '*' +
+      '. Quisiera obtener más información por favor.'
+    );
   }
   /**
    * Destruir el componete destruye susbcripciones
