@@ -1,4 +1,10 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { WorksService } from '../../services/works.service';
 import { SateliteUser } from '../models/satelite.model';
@@ -19,6 +25,7 @@ import WaButtonComponent from '../../../shared/ui/wa-button/wa-button.component'
 import CardPositionComponent from '../../../shared/ui/card-position/card-position.component';
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
 import { toast } from 'ngx-sonner';
+import { AnalyticsService } from '../../../shared/data-access/analytics.service';
 
 const COLLECTION_DATA = 'talleres';
 
@@ -36,9 +43,11 @@ const COLLECTION_DATA = 'talleres';
   templateUrl: './taller-individual.component.html',
   styleUrl: './taller-individual.component.scss',
 })
-export default class TallerIndividualComponent {
-  //Current User
+export default class TallerIndividualComponent implements AfterViewInit {
+  // Services
   private authState = inject(AuthStateService);
+  private analyticsService = inject(AnalyticsService);
+
   // Crear signal para guardar el usuario individual
   tallerSignal = signal<TallerUSer | null>(null);
   //
@@ -71,7 +80,18 @@ export default class TallerIndividualComponent {
     this.initializeForm();
     this.paginateComments(); // Cargar los primeros comentarios
   }
-
+  /**
+   *
+   */
+  ngAfterViewInit() {
+    if (this.tallerSignal()) {
+      const sateliteData = this.tallerSignal();
+      this.analyticsService.logCustomEvent('page-visit', {
+        page: 'taller-individual',
+        sateliteData: sateliteData,
+      });
+    }
+  }
   // Método para paginar los comentarios en grupos de 5
   paginateComments() {
     setTimeout(() => {

@@ -31,9 +31,10 @@
         <div class="worker-info">
           <h2 class="mt-2">{{ workerSignal()?.name }}</h2>
           <p class="mt-2">
+            Ubicación:
             {{ workerSignal()?.city }}, {{ workerSignal()?.country }}
           </p>
-          <p class="mt-2" *ngIf="authStateService.isAuthenticated$ | async">
+          <p class="mt-2" *ngIf="stateAuth()">
             <strong>Teléfono:</strong> {{ workerSignal()?.phone }}
             <app-wa-button
               [phoneNumber]="workerSignal()?.phone"

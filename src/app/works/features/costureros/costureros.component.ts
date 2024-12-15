@@ -1,4 +1,11 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import CardCalificationComponent from '../../../shared/ui/card-calification/card-calification.component';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
@@ -12,6 +19,7 @@ import {
   tap,
 } from 'rxjs';
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
+import { AnalyticsService } from '../../../shared/data-access/analytics.service';
 
 const COLLECTION_DATA = 'trabajadores';
 const CONCEPT_FILTER = 'costura';
@@ -23,12 +31,14 @@ const CONCEPT_FILTER = 'costura';
   templateUrl: './costureros.component.html',
   styleUrl: './costureros.component.scss',
 })
-export default class CosturerosComponent implements OnInit {
+export default class CosturerosComponent implements OnInit, AfterViewInit {
   // subject para destruir el componente
   private destroy$ = new Subject<void>(); // Controlador de destrucción
-  // Estado actual
+  // Servicios
   private authState = inject(AuthStateService);
   private userService = inject(WorksService);
+  private analyticsService = inject(AnalyticsService);
+
   currentStatusState = signal<boolean>(false);
   //Inyecciones importantes
   private _router = inject(Router);
@@ -100,6 +110,13 @@ export default class CosturerosComponent implements OnInit {
         }
       });
   }
+  /**
+   *
+   */
+  ngAfterViewInit() {
+    this.analyticsService.logPageVisit('costureros');
+  }
+
   /**
    *
    * @param value

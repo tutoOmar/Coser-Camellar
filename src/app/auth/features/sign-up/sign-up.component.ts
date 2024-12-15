@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { AfterViewInit, Component, inject, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -18,6 +18,7 @@ import { GoogleButtonComponent } from '../../ui/google-button/google-button.comp
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
 import { Subject, takeUntil } from 'rxjs';
 import { FacebookButtonComponent } from '../../ui/facebook-button/facebook-button.component';
+import { AnalyticsService } from '../../../shared/data-access/analytics.service';
 
 interface FormSingUp {
   email: FormControl<string | null>;
@@ -36,13 +37,14 @@ interface FormSingUp {
   templateUrl: './sign-up.component.html',
   styles: ``,
 })
-export default class SignUpComponent implements OnInit {
+export default class SignUpComponent implements OnInit, AfterViewInit {
   // subject para destruir el componente
   private destroy$ = new Subject<void>(); // Controlador de destrucción
   //
   private _formBuilder = inject(NonNullableFormBuilder);
   // Estado actual
   private authState = inject(AuthStateService);
+  private analyticsService = inject(AnalyticsService);
   /**
    *
    * @param field
@@ -86,6 +88,12 @@ export default class SignUpComponent implements OnInit {
           this.router.navigate(['/auth/register']);
         }
       });
+  }
+  /**
+   *
+   */
+  ngAfterViewInit() {
+    this.analyticsService.logPageVisit('sign-up');
   }
   /**
    * funcion que se encarga de manejar eventos del submit

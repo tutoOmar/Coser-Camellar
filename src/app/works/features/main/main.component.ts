@@ -1,4 +1,11 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import CardCalificationComponent from '../../../shared/ui/card-calification/card-calification.component';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
@@ -13,6 +20,8 @@ import {
 } from 'rxjs';
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
 import LoadingComponent from '../../../shared/ui/loading/loading.component';
+import { Analytics, getAnalytics, logEvent } from '@angular/fire/analytics';
+import { AnalyticsService } from '../../../shared/data-access/analytics.service';
 
 @Component({
   selector: 'app-main',
@@ -25,12 +34,14 @@ import LoadingComponent from '../../../shared/ui/loading/loading.component';
   ],
   templateUrl: './main.component.html',
   styleUrl: './main.component.scss',
+  providers: [AnalyticsService],
 })
-export default class MainComponent implements OnInit {
+export default class MainComponent implements OnInit, AfterViewInit {
   private destroy$ = new Subject<void>();
   private authState = inject(AuthStateService);
   private userService = inject(WorksService);
   private _router = inject(Router);
+  private analyticsService = inject(AnalyticsService);
   workersListSignal = inject(WorksService).getWorkersSignal('trabajadores');
   readonly MAX_DISPLAY_COUNT = 5;
 
@@ -40,16 +51,14 @@ export default class MainComponent implements OnInit {
   // Categorías disponibles
   categories = ['costura', 'corte', 'patinaje', 'arreglo', 'patronaje'];
 
-  // Trabajadores clasificados por categoría
   categorizedWorkersSignal = computed(() => {
     const workers = this.workersListSignal();
-    const searchValue = this.searchValueSignal().toLowerCase();
+    const searchValue = this.searchValueSignal().toLowerCase().trim();
 
     if (!workers) return {};
 
-    const categorizedWorkers: Record<string, any[]> = {};
-
     // Inicializar las categorías con listas vacías
+    const categorizedWorkers: Record<string, any[]> = {};
     this.categories.forEach((category) => {
       categorizedWorkers[category] = [];
     });
@@ -60,22 +69,25 @@ export default class MainComponent implements OnInit {
         firstSpecialty?.includes(category)
       );
 
-      if (matchingCategory) {
-        const matchesSearch = searchValue
-          ? worker.name.toLowerCase().includes(searchValue) ||
-            worker.city.toLowerCase().includes(searchValue) ||
-            worker.country.toLowerCase().includes(searchValue)
-          : true;
+      // Lógica de filtrado mejorada
+      const matchesSearch =
+        !searchValue ||
+        worker.name.toLowerCase().includes(searchValue) ||
+        worker.city.toLowerCase().includes(searchValue) ||
+        worker.country.toLowerCase().includes(searchValue) ||
+        firstSpecialty?.includes(searchValue);
 
-        if (
-          matchesSearch &&
-          categorizedWorkers[matchingCategory].length < this.MAX_DISPLAY_COUNT
-        ) {
-          categorizedWorkers[matchingCategory].push(worker);
-        }
+      if (matchingCategory && matchesSearch) {
+        categorizedWorkers[matchingCategory].push(worker);
       }
     });
-    return categorizedWorkers;
+
+    // Filtrar y retornar solo las categorías con trabajadores
+    return Object.fromEntries(
+      Object.entries(categorizedWorkers).filter(
+        ([, workers]) => workers.length > 0
+      )
+    );
   });
 
   constructor() {
@@ -95,10 +107,16 @@ export default class MainComponent implements OnInit {
         //Debemos validar que sí el status del usario en el registro está incompleto pero existe ya un usuario lo reenvie al register para que finalice su registro
         if (!stateUserExist && this.currentStatusState()) {
           /** Esto se hace para cuando se regist pero aun no haya ingresado datos no pueda ir, es mejor manejarlo con un guard */
-          this._router.navigate(['/auth/register']);
+          // this._router.navigate(['/auth/register']);
         }
         this.isLoading.set(false);
       });
+  }
+  /**
+   *
+   */
+  ngAfterViewInit() {
+    this.analyticsService.logPageVisit('worksAll');
   }
 
   onSearch(value: any) {
