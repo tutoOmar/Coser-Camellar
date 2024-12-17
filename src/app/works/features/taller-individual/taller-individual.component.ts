@@ -43,7 +43,7 @@ const COLLECTION_DATA = 'talleres';
   templateUrl: './taller-individual.component.html',
   styleUrl: './taller-individual.component.scss',
 })
-export default class TallerIndividualComponent implements AfterViewInit {
+export default class TallerIndividualComponent {
   // Services
   private authState = inject(AuthStateService);
   private analyticsService = inject(AnalyticsService);
@@ -79,18 +79,6 @@ export default class TallerIndividualComponent implements AfterViewInit {
     }
     this.initializeForm();
     this.paginateComments(); // Cargar los primeros comentarios
-  }
-  /**
-   *
-   */
-  ngAfterViewInit() {
-    if (this.tallerSignal()) {
-      const sateliteData = this.tallerSignal();
-      this.analyticsService.logCustomEvent('page-visit', {
-        page: 'taller-individual',
-        sateliteData: sateliteData,
-      });
-    }
   }
   // Método para paginar los comentarios en grupos de 5
   paginateComments() {
@@ -197,6 +185,10 @@ export default class TallerIndividualComponent implements AfterViewInit {
       .subscribe((worker: any) => {
         const validationUSer = worker as TallerUSer;
         this.tallerSignal.set(validationUSer);
+        this.analyticsService.logCustomEvent('page-visit', {
+          page: 'taller-individual',
+          sateliteData: validationUSer,
+        });
         this.paginateComments();
       });
   }

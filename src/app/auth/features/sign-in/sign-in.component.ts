@@ -75,7 +75,7 @@ export default class SignInComponent implements OnInit, AfterViewInit {
       .pipe(takeUntil(this.destroy$))
       .subscribe((state) => {
         if (state) {
-          this.router.navigate(['/auth/register']);
+          this.router.navigate(['/works']);
         }
       });
   }
@@ -102,7 +102,7 @@ export default class SignInComponent implements OnInit, AfterViewInit {
         email: email,
       });
       toast.success('Hola nuevamente!');
-      this.router.navigate(['/auth/register']);
+      this.router.navigate(['/works']);
     } catch (error) {
       toast.error('contraseña y/o correo invalida');
     }
@@ -114,7 +114,7 @@ export default class SignInComponent implements OnInit, AfterViewInit {
     try {
       await this.authService.signWithGoogle();
       toast.success('Inicio de sesión exitosa');
-      this.router.navigate(['/auth/register']);
+      this.router.navigate(['/works']);
     } catch (error) {
       toast.error('ocurrio un error');
     }
@@ -126,7 +126,7 @@ export default class SignInComponent implements OnInit, AfterViewInit {
     try {
       await this.authService.signWithFacebook();
       toast.success('Inicio de sesión exitosa');
-      this.router.navigate(['/auth/register']);
+      this.router.navigate(['/works']);
     } catch (error: any) {
       console.log(error.code);
       if (error.code === 'auth/account-exists-with-different-credential') {

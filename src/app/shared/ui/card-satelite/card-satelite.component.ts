@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { WorkerUser } from '../../../works/features/models/worker.model';
 import { SateliteUser } from '../../../works/features/models/satelite.model';
 import { TallerUSer } from '../../../works/features/models/talleres.model';
@@ -18,6 +18,7 @@ import { AuthStateService } from '../../data-access/auth-state.service';
 export default class CardSateliteComponent {
   // Validamos el estado
   public authState = inject(AuthStateService).currentUser;
+  private router = inject(Router);
   // LLega la información del trabajador
   satelite = input<SateliteUser | TallerUSer>();
 
@@ -57,6 +58,14 @@ export default class CardSateliteComponent {
       return specialtiesComplete;
     } else {
       return '';
+    }
+  }
+  //
+  goIndividual() {
+    const typeUser = this.satelite() ? this.satelite()?.typeUSer : 'satelite';
+    const id = this.satelite() ? this.satelite()?.id : '';
+    if (id && typeUser) {
+      this.router.navigate([`/works/${typeUser}`, id]);
     }
   }
 }

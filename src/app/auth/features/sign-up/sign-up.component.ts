@@ -85,7 +85,7 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
       .pipe(takeUntil(this.destroy$))
       .subscribe((state) => {
         if (state) {
-          this.router.navigate(['/auth/register']);
+          this.router.navigate(['/works']);
         }
       });
   }
@@ -112,7 +112,7 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
         email: email,
       });
       toast.success('usuario creado Correctamente');
-      this.router.navigate(['/auth/register']);
+      this.router.navigate(['/works']);
     } catch (error: any) {
       if (error.code === 'auth/email-already-in-use') {
         toast.error('Correo ya existe, inicia sesión');
@@ -128,7 +128,7 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
     try {
       await this.authService.signWithGoogle();
       toast.success('Usuario creado Correctamente');
-      this.router.navigate(['/auth/register']);
+      this.router.navigate(['/works']);
     } catch (error: any) {
       if (error.code === 'auth/account-exists-with-different-credential') {
         toast.error('Ya existe una cuenta con esta cuenta de Facebook');
@@ -144,7 +144,7 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
     try {
       await this.authService.signWithFacebook();
       toast.success('Inicio de sesión exitosa');
-      this.router.navigate(['/auth/register']);
+      this.router.navigate(['/works']);
     } catch (error) {
       toast.error('ocurrio un error');
     }

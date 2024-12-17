@@ -33,7 +33,7 @@ import { AnalyticsService } from '../../../shared/data-access/analytics.service'
   templateUrl: './satelite-individual.component.html',
   styleUrl: './satelite-individual.component.scss',
 })
-export default class SateliteIndividualComponent implements AfterViewInit {
+export default class SateliteIndividualComponent {
   // inyeccion de servicios
   private authState = inject(AuthStateService);
   private analyticsService = inject(AnalyticsService);
@@ -70,18 +70,6 @@ export default class SateliteIndividualComponent implements AfterViewInit {
     }
     this.initializeForm();
     this.paginateComments(); // Cargar los primeros comentarios
-  }
-  /**
-   *
-   */
-  ngAfterViewInit() {
-    if (this.sateliteSignal()) {
-      const sateliteData = this.sateliteSignal();
-      this.analyticsService.logCustomEvent('page-visit', {
-        page: 'satelite-individual',
-        sateliteData: sateliteData,
-      });
-    }
   }
   // Método para paginar los comentarios en grupos de 5
   paginateComments() {
@@ -188,6 +176,10 @@ export default class SateliteIndividualComponent implements AfterViewInit {
       .subscribe((worker: any) => {
         const validationUSer = worker as SateliteUser;
         this.sateliteSignal.set(validationUSer);
+        this.analyticsService.logCustomEvent('page-visit', {
+          page: 'satelite-individual',
+          sateliteData: validationUSer,
+        });
         this.paginateComments();
       });
   }
