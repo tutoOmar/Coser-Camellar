@@ -79,6 +79,10 @@ export default [
       import('./profile/edit-profile-business/edit-profile-business.component'),
   },
   {
+    path: 'politicas',
+    loadComponent: () => import('./politicas/politicas.component'),
+  },
+  {
     path: '**',
     loadComponent: () => import('./main/main.component'),
   },

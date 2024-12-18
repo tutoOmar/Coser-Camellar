@@ -31,7 +31,7 @@ export class AppComponent implements OnInit {
         setTimeout(() => {
           this.showModal = true;
           localStorage.setItem('modalShown', 'true');
-        }, 60000); // 1 minuto
+        }, 30000); // 30 segundos
       }
     }
   }

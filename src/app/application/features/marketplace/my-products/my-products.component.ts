@@ -49,9 +49,6 @@ export default class MyProductsComponent implements AfterViewInit {
   ngAfterViewInit() {
     this.analyticsService.logPageVisit('my-products-marketplace');
   }
-  onBuy(itemId: string) {
-    console.log(`Producto con ID ${itemId} comprado.`);
-  }
   /**
    * Funcion para abrir la imagen en grande
    * @param image

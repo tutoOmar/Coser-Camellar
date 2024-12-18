@@ -126,7 +126,6 @@ export default class EditProfileBusinessComponent implements OnInit {
    */
   ngOnInit(): void {
     const userId = this.currentRoute.snapshot.paramMap.get('id');
-    console.log('User id', userId);
     if (userId) {
       this.loadBusiness(userId);
     }

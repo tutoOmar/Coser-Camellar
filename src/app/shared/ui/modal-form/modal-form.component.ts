@@ -13,11 +13,12 @@ import { RegisterUserService } from '../../data-access/register-user.service';
 import { AnalyticsService } from '../../data-access/analytics.service';
 import { toast } from 'ngx-sonner';
 import Swal from 'sweetalert2';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-modal-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule],
   templateUrl: './modal-form.component.html',
   styleUrl: './modal-form.component.scss',
 })
@@ -84,7 +85,6 @@ export default class ModalFormComponent implements AfterViewInit {
    *
    */
   ngOnDestroy() {
-    console.log('SE destruye modal');
     this.destroy$.next();
     this.destroy$.complete();
   }
