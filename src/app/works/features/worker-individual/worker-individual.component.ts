@@ -11,7 +11,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { WorksService } from '../../services/works.service';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, tap } from 'rxjs';
 import WaButtonComponent from '../../../shared/ui/wa-button/wa-button.component';
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
 import { toast } from 'ngx-sonner';
@@ -34,6 +34,7 @@ export default class WorkerIndividualComponent implements OnInit {
   private authState = inject(AuthStateService);
   // Crear signal para guardar el usuario individual
   workerSignal = signal<WorkerUser | null>(null);
+  stateAuth = signal<boolean>(false);
   //
   private destroy$: Subject<void> = new Subject<void>();
   /**  */
@@ -62,6 +63,12 @@ export default class WorkerIndividualComponent implements OnInit {
     if (this.workerId) {
       this.loadWorker('trabajadores', this.workerId);
     }
+    this.authState.isAuthenticated$
+      .pipe(
+        takeUntil(this.destroy$),
+        tap((state) => this.stateAuth.set(state))
+      )
+      .subscribe();
     this.initializeForm();
     this.paginateComments(); // Cargar los primeros comentarios
   }
@@ -130,6 +137,7 @@ export default class WorkerIndividualComponent implements OnInit {
             );
             this.worksService
               .addComment('trabajadores', workerUserData, this.workerId)
+              .pipe(takeUntil(this.destroy$))
               .subscribe({
                 next: (res) => res,
                 error: (err) => toast.error('Error al actualizar el documento'),

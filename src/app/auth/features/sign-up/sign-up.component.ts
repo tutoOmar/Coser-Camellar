@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { AfterViewInit, Component, inject, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -18,6 +18,7 @@ import { GoogleButtonComponent } from '../../ui/google-button/google-button.comp
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
 import { Subject, takeUntil } from 'rxjs';
 import { FacebookButtonComponent } from '../../ui/facebook-button/facebook-button.component';
+import { AnalyticsService } from '../../../shared/data-access/analytics.service';
 
 interface FormSingUp {
   email: FormControl<string | null>;
@@ -36,13 +37,14 @@ interface FormSingUp {
   templateUrl: './sign-up.component.html',
   styles: ``,
 })
-export default class SignUpComponent implements OnInit {
+export default class SignUpComponent implements OnInit, AfterViewInit {
   // subject para destruir el componente
   private destroy$ = new Subject<void>(); // Controlador de destrucción
   //
   private _formBuilder = inject(NonNullableFormBuilder);
   // Estado actual
   private authState = inject(AuthStateService);
+  private analyticsService = inject(AnalyticsService);
   /**
    *
    * @param field
@@ -83,9 +85,15 @@ export default class SignUpComponent implements OnInit {
       .pipe(takeUntil(this.destroy$))
       .subscribe((state) => {
         if (state) {
-          this.router.navigate(['/auth/register']);
+          this.router.navigate(['/works']);
         }
       });
+  }
+  /**
+   *
+   */
+  ngAfterViewInit() {
+    this.analyticsService.logPageVisit('sign-up');
   }
   /**
    * funcion que se encarga de manejar eventos del submit
@@ -104,7 +112,7 @@ export default class SignUpComponent implements OnInit {
         email: email,
       });
       toast.success('usuario creado Correctamente');
-      this.router.navigate(['/auth/register']);
+      this.router.navigate(['/works']);
     } catch (error: any) {
       if (error.code === 'auth/email-already-in-use') {
         toast.error('Correo ya existe, inicia sesión');
@@ -120,7 +128,7 @@ export default class SignUpComponent implements OnInit {
     try {
       await this.authService.signWithGoogle();
       toast.success('Usuario creado Correctamente');
-      this.router.navigate(['/auth/register']);
+      this.router.navigate(['/works']);
     } catch (error: any) {
       if (error.code === 'auth/account-exists-with-different-credential') {
         toast.error('Ya existe una cuenta con esta cuenta de Facebook');
@@ -136,7 +144,7 @@ export default class SignUpComponent implements OnInit {
     try {
       await this.authService.signWithFacebook();
       toast.success('Inicio de sesión exitosa');
-      this.router.navigate(['/auth/register']);
+      this.router.navigate(['/works']);
     } catch (error) {
       toast.error('ocurrio un error');
     }

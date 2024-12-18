@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, inject, signal } from '@angular/core';
 import {
   FormsModule,
   ReactiveFormsModule,
@@ -17,6 +17,7 @@ import CardPositionComponent from '../../../shared/ui/card-position/card-positio
 import WaButtonComponent from '../../../shared/ui/wa-button/wa-button.component';
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
 import { toast } from 'ngx-sonner';
+import { AnalyticsService } from '../../../shared/data-access/analytics.service';
 
 @Component({
   selector: 'app-satelite-individual',
@@ -33,8 +34,10 @@ import { toast } from 'ngx-sonner';
   styleUrl: './satelite-individual.component.scss',
 })
 export default class SateliteIndividualComponent {
-  //Current User
+  // inyeccion de servicios
   private authState = inject(AuthStateService);
+  private analyticsService = inject(AnalyticsService);
+
   // Crear signal para guardar el usuario individual
   sateliteSignal = signal<SateliteUser | null>(null);
   //
@@ -68,7 +71,6 @@ export default class SateliteIndividualComponent {
     this.initializeForm();
     this.paginateComments(); // Cargar los primeros comentarios
   }
-
   // Método para paginar los comentarios en grupos de 5
   paginateComments() {
     setTimeout(() => {
@@ -174,6 +176,10 @@ export default class SateliteIndividualComponent {
       .subscribe((worker: any) => {
         const validationUSer = worker as SateliteUser;
         this.sateliteSignal.set(validationUSer);
+        this.analyticsService.logCustomEvent('page-visit', {
+          page: 'satelite-individual',
+          sateliteData: validationUSer,
+        });
         this.paginateComments();
       });
   }

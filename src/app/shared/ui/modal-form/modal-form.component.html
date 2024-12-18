@@ -1,0 +1,68 @@
+<div
+  class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+>
+  <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
+    <h2 class="text-xl font-semibold mb-4">
+      ¡Bienvenido(a) a nuestra comunidad! Nos llena de orgullo que hagas parte
+      de este proyecto. Cada idea, cada palabra, y cada aporte que nos dejes nos
+      ayuda a crecer juntos y a ser mejores. ¡Gracias por estar aquí!
+    </h2>
+    <form (ngSubmit)="submitForm()">
+      <div class="mb-4">
+        <label for="name" class="block font-medium mb-1">Nombre:</label>
+        <input
+          type="text"
+          id="name"
+          class="w-full border border-gray-300 rounded-md p-2"
+          [(ngModel)]="name"
+          name="name"
+          required
+        />
+      </div>
+      <div class="mb-4">
+        <label for="phone" class="block font-medium mb-1">Teléfono:</label>
+        <input
+          type="tel"
+          id="phone"
+          class="w-full border border-gray-300 rounded-md p-2"
+          [(ngModel)]="phone"
+          name="phone"
+          required
+        />
+      </div>
+      <div class="mb-4">
+        <label for="comment" class="block font-medium mb-1"
+          >¿Cómo podemos mejorar?:</label
+        >
+        <textarea
+          id="comment"
+          class="w-full border border-gray-300 rounded-md p-2"
+          [(ngModel)]="comment"
+          name="comment"
+          placeholder="Cuéntanos qué te gusta, qué podemos mejorar o qué ideas tienes para que esta app sea más útil para ti"
+        ></textarea>
+      </div>
+      <div class="flex justify-end">
+        <button
+          type="button"
+          class="bg-gray-500 text-white px-4 py-2 rounded mr-2"
+          (click)="closeModal()"
+        >
+          Cancelar
+        </button>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">
+          Enviar
+        </button>
+      </div>
+      <p class="text-sm font-light text-gray-500 dark:text-gray-400">
+        Al registrarte, aceptas nuestras
+        <a
+          routerLink="/works/politicas"
+          class="font-medium text-primary-600 hover:underline dark:text-primary-500"
+        >
+          políticas de tratamiento de datos </a
+        >.
+      </p>
+    </form>
+  </div>
+</div>

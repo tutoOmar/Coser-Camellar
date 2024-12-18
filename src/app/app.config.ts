@@ -1,4 +1,9 @@
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import {
+  ApplicationConfig,
+  inject,
+  PLATFORM_ID,
+  provideZoneChangeDetection,
+} from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
@@ -8,6 +13,13 @@ import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { getStorage, provideStorage } from '@angular/fire/storage';
 import { provideHttpClient } from '@angular/common/http';
+import {
+  getAnalytics,
+  provideAnalytics,
+  ScreenTrackingService,
+  UserTrackingService,
+} from '@angular/fire/analytics';
+import { isPlatformBrowser } from '@angular/common';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -19,7 +31,6 @@ export const appConfig: ApplicationConfig = {
         projectId: 'tu-chamba-cf127',
         appId: '1:808757943646:web:58b2596b30ba98f30903cf',
         storageBucket: 'tu-chamba-cf127.appspot.com',
-        // locationId: 'us-central',
         apiKey: 'AIzaSyB1j1_VQM_zrNefqzreyyXAlYjXKgXI94U',
         authDomain: 'tu-chamba-cf127.firebaseapp.com',
         messagingSenderId: '808757943646',
@@ -30,5 +41,18 @@ export const appConfig: ApplicationConfig = {
     provideFirestore(() => getFirestore()),
     provideStorage(() => getStorage()),
     provideHttpClient(),
+    // Habilitar Analytics solo en el navegador
+    provideAnalytics(() => {
+      const platformId = inject(PLATFORM_ID);
+      if (isPlatformBrowser(platformId)) {
+        const analytics = getAnalytics();
+        return analytics;
+      }
+      return {
+        logEvent: () => {},
+      } as any;
+    }),
+    ScreenTrackingService,
+    UserTrackingService,
   ],
 };

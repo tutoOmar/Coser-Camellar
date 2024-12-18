@@ -214,10 +214,13 @@
           name="specialty"
           #specialtySelectWorker
           (blur)="specialtiesTouched = true"
-          (change)="addSpecialtyWorkerToTemp($event)"
+          (change)="addSpecialtyWorker($event)"
           class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
           multiple
         >
+          <option value="" disabled selected>
+            Selecciona tus Especialidades
+          </option>
           <option
             *ngFor="let specialty of availableSpecialties"
             [value]="specialty"
@@ -225,60 +228,36 @@
             {{ removeHyphens(specialty) }}
           </option>
         </select>
-      </div>
-      <!-- Temporary selections -->
-      <div class="mt-2" *ngIf="tempSelectedSpecialtiesWorker.length > 0">
-        <label class="block text-gray-700 font-medium">
-          Especialidades seleccionadas:
-        </label>
-        <div class="flex flex-wrap gap-2 mt-2">
-          <span
-            *ngFor="let specialty of tempSelectedSpecialtiesWorker"
-            class="flex items-center gap-1 px-3 py-1 bg-yellow-200 text-yellow-700 rounded-full"
-          >
-            {{ removeHyphens(specialty) }}
-          </span>
-        </div>
 
-        <div class="flex gap-2 mt-2">
-          <button
-            (click)="confirmWorkerSpecialties()"
-            class="bg-blue-500 text-white px-4 py-2 rounded"
-          >
-            Confirmar Selección
-          </button>
-          <button
-            (click)="clearTempSelectionsWorkerSpecialties()"
-            class="bg-red-500 text-white px-4 py-2 rounded"
-          >
-            Cancelar
-          </button>
-        </div>
-      </div>
-      <!-- Validación de cantidad de seleccionados -->
-      <small
-        *ngIf="!isSelectedAtLeastOne(newWorker.specialty) && specialtiesTouched"
-        class="text-red-400"
-      >
-        Debes seleccionar al menos una especialidad.
-      </small>
-      <div class="mt-2">
-        <label class="block text-gray-700 font-medium"
-          >Especialidades seleccionadas:</label
+        <!-- Mensaje de validación -->
+        <small
+          *ngIf="
+            !isSelectedAtLeastOne(newWorker.specialty) && specialtiesTouched
+          "
+          class="text-red-400"
         >
-        <div class="flex flex-wrap gap-2 mt-2">
-          <span
-            *ngFor="let specialty of newWorker.specialty"
-            class="flex items-center gap-1 px-3 py-1 bg-blue-200 text-blue-700 rounded-full"
-          >
-            {{ removeHyphens(specialty) }}
-            <button
-              (click)="removeSpecialtyWorker(specialty)"
-              class="text-red-500"
+          Debes seleccionar al menos una especialidad.
+        </small>
+
+        <!-- Especialidades seleccionadas -->
+        <div class="mt-2" *ngIf="newWorker.specialty.length > 0">
+          <label class="block text-gray-700 font-medium">
+            Especialidades seleccionadas:
+          </label>
+          <div class="flex flex-wrap gap-2 mt-2">
+            <span
+              *ngFor="let specialty of newWorker.specialty"
+              class="flex items-center gap-1 px-3 py-1 bg-blue-200 text-blue-700 rounded-full"
             >
-              x
-            </button>
-          </span>
+              {{ removeHyphens(specialty) }}
+              <button
+                (click)="removeSpecialtyWorker(specialty)"
+                class="text-red-500"
+              >
+                x
+              </button>
+            </span>
+          </div>
         </div>
       </div>
       <!-- Maquinas -->
@@ -287,9 +266,10 @@
           >Elige al menos una máquinas en la que te especialices:</label
         >
         <select
+          name="machine"
           #machineSelectWorker
           (blur)="machinesTouched = true"
-          (change)="addMachineWorkerToTemp($event)"
+          (change)="addMachineWorker($event)"
           class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
           multiple
         >
@@ -299,35 +279,6 @@
           </option>
         </select>
       </div>
-      <!-- Temporary selections -->
-      <div class="mt-2" *ngIf="tempSelectedMachinesWorker.length > 0">
-        <label class="block text-gray-700 font-medium">
-          Máquinas seleccionadas:
-        </label>
-        <div class="flex flex-wrap gap-2 mt-2">
-          <span
-            *ngFor="let machine of tempSelectedMachinesWorker"
-            class="flex items-center gap-1 px-3 py-1 bg-yellow-200 text-yellow-700 rounded-full"
-          >
-            {{ removeHyphens(machine) }}
-          </span>
-        </div>
-
-        <div class="flex gap-2 mt-2">
-          <button
-            (click)="confirmWorkersMachines()"
-            class="bg-blue-500 text-white px-4 py-2 rounded"
-          >
-            Confirmar Selección
-          </button>
-          <button
-            (click)="clearTempSelectionsWorkersMachines()"
-            class="bg-red-500 text-white px-4 py-2 rounded"
-          >
-            Cancelar
-          </button>
-        </div>
-      </div>
       <!-- Validación de cantidad de seleccionados -->
       <small
         *ngIf="!isSelectedAtLeastOne(newWorker.machines) && machinesTouched"
@@ -335,7 +286,8 @@
       >
         Debes seleccionar al menos una máquina en la que te especialices.
       </small>
-      <div class="mt-2">
+      <!-- Máquinas seleccionadas -->
+      <div class="mt-2" *ngIf="newWorker.machines.length > 0">
         <label class="block text-gray-700 font-medium"
           >Máquinas seleccionadas:</label
         >
@@ -362,7 +314,7 @@
           (blur)="experienceTouched = true"
           [(ngModel)]="newWorker.experience[0]"
           class="w-full h-32 border border-gray-300 rounded resize-none focus:outline-none focus:ring focus:ring-blue-200 align-top p-3"
-          placeholder="Escribe una breve descripción de las experiencias más significativas y cantidad de años en el sector"
+          placeholder="Escribe una breve descripción sobre tí a nivel laboral y la experiencia laboral que tengas"
         ></textarea>
       </div>
       <small
@@ -382,7 +334,9 @@
     </form>
   </div>
 
-  <!-- Formulario para Negocios -->
+  <!-- ============================  Formulario para Negocios   =======================================================
+  =====================================================================================================================
+  -->
   <div *ngIf="selectedForm === 'business'" class="formBusiness space-y-4">
     <h2 class="text-xl font-semibold mb-4">Registro para taller o satelite</h2>
     <form
@@ -583,14 +537,13 @@
         <h1 class="text-xl text-center">Laboral</h1>
       </div>
       <!-- Validación campo requerido -->
-
       <div class="form-group">
         <label class="block text-gray-700 font-medium">
           Elige las áreas en las que te especializas:
         </label>
         <select
           #specialtySelect
-          (change)="addSpecialtyBusinessToTemp($event)"
+          (change)="addSpecialtyBusiness($event)"
           class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
           multiple
         >
@@ -601,45 +554,14 @@
             {{ removeHyphens(specialty) }}
           </option>
         </select>
-        <!-- Temporary selections -->
-        <div class="mt-2" *ngIf="tempSelectedSpecialties.length > 0">
-          <label class="block text-gray-700 font-medium">
-            Especialidades seleccionadas:
-          </label>
-          <div class="flex flex-wrap gap-2 mt-2">
-            <span
-              *ngFor="let specialty of tempSelectedSpecialties"
-              class="flex items-center gap-1 px-3 py-1 bg-yellow-200 text-yellow-700 rounded-full"
-            >
-              {{ removeHyphens(specialty) }}
-            </span>
-          </div>
-
-          <div class="flex gap-2 mt-2">
-            <button
-              (click)="confirmBusinessSpecialties()"
-              class="bg-blue-500 text-white px-4 py-2 rounded"
-            >
-              Confirmar Selección
-            </button>
-            <button
-              (click)="clearTempSelections()"
-              class="bg-red-500 text-white px-4 py-2 rounded"
-            >
-              Cancelar
-            </button>
-          </div>
-        </div>
-        <!-- Validación de cantidad de seleccionados -->
         <small
           *ngIf="
             !isSelectedAtLeastOne(newBusiness.specialty) && specialtiesTouched
           "
           class="text-red-400"
         >
-          Debes seleccionar al menos una especialida.
+          Debes seleccionar al menos una especialidad.
         </small>
-        <!-- Selected specialties -->
         <div class="mt-2">
           <label class="block text-gray-700 font-medium">
             Especialidades seleccionadas:
@@ -660,6 +582,7 @@
           </div>
         </div>
       </div>
+
       <!-- Maquinas -->
       <div class="form-group">
         <label class="block text-gray-700 font-medium"
@@ -668,7 +591,7 @@
         <select
           #machineSelect
           (blur)="machinesTouched = true"
-          (change)="addMachineBusinessToTemp($event)"
+          (change)="addMachineBusiness($event)"
           class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
           multiple
         >
@@ -676,35 +599,6 @@
             {{ removeHyphens(machine) }}
           </option>
         </select>
-      </div>
-      <!-- Temporary selections -->
-      <div class="mt-2" *ngIf="tempSelectedMachines.length > 0">
-        <label class="block text-gray-700 font-medium">
-          Maquinas seleccionadas:
-        </label>
-        <div class="flex flex-wrap gap-2 mt-2">
-          <span
-            *ngFor="let machine of tempSelectedMachines"
-            class="flex items-center gap-1 px-3 py-1 bg-yellow-200 text-yellow-700 rounded-full"
-          >
-            {{ removeHyphens(machine) }}
-          </span>
-        </div>
-
-        <div class="flex gap-2 mt-2">
-          <button
-            (click)="confirmBusinessMachines()"
-            class="bg-blue-500 text-white px-4 py-2 rounded"
-          >
-            Confirmar Selección
-          </button>
-          <button
-            (click)="clearTempSelectionsMachines()"
-            class="bg-red-500 text-white px-4 py-2 rounded"
-          >
-            Cancelar
-          </button>
-        </div>
       </div>
       <!-- Validación de cantidad de seleccionados -->
       <small
@@ -743,7 +637,7 @@
           (blur)="experienceTouched = true"
           [(ngModel)]="newBusiness.experience[0]"
           class="w-full h-32 border border-gray-300 rounded resize-none focus:outline-none focus:ring focus:ring-blue-200 align-top p-3"
-          placeholder="Escribe una breve descripción de las experiencias más significativas que tengas en el sector"
+          placeholder="Escribe una breve descripción de las experiencias laborales más importante que tengas en el sector de la confección"
         ></textarea>
       </div>
       <small

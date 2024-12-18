@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { WhatsAppService } from '../../data-access/whats-app.service';
+import { AnalyticsService } from '../../data-access/analytics.service';
 
 @Component({
   selector: 'app-wa-button',
@@ -16,9 +17,16 @@ export default class WaButtonComponent {
   // Emite una señal cuando el botón es presionado
   @Output() buttonClicked: EventEmitter<string> = new EventEmitter<string>();
 
-  constructor(private whatsAppService: WhatsAppService) {}
+  constructor(
+    private whatsAppService: WhatsAppService,
+    private analyticsService: AnalyticsService
+  ) {}
 
   openWhatsApp() {
+    this.analyticsService.logCustomEvent('go-to-WA', {
+      phoneNumber: this.phoneNumber,
+      message: this.messageToSend,
+    });
     this.whatsAppService.openWhatsAppAction(
       this.phoneNumber,
       this.messageToSend

@@ -141,7 +141,7 @@ export default class EditProfileBusinessComponent implements OnInit {
       .getUserByIdInAnyCollection(businessId)
       .pipe(takeUntil(this.destroy$))
       .subscribe((business: any) => {
-        const validationUser = business as SateliteUser | TallerUSer;
+        const validationUser = business[0] as SateliteUser | TallerUSer;
         this.userInfo = validationUser;
         if (validationUser) {
           // Usamos patchValue para setear los valores en el formulario

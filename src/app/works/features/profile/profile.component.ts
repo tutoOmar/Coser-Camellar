@@ -1,37 +1,26 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { WorksService } from '../../services/works.service';
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
-import {
-  catchError,
-  of,
-  forkJoin,
-  map,
-  filter,
-  switchMap,
-  tap,
-  EMPTY,
-  mergeMap,
-  Observable,
-  Subject,
-  takeUntil,
-  mergeAll,
-  concatMap,
-  first,
-  from,
-} from 'rxjs';
+import { of, switchMap, tap, Subject, takeUntil } from 'rxjs';
 import { SateliteUser } from '../models/satelite.model';
 import { WorkerUser } from '../models/worker.model';
 import { TallerUSer } from '../models/talleres.model';
 import { CommonModule } from '@angular/common';
 import CardPositionComponent from '../../../shared/ui/card-position/card-position.component';
-import { user } from '@angular/fire/auth';
 import StartsCalificationComponent from '../../../shared/ui/starts-calification/starts-calification.component';
 import { PositionsService } from '../../services/positions.service';
 import { toast } from 'ngx-sonner';
 import { Position, StatusPositionEnum } from '../models/position.model';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import LoadingComponent from '../../../shared/ui/loading/loading.component';
+import { AnalyticsService } from '../../../shared/data-access/analytics.service';
 
 @Component({
   selector: 'app-profile',
@@ -48,7 +37,7 @@ import LoadingComponent from '../../../shared/ui/loading/loading.component';
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
 })
-export default class ProfileComponent implements OnInit {
+export default class ProfileComponent implements OnInit, AfterViewInit {
   // Señal donde guardaremos el tipo de usuario para mostrar
   typeUser = signal<string>('');
   //
@@ -65,6 +54,7 @@ export default class ProfileComponent implements OnInit {
   private _auth = inject(AuthStateService);
   private userService = inject(WorksService);
   private positionService = inject(PositionsService);
+  private analyticsService = inject(AnalyticsService);
   /**
    *
    */
@@ -100,6 +90,12 @@ export default class ProfileComponent implements OnInit {
         })
       )
       .subscribe();
+  }
+  /**
+   *
+   */
+  ngAfterViewInit() {
+    this.analyticsService.logPageVisit('profile');
   }
   /**
    *

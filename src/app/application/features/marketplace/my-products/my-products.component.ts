@@ -1,4 +1,10 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { of, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { Product } from '../../../models/product.model';
 import { StateProductEnum } from '../../../models/state-product.enum';
@@ -6,6 +12,7 @@ import { MarketplaceService } from '../../../services/marketplace.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthStateService } from '../../../../shared/data-access/auth-state.service';
+import { AnalyticsService } from '../../../../shared/data-access/analytics.service';
 
 @Component({
   selector: 'app-my-products',
@@ -15,11 +22,13 @@ import { AuthStateService } from '../../../../shared/data-access/auth-state.serv
   styleUrl: './my-products.component.scss',
   providers: [MarketplaceService],
 })
-export default class MyProductsComponent {
+export default class MyProductsComponent implements AfterViewInit {
   private destroy$ = new Subject<void>();
   // Inyección de servicios
   private authService = inject(AuthStateService);
   private productService = inject(MarketplaceService);
+  private analyticsService = inject(AnalyticsService);
+
   // Datos de los productos
   private products = signal<Product[]>([]);
   // Computed signal para filtrar y procesar productos si es necesario
@@ -34,8 +43,11 @@ export default class MyProductsComponent {
     // Simula la carga de datos desde un archivo JSON
     this.loadProducts();
   }
-  onBuy(itemId: string) {
-    console.log(`Producto con ID ${itemId} comprado.`);
+  /**
+   *
+   */
+  ngAfterViewInit() {
+    this.analyticsService.logPageVisit('my-products-marketplace');
   }
   /**
    * Funcion para abrir la imagen en grande

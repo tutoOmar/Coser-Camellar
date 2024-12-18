@@ -1,14 +1,13 @@
 import { CommonModule } from '@angular/common';
 import {
+  AfterViewInit,
   Component,
-  ElementRef,
   inject,
   OnInit,
   signal,
-  ViewChild,
 } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { TypeUser } from '../../../works/features/models/type-user.model';
 import { SateliteUser } from '../../../works/features/models/satelite.model';
 import { Status } from '../../../works/features/models/status.model';
@@ -25,6 +24,7 @@ import { toast } from 'ngx-sonner';
 import { Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
 import { WorksService } from '../../../works/services/works.service';
+import { AnalyticsService } from '../../../shared/data-access/analytics.service';
 
 @Component({
   selector: 'app-register',
@@ -34,12 +34,13 @@ import { WorksService } from '../../../works/services/works.service';
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
 })
-export default class RegisterComponent implements OnInit {
+export default class RegisterComponent implements OnInit, AfterViewInit {
   // subject para destruir el componente
   private destroy$ = new Subject<void>(); // Controlador de destrucción
   // Estado actual
   private authState = inject(AuthStateService);
   private userService = inject(WorksService);
+  private analyticsService = inject(AnalyticsService);
   // Subject para manejar la suscripción
   // Signal de loadging
   loading = signal<boolean>(false);
@@ -64,21 +65,6 @@ export default class RegisterComponent implements OnInit {
   // Lista que se present disponible en el select
   availableSpecialties = [...this.workerSpecialties]; // Lista de especialidades disponibles para seleccionar
   availableMachines = [...this.machinesExperience];
-  tempSelectedSpecialties: string[] = []; // Nuevo array para selección temporal
-  tempSelectedMachines: string[] = []; // Nuevo array para selección temporal
-  tempSelectedSpecialtiesWorker: string[] = []; // Nuevo array para selección temporal
-  tempSelectedMachinesWorker: string[] = []; // Nuevo array para selección temporal
-  // Modified select element to allow multiple selections
-  @ViewChild('specialtySelect') specialtySelect: ElementRef | undefined;
-  // Modified select element to allow multiple selections
-  @ViewChild('machineSelect') machineSelect: ElementRef | undefined;
-  // Datos prefedinidos para paise sy ciudades
-  // Modified select element to allow multiple selections
-  @ViewChild('specialtySelectWorker') specialtySelectWorker:
-    | ElementRef
-    | undefined;
-  // Modified select element to allow multiple selections
-  @ViewChild('machineSelectWorker') machineSelectWorker: ElementRef | undefined;
   // Datos prefedinidos para paise sy ciudades
   //ToDo esto deberá estar vacio cuando nos conectemos a un API
   countries: any[] = [{ name: 'Colombia', code: 'CO' }];
@@ -169,6 +155,12 @@ export default class RegisterComponent implements OnInit {
         }
       });
   }
+  /**
+   *
+   */
+  ngAfterViewInit() {
+    this.analyticsService.logPageVisit('register');
+  }
   // Método para seleccionar el tipo de formulario
   selectType(type: string) {
     this.selectedForm = type;
@@ -221,51 +213,34 @@ export default class RegisterComponent implements OnInit {
    * Funciones para añadir opciones a los trabajadores
    =============================================================================================*/
 
-  // Método para agregar una especialidad a un trabajador
-  addSpecialtyWorkerToTemp(event: any) {
-    const specialty = event.target.value;
+  // Método para manejar cambios en la selección
+  addSpecialtyWorker(event: any) {
+    const selectElement = event.target as HTMLSelectElement;
+    const selectedOptions = Array.from(selectElement.selectedOptions).map(
+      (option) => option.value
+    );
 
-    if (
-      specialty &&
-      this.isSpecialtyEnum(specialty) &&
-      !this.newWorker.specialty.includes(specialty)
-    ) {
-      this.tempSelectedSpecialtiesWorker.push(specialty); // Añadir a la lista de especialidades seleccionadas
-    }
+    // Filtrar nuevas selecciones que no sean válidas según Specialty
+    const validSelections = selectedOptions.filter((option) =>
+      this.isSpecialtyEnum(option)
+    ) as Specialty[]; // Confirmar el tipo Specialty después de la validación
+
+    // Filtrar opciones que ya estén seleccionadas para evitar duplicados
+    const newSelections = validSelections.filter(
+      (option) => !this.newWorker.specialty.includes(option)
+    );
+
+    // Agregar nuevas especialidades válidas a la lista seleccionada
+    this.newWorker.specialty.push(...newSelections);
+
+    // Actualizar las especialidades disponibles, excluyendo las seleccionadas
+    this.availableSpecialties = this.availableSpecialties.filter(
+      (item) => !newSelections.includes(item)
+    );
+
+    // Reiniciar la selección para evitar confusión visual
+    selectElement.selectedIndex = -1;
   }
-
-  // New method to confirm selections
-  confirmWorkerSpecialties() {
-    // Remove selected specialties from available list
-    this.tempSelectedSpecialtiesWorker.forEach((specialty) => {
-      this.availableSpecialties = this.availableSpecialties.filter(
-        (item) => item !== specialty
-      );
-    });
-    const validatedSpecialties = this.tempSelectedSpecialtiesWorker
-      .map((specialty) => {
-        if (this.isSpecialtyEnum(specialty)) {
-          return specialty;
-        } else {
-          return null;
-        }
-      })
-      .filter((specialty) => specialty !== null);
-    // // Add all temp selections to main specialty list
-    this.newWorker.specialty = [
-      ...this.newWorker.specialty,
-      ...validatedSpecialties,
-    ];
-
-    // Clear temporary selections
-    this.tempSelectedSpecialtiesWorker = [];
-
-    // Reset select input
-    if (this.specialtySelectWorker) {
-      this.specialtySelectWorker.nativeElement.selectedIndex = 0;
-    }
-  }
-
   // Método para quitar una especialidad
   removeSpecialtyWorker(specialty: string) {
     this.newWorker.specialty = this.newWorker.specialty.filter(
@@ -275,52 +250,29 @@ export default class RegisterComponent implements OnInit {
       this.availableSpecialties.push(specialty); // Añadir de nuevo a la lista de disponibles
     }
   }
-  // Clear temporary selections
-  clearTempSelectionsWorkerSpecialties() {
-    this.tempSelectedSpecialtiesWorker = [];
-  }
 
   // Método para agregar una especialidad
-  addMachineWorkerToTemp(event: any) {
-    const machine = event.target.value;
-    if (
-      machine &&
-      this.isMachineEnum(machine) &&
-      !this.tempSelectedMachinesWorker.includes(machine)
-    ) {
-      this.tempSelectedMachinesWorker.push(machine); // Añadir a la lista de especialidades seleccionadas
-    }
-  }
-  // New method to confirm selections
-  confirmWorkersMachines() {
-    // Remove selected specialties from available list
-    this.tempSelectedMachinesWorker.forEach((machine) => {
-      this.availableMachines = this.availableMachines.filter(
-        (item) => item !== machine
-      );
-    });
-    const validatedMachines = this.tempSelectedMachinesWorker
-      .map((machine) => {
-        if (this.isMachineEnum(machine)) {
-          return machine;
-        } else {
-          return null;
-        }
-      })
-      .filter((machine) => machine !== null);
-    // // Add all temp selections to main machine list
-    this.newWorker.machines = [
-      ...this.newWorker.machines,
-      ...validatedMachines,
-    ];
-
-    // Clear temporary selections
-    this.tempSelectedMachinesWorker = [];
-
-    // Reset select input
-    if (this.machineSelectWorker) {
-      this.machineSelectWorker.nativeElement.selectedIndex = 0;
-    }
+  addMachineWorker(event: any) {
+    const selectElement = event.target as HTMLSelectElement;
+    const selectedOptions = Array.from(selectElement.selectedOptions).map(
+      (option) => option.value
+    );
+    // Filtrar nuevas selecciones que no sean válidas según Specialty
+    const validSelections = selectedOptions.filter((option) =>
+      this.isMachineEnum(option)
+    ) as Machines[]; // Confirmar el tipo Specialty después de la validación
+    // Filtrar opciones que ya estén seleccionadas para evitar duplicados
+    const newSelections = validSelections.filter(
+      (option) => !this.newWorker.machines.includes(option)
+    );
+    // Agregar nuevas especialidades válidas a la lista seleccionada
+    this.newWorker.machines.push(...newSelections);
+    // Actualizar las especialidades disponibles, excluyendo las seleccionadas
+    this.availableMachines = this.availableMachines.filter(
+      (item) => !newSelections.includes(item)
+    );
+    // Reiniciar la selección para evitar confusión visual
+    selectElement.selectedIndex = -1;
   }
   // Método para quitar una especialidad
   removeMachineWorker(machine: string) {
@@ -330,10 +282,6 @@ export default class RegisterComponent implements OnInit {
     if (this.isMachineEnum(machine)) {
       this.availableMachines.push(machine); // Añadir de nuevo a la lista de disponibles
     }
-  }
-  // Clear temporary selections
-  clearTempSelectionsWorkersMachines() {
-    this.tempSelectedMachines = [];
   }
   /* ===========================================================================================
    * Funciones para añadir opciones a los negocios como satelites o talleres
@@ -386,47 +334,27 @@ export default class RegisterComponent implements OnInit {
     }
   }
   // Se añade especialidad temporal
-  addSpecialtyBusinessToTemp(event: any) {
-    const specialty = event.target.value;
-
-    if (
-      specialty &&
-      this.isSpecialtyEnum(specialty) &&
-      !this.tempSelectedSpecialties.includes(specialty)
-    ) {
-      this.tempSelectedSpecialties.push(specialty);
-    }
-  }
-  // New method to confirm selections
-  confirmBusinessSpecialties() {
-    // Remove selected specialties from available list
-    this.tempSelectedSpecialties.forEach((specialty) => {
-      this.availableSpecialties = this.availableSpecialties.filter(
-        (item) => item !== specialty
-      );
-    });
-    const validatedSpecialties = this.tempSelectedSpecialties
-      .map((specialty) => {
-        if (this.isSpecialtyEnum(specialty)) {
-          return specialty;
-        } else {
-          return null;
-        }
-      })
-      .filter((specialty) => specialty !== null);
-    // // Add all temp selections to main specialty list
-    this.newBusiness.specialty = [
-      ...this.newBusiness.specialty,
-      ...validatedSpecialties,
-    ];
-
-    // Clear temporary selections
-    this.tempSelectedSpecialties = [];
-
-    // Reset select input
-    if (this.specialtySelect) {
-      this.specialtySelect.nativeElement.selectedIndex = 0;
-    }
+  addSpecialtyBusiness(event: any) {
+    const selectElement = event.target as HTMLSelectElement;
+    const selectedOptions = Array.from(selectElement.selectedOptions).map(
+      (option) => option.value
+    );
+    // Filtrar nuevas selecciones que no sean válidas según Specialty
+    const validSelections = selectedOptions.filter((option) =>
+      this.isSpecialtyEnum(option)
+    ) as Specialty[]; // Confirmar el tipo Specialty después de la validación
+    // Filtrar opciones que ya estén seleccionadas para evitar duplicados
+    const newSelections = validSelections.filter(
+      (option) => !this.newBusiness.specialty.includes(option)
+    );
+    // Agregar nuevas especialidades válidas a la lista seleccionada
+    this.newBusiness.specialty.push(...newSelections);
+    // Actualizar las especialidades disponibles, excluyendo las seleccionadas
+    this.availableSpecialties = this.availableSpecialties.filter(
+      (item) => !newSelections.includes(item)
+    );
+    // Reiniciar la selección para evitar confusión visual
+    selectElement.selectedIndex = -1;
   }
 
   // Modified remove method
@@ -434,59 +362,34 @@ export default class RegisterComponent implements OnInit {
     this.newBusiness.specialty = this.newBusiness.specialty.filter(
       (item) => item !== specialty
     );
-
     // Add back to available specialties if it's a valid specialty
     if (this.isSpecialtyEnum(specialty)) {
       this.availableSpecialties.push(specialty);
     }
   }
-  // Clear temporary selections
-  clearTempSelections() {
-    this.tempSelectedSpecialties = [];
-  }
 
   // Método para agregar una especialidad
-  addMachineBusinessToTemp(event: any) {
-    const machine = event.target.value;
-
-    if (
-      machine &&
-      this.isMachineEnum(machine) &&
-      !this.tempSelectedMachines.includes(machine)
-    ) {
-      this.tempSelectedMachines.push(machine); // Añadir a la lista de especialidades seleccionadas
-    }
-  }
-  // New method to confirm selections
-  confirmBusinessMachines() {
-    // Remove selected specialties from available list
-    this.tempSelectedMachines.forEach((machine) => {
-      this.availableMachines = this.availableMachines.filter(
-        (item) => item !== machine
-      );
-    });
-    const validatedMachines = this.tempSelectedMachines
-      .map((machine) => {
-        if (this.isMachineEnum(machine)) {
-          return machine;
-        } else {
-          return null;
-        }
-      })
-      .filter((machine) => machine !== null);
-    // // Add all temp selections to main machine list
-    this.newBusiness.machines = [
-      ...this.newBusiness.machines,
-      ...validatedMachines,
-    ];
-
-    // Clear temporary selections
-    this.tempSelectedMachines = [];
-
-    // Reset select input
-    if (this.machineSelect) {
-      this.machineSelect.nativeElement.selectedIndex = 0;
-    }
+  addMachineBusiness(event: any) {
+    const selectElement = event.target as HTMLSelectElement;
+    const selectedOptions = Array.from(selectElement.selectedOptions).map(
+      (option) => option.value
+    );
+    // Filtrar nuevas selecciones que no sean válidas según Specialty
+    const validSelections = selectedOptions.filter((option) =>
+      this.isMachineEnum(option)
+    ) as Machines[]; // Confirmar el tipo Specialty después de la validación
+    // Filtrar opciones que ya estén seleccionadas para evitar duplicados
+    const newSelections = validSelections.filter(
+      (option) => !this.newBusiness.machines.includes(option)
+    );
+    // Agregar nuevas especialidades válidas a la lista seleccionada
+    this.newBusiness.machines.push(...newSelections);
+    // Actualizar las especialidades disponibles, excluyendo las seleccionadas
+    this.availableMachines = this.availableMachines.filter(
+      (item) => !newSelections.includes(item)
+    );
+    // Reiniciar la selección para evitar confusión visual
+    selectElement.selectedIndex = -1;
   }
   // Método para quitar una especialidad
   removeMachineBusiness(machine: string) {
@@ -496,10 +399,6 @@ export default class RegisterComponent implements OnInit {
     if (this.isMachineEnum(machine)) {
       this.availableMachines.push(machine); // Añadir de nuevo a la lista de disponibles
     }
-  }
-  // Clear temporary selections
-  clearTempSelectionsMachines() {
-    this.tempSelectedMachines = [];
   }
   /**Remueve guiónes de las palabras que normalmente las lleva*/
   removeHyphens(wordWithHyphens: string | undefined): string {

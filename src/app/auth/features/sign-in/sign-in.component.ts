@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { AfterViewInit, Component, inject, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -14,6 +14,7 @@ import { GoogleButtonComponent } from '../../ui/google-button/google-button.comp
 import { Subject, takeUntil } from 'rxjs';
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
 import { FacebookButtonComponent } from '../../ui/facebook-button/facebook-button.component';
+import { AnalyticsService } from '../../../shared/data-access/analytics.service';
 
 interface FormSignIn {
   email: FormControl<string | null>;
@@ -32,13 +33,15 @@ interface FormSignIn {
   templateUrl: './sign-in.component.html',
   styles: ``,
 })
-export default class SignInComponent implements OnInit {
+export default class SignInComponent implements OnInit, AfterViewInit {
   // subject para destruir el componente
   private destroy$ = new Subject<void>(); // Controlador de destrucción
   //
   private _formBuilder = inject(NonNullableFormBuilder);
-  // Estado actual
+  // Servicios
   private authState = inject(AuthStateService);
+  private analyticsService = inject(AnalyticsService);
+
   /**
    *
    * @param field
@@ -72,9 +75,15 @@ export default class SignInComponent implements OnInit {
       .pipe(takeUntil(this.destroy$))
       .subscribe((state) => {
         if (state) {
-          this.router.navigate(['/auth/register']);
+          this.router.navigate(['/works']);
         }
       });
+  }
+  /**
+   *
+   */
+  ngAfterViewInit() {
+    this.analyticsService.logPageVisit('login');
   }
   /**
    * funcion que se encarga de manejar eventos del submit
@@ -93,7 +102,7 @@ export default class SignInComponent implements OnInit {
         email: email,
       });
       toast.success('Hola nuevamente!');
-      this.router.navigate(['/auth/register']);
+      this.router.navigate(['/works']);
     } catch (error) {
       toast.error('contraseña y/o correo invalida');
     }
@@ -105,7 +114,7 @@ export default class SignInComponent implements OnInit {
     try {
       await this.authService.signWithGoogle();
       toast.success('Inicio de sesión exitosa');
-      this.router.navigate(['/auth/register']);
+      this.router.navigate(['/works']);
     } catch (error) {
       toast.error('ocurrio un error');
     }
@@ -117,7 +126,7 @@ export default class SignInComponent implements OnInit {
     try {
       await this.authService.signWithFacebook();
       toast.success('Inicio de sesión exitosa');
-      this.router.navigate(['/auth/register']);
+      this.router.navigate(['/works']);
     } catch (error: any) {
       console.log(error.code);
       if (error.code === 'auth/account-exists-with-different-credential') {

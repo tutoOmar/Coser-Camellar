@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import {
   FormArray,
   FormBuilder,
@@ -24,6 +30,7 @@ import { SateliteUser } from '../../models/satelite.model';
 import { TallerUSer } from '../../models/talleres.model';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { PositionsService } from '../../../services/positions.service';
+import { AnalyticsService } from '../../../../shared/data-access/analytics.service';
 @Component({
   selector: 'app-edit-position',
   standalone: true,
@@ -31,12 +38,13 @@ import { PositionsService } from '../../../services/positions.service';
   templateUrl: './edit-position.component.html',
   styleUrl: './edit-position.component.scss',
 })
-export default class EditPositionComponent {
+export default class EditPositionComponent implements AfterViewInit {
   // Inyeccion de los servicios
   private authService = inject(AuthStateService);
   private worksService = inject(WorksService);
   private positionsService = inject(PositionsService);
   private currentRoute = inject(ActivatedRoute);
+  private analyticsService = inject(AnalyticsService);
   // Subject para desturir componente
   private destroy$ = new Subject<void>();
   // Variables de control
@@ -164,7 +172,12 @@ export default class EditPositionComponent {
       )
       .subscribe();
   }
-
+  /**
+   *
+   */
+  ngAfterViewInit() {
+    this.analyticsService.logPageVisit('editar-oferta-laboral');
+  }
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();

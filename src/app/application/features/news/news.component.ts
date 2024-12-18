@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, inject, signal } from '@angular/core';
 import { Firestore } from '@angular/fire/firestore';
 import { NewsService } from '../../services/news.service';
 import LoadingComponent from '../../../shared/ui/loading/loading.component';
+import { AnalyticsService } from '../../../shared/data-access/analytics.service';
 
 interface News {
   id: string;
@@ -26,15 +27,22 @@ interface News {
   templateUrl: './news.component.html',
   styleUrl: './news.component.scss',
 })
-export default class NewsComponent {
+export default class NewsComponent implements AfterViewInit {
   newsListSignal = inject(NewsService).getNewsSignal();
+  private analyticsService = inject(AnalyticsService);
+
   isExpanded: { [id: string]: boolean } = {}; // Control de expansión para cada noticia
   isLoadingPage = signal<boolean>(true);
 
   constructor(private firestore: Firestore) {}
 
   ngOnInit(): void {}
-
+  /**
+   *
+   */
+  ngAfterViewInit() {
+    this.analyticsService.logPageVisit('news');
+  }
   toggleExpand(newsId: string): void {
     this.isExpanded[newsId] = !this.isExpanded[newsId];
   }

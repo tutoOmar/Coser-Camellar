@@ -1,4 +1,10 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Product } from '../../models/product.model';
 import { MarketplaceService } from '../../services/marketplace.service';
@@ -17,6 +23,7 @@ import { Router, RouterModule } from '@angular/router';
 import LoadingComponent from '../../../shared/ui/loading/loading.component';
 import WaButtonComponent from '../../../shared/ui/wa-button/wa-button.component';
 import { WorksService } from '../../../works/services/works.service';
+import { AnalyticsService } from '../../../shared/data-access/analytics.service';
 interface ProductWithPhone extends Product {
   userPhone: string | null; // null si no hay usuario asociado
 }
@@ -28,11 +35,13 @@ interface ProductWithPhone extends Product {
   styleUrl: './marketplace.component.scss',
   providers: [MarketplaceService],
 })
-export default class MarketplaceComponent {
+export default class MarketplaceComponent implements AfterViewInit {
   private destroy$ = new Subject<void>();
   // Inyección de servicios
   private productService = inject(MarketplaceService);
   private userService = inject(WorksService);
+  private analyticsService = inject(AnalyticsService);
+
   // Datos de los productos
   private products = signal<ProductWithPhone[]>([]);
   // Computed signal para filtrar y procesar productos si es necesario
@@ -47,8 +56,11 @@ export default class MarketplaceComponent {
     // Simula la carga de datos desde un archivo JSON
     this.loadProducts();
   }
-  onBuy(itemId: string) {
-    console.log(`Producto con ID ${itemId} comprado.`);
+  /**
+   *
+   */
+  ngAfterViewInit() {
+    this.analyticsService.logPageVisit('marketplace');
   }
   /**
    * Funcion para abrir la imagen en grande

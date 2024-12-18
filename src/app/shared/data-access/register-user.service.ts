@@ -20,6 +20,7 @@ import {
   Storage,
   uploadBytesResumable,
 } from '@angular/fire/storage';
+import { timeStamp } from 'console';
 
 @Injectable({
   providedIn: 'root',
@@ -122,5 +123,17 @@ export class RegisterUserService {
       ...userInfo,
       userId: this._authState.currentUser?.uid,
     });
+  }
+  /**
+   * Funcion encargada de recibir los datos del modal
+   */
+  sendCommentsUsers(dataUser: any) {
+    const _collection = collection(this._firestore, 'commentsUsers');
+    return from(
+      addDoc(_collection, {
+        ...dataUser,
+        timeStamp: new Date().toISOString(),
+      })
+    );
   }
 }
