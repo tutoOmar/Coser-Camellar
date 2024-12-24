@@ -1,9 +1,12 @@
 <!-- Input de búsqueda -->
 <div class="search">
+  <label for="search-input" class="sr-only">Buscar trabajadores</label>
   <input
+    id="search-input"
     type="text"
-    placeholder="Buscar"
+    placeholder="Buscar trabajadores"
     (input)="onSearch($event)"
+    aria-label="Buscar trabajadores por nombre o categoría"
     class="search_input ml-5 mt-3 w-80 md:w-1/2 lg:w-1/3 xl:w-1/4 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
   />
 </div>
@@ -44,9 +47,13 @@
           categorizedWorkersSignal()[category].length >= MAX_DISPLAY_COUNT
         "
         (click)="onViewMore(category)"
+        [attr.aria-label]="
+          'Ver más trabajadores en la categoría ' +
+          convertNameCategoryToPresentInHTML(category)
+        "
         class="align-middle mt-4 ml-4 px-6 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-blue-600 cursor-pointer"
       >
-        Ver lista completa de {{ convertNameCategoryToPresentInHTML(category) }}
+        Ver más {{ convertNameCategoryToPresentInHTML(category) }}
       </button>
       <!-- Mensaje cuando no hay trabajadores en la categoría -->
       <ng-template #noWorkers>
@@ -55,3 +62,59 @@
     </div>
   </div>
 </ng-template>
+
+<!-- SEO Básico -->
+<title>Confección - Encuentra Profesionales de Costura y Talleres</title>
+<meta
+  name="description"
+  content="Explora nuestra plataforma y encuentra costureros, cortadores, rematadores y otros profesionales del área de confección."
+/>
+<meta
+  name="keywords"
+  content="costureros, cortadores, rematadores, confección, talleres, satélites, producción textil, trabajadores textiles"
+/>
+<meta name="robots" content="index, follow" />
+
+<!-- Open Graph para Redes Sociales -->
+<meta property="og:type" content="website" />
+<meta
+  property="og:title"
+  content="Confección - Profesionales de Costura y Talleres"
+/>
+<meta
+  property="og:description"
+  content="Encuentra y contacta trabajadores calificados en la industria de confección."
+/>
+<meta
+  property="og:image"
+  content="https://coserycamellar.netlify.app/assets/imagen-principal.jpg"
+/>
+<meta property="og:url" content="https://coserycamellar.netlify.app/" />
+
+<!-- Twitter Cards -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta
+  name="twitter:title"
+  content="Confección - Profesionales de Costura y Talleres"
+/>
+<meta
+  name="twitter:description"
+  content="Explora nuestra plataforma para encontrar profesionales del área de confección como costureros, cortadores y más."
+/>
+<meta
+  name="twitter:image"
+  content="https://coserycamellar.netlify.app/assets/imagen-principal.jpg"
+/>
+
+<!-- Viewport y Configuración Responsive -->
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+/>
+
+<!-- Favicon -->
+<link
+  rel="icon"
+  href="https://coserycamellar.netlify.app/assets/favicon.ico"
+  type="image/x-icon"
+/>

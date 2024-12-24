@@ -101,8 +101,8 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
    * Inicialización del componente
    */
   ngOnInit(): void {
-    this.initRecaptcha();
-
+    //Se comenta mientrás se implementa la opción de Telefono
+    // this.initRecaptcha();
     this.authState.isAuthenticated$
       .pipe(takeUntil(this.destroy$))
       .subscribe((state) => {
@@ -117,9 +117,10 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     this.analyticsService.logPageVisit('sign-up');
     // Garantiza que el reCAPTCHA esté visible después de renderizar el DOM
-    if (!this.recaptchaInitialized) {
-      this.initRecaptcha();
-    }
+    //Se comenta mientrás se implementa la opción de Telefonos
+    // if (!this.recaptchaInitialized) {
+    //   this.initRecaptcha();
+    // }
   }
   /**
    * Seleccionamos el metodo de registro

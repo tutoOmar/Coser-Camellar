@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import ModalFormComponent from './shared/ui/modal-form/modal-form.component';
 import { RegisterUserService } from './shared/data-access/register-user.service';
 import Swal from 'sweetalert2';
+import { Meta, Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-root',
@@ -20,8 +21,39 @@ export class AppComponent implements OnInit {
   // Inyección servicios
   private services = inject(RegisterUserService);
 
+  constructor(private meta: Meta, private title_: Title) {}
+
   ngOnInit() {
     this.startModalTimer();
+    this.title_.setTitle(
+      'Confección - Encuentra Profesionales de Costura y Talleres'
+    );
+    this.meta.addTags([
+      {
+        name: 'description',
+        content:
+          'Explora nuestra plataforma y encuentra costureros, cortadores, rematadores y otros profesionales del área de confección.',
+      },
+      {
+        name: 'keywords',
+        content:
+          'costureros, cortadores, rematadores, confección, talleres, satélites',
+      },
+      {
+        property: 'og:title',
+        content: 'Confección - Profesionales de Costura y Talleres',
+      },
+      {
+        property: 'og:description',
+        content:
+          'Encuentra y contacta trabajadores calificados en la industria de confección.',
+      },
+      {
+        property: 'og:image',
+        content: 'https://coserycamellar.netlify.app/assets/machine.png',
+      },
+      { property: 'og:url', content: 'https://coserycamellar.netlify.app/' },
+    ]);
   }
 
   startModalTimer() {
