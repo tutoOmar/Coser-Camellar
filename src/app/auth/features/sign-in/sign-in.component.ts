@@ -112,7 +112,7 @@ export default class SignInComponent implements OnInit, AfterViewInit {
    */
   async submitWithGoogle() {
     try {
-      await this.authService.signWithGoogle();
+      await this.authService.signInWithGoogle();
       toast.success('Inicio de sesión exitosa');
       this.router.navigate(['/works']);
     } catch (error) {
@@ -124,7 +124,7 @@ export default class SignInComponent implements OnInit, AfterViewInit {
    */
   async submitWithFacebook() {
     try {
-      await this.authService.signWithFacebook();
+      await this.authService.signInWithFacebook();
       toast.success('Inicio de sesión exitosa');
       this.router.navigate(['/works']);
     } catch (error: any) {

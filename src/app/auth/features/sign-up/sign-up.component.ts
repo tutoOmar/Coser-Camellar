@@ -1,4 +1,11 @@
-import { AfterViewInit, Component, inject, OnInit } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  inject,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -19,6 +26,7 @@ import { AuthStateService } from '../../../shared/data-access/auth-state.service
 import { Subject, takeUntil } from 'rxjs';
 import { FacebookButtonComponent } from '../../ui/facebook-button/facebook-button.component';
 import { AnalyticsService } from '../../../shared/data-access/analytics.service';
+import { CommonModule } from '@angular/common';
 
 interface FormSingUp {
   email: FormControl<string | null>;
@@ -29,6 +37,7 @@ interface FormSingUp {
   selector: 'app-sign-up',
   standalone: true,
   imports: [
+    CommonModule,
     ReactiveFormsModule,
     RouterLink,
     GoogleButtonComponent,
@@ -45,12 +54,23 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
   // Estado actual
   private authState = inject(AuthStateService);
   private analyticsService = inject(AnalyticsService);
+  authMethod: 'email' | 'phone' = 'email';
+  codeSent = false;
+  private recaptchaInitialized = false;
+  // Nuevo FormGroup para teléfono
+  phoneForm = this._formBuilder.group({
+    phone: ['', [Validators.required, Validators.pattern(/^\+[1-9]\d{1,14}$/)]],
+    verificationCode: [''],
+  });
+
+  @ViewChild('phoneSignIn') phoneSignInButton!: ElementRef;
+  private confirmationResult: any;
   /**
    *
    * @param field
    * @returns
    */
-  isRequired(field: 'email' | 'password') {
+  isRequired(field: 'email' | 'password' | 'phone') {
     return isRequired(field, this.form);
   }
   /**
@@ -81,6 +101,8 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
    * Inicialización del componente
    */
   ngOnInit(): void {
+    this.initRecaptcha();
+
     this.authState.isAuthenticated$
       .pipe(takeUntil(this.destroy$))
       .subscribe((state) => {
@@ -94,7 +116,22 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
    */
   ngAfterViewInit() {
     this.analyticsService.logPageVisit('sign-up');
+    // Garantiza que el reCAPTCHA esté visible después de renderizar el DOM
+    if (!this.recaptchaInitialized) {
+      this.initRecaptcha();
+    }
   }
+  /**
+   * Seleccionamos el metodo de registro
+   * @param method
+   */
+  setAuthMethod(method: 'email' | 'phone') {
+    this.authMethod = method;
+    if (method === 'phone') {
+      this.authService.initRecaptcha('phoneSignIn');
+    }
+  }
+
   /**
    * funcion que se encarga de manejar eventos del submit
    * @returns
@@ -126,7 +163,7 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
    */
   async submitWithGoogle() {
     try {
-      await this.authService.signWithGoogle();
+      await this.authService.signInWithGoogle();
       toast.success('Usuario creado Correctamente');
       this.router.navigate(['/works']);
     } catch (error: any) {
@@ -142,11 +179,49 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
    */
   async submitWithFacebook() {
     try {
-      await this.authService.signWithFacebook();
+      await this.authService.signInWithFacebook();
       toast.success('Inicio de sesión exitosa');
       this.router.navigate(['/works']);
     } catch (error) {
       toast.error('ocurrio un error');
+    }
+  }
+  /**
+   * Funcion para registrarse con el celular
+   */
+  async submitPhone() {
+    if (!this.codeSent) {
+      // Enviar código
+      try {
+        const phone = this.phoneForm.get('phone')?.value;
+        if (phone) {
+          this.confirmationResult =
+            await this.authService.signInWithPhoneNumber(phone);
+          this.codeSent = true;
+        }
+      } catch (error) {
+        console.error('Error al enviar código:', error);
+      }
+    } else {
+      // Verificar código
+      try {
+        const code = this.phoneForm.get('verificationCode')?.value;
+        if (code) {
+          await this.authService.verifyPhoneCode(this.confirmationResult, code);
+          // Redirigir o hacer lo necesario después del registro exitoso
+        }
+      } catch (error) {
+        console.error('Error al verificar código:', error);
+      }
+    }
+  }
+  /**
+   * Inicializa el reCAPTCHA
+   */
+  private initRecaptcha(): void {
+    if (!this.recaptchaInitialized) {
+      this.authService.initRecaptcha('phoneSignIn');
+      this.recaptchaInitialized = true;
     }
   }
   // Método OnDestroy para completar el Subject cuando el componente se destruya
