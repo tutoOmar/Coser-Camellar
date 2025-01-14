@@ -12,6 +12,7 @@ import { Router, RouterModule } from '@angular/router';
 import { WorksService } from '../../services/works.service';
 import {
   Subject,
+  catchError,
   debounceTime,
   distinctUntilChanged,
   switchMap,
@@ -102,6 +103,20 @@ export default class MainComponent implements OnInit, AfterViewInit {
         tap((authStatus) => this.currentStatusState.set(authStatus)),
         switchMap(() => {
           return this.userService.checkUserExists();
+        }),
+        catchError((error) => {
+          console.error(
+            'Error al verificar autenticación o existencia de usuario:',
+            error
+          );
+          Swal.fire({
+            title: 'Error',
+            text: 'Hubo un problema al verificar tu autenticación. Por favor, intenta más tarde.',
+            icon: 'error',
+            confirmButtonText: 'Aceptar',
+          });
+          this.isLoading.set(false);
+          return []; // Devuelve un observable vacío para continuar con la ejecución
         })
       )
       .subscribe((stateUserExist) => {
@@ -109,13 +124,6 @@ export default class MainComponent implements OnInit, AfterViewInit {
         if (!stateUserExist && this.currentStatusState()) {
           /** Esto se hace para cuando se regist pero aun no haya ingresado datos no pueda ir, es mejor manejarlo con un guard */
           // this._router.navigate(['/auth/register']);
-          Swal.fire({
-            title: 'Llena tu perfil',
-            text: 'Para que tu perfil sea visible te recomendamos completar tu perfil y así poder aparecer en las busquedas de otras personas.  ',
-            icon: 'info',
-            confirmButtonText: 'Aceptar',
-          });
-
           Swal.fire({
             title: '¡Completa tu perfil!',
             text: 'Para que tu perfil sea visible te recomendamos completarlo y así poder aparecer en las busquedas de otras personas.  ',

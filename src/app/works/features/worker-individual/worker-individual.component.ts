@@ -11,10 +11,11 @@ import {
   Validators,
 } from '@angular/forms';
 import { WorksService } from '../../services/works.service';
-import { Subject, takeUntil, tap } from 'rxjs';
+import { first, of, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import WaButtonComponent from '../../../shared/ui/wa-button/wa-button.component';
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
 import { toast } from 'ngx-sonner';
+import { TypeUser } from '../models/type-user.model';
 
 @Component({
   selector: 'app-worker-individual',
@@ -35,6 +36,7 @@ export default class WorkerIndividualComponent implements OnInit {
   // Crear signal para guardar el usuario individual
   workerSignal = signal<WorkerUser | null>(null);
   stateAuth = signal<boolean>(false);
+  private hasUpdatedVisitCount = false; // Flag para prevenir múltiples actualizaciones
   //
   private destroy$: Subject<void> = new Subject<void>();
   /**  */
@@ -177,12 +179,30 @@ export default class WorkerIndividualComponent implements OnInit {
   loadWorker(collectionName: string, workerId: string) {
     this.worksService
       .getUserByIdAndCollection(workerId, collectionName)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((worker: any) => {
-        const validationUSer = worker as WorkerUser;
-        this.workerSignal.set(validationUSer);
-        this.paginateComments();
-      });
+      .pipe(
+        first(),
+        takeUntil(this.destroy$),
+        tap((worker: any) => {
+          const validationUSer = worker as WorkerUser;
+          this.workerSignal.set(validationUSer);
+          this.paginateComments();
+        }),
+        switchMap((worker: WorkerUser) => {
+          const count = worker.countProfileVisits;
+          if (worker.countProfileVisits) {
+            worker.countProfileVisits++;
+          } else {
+            worker.countProfileVisits = 1;
+          }
+          return this.worksService.updateUser(
+            TypeUser.TRABAJADOR,
+            worker,
+            null
+          );
+          // return of();
+        })
+      )
+      .subscribe();
   }
   /**
    *

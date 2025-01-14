@@ -95,7 +95,10 @@
     <p *ngIf="authState" class="text-gray-700 dark:text-gray-300 mt-2">
       <strong>Teléfono:</strong> {{ worker()?.phone }}
     </p>
-    <app-wa-button [phoneNumber]="worker()?.phone"></app-wa-button>
+    <app-wa-button
+      (buttonClicked)="handleWaButton()"
+      [phoneNumber]="worker()?.phone"
+    ></app-wa-button>
 
     <a
       (click)="onViewMoreComments()"
