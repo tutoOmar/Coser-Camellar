@@ -11,7 +11,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { WorksService } from '../../services/works.service';
-import { first, of, Subject, switchMap, takeUntil, tap } from 'rxjs';
+import { first, of, Subject, switchMap, take, takeUntil, tap } from 'rxjs';
 import WaButtonComponent from '../../../shared/ui/wa-button/wa-button.component';
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
 import { toast } from 'ngx-sonner';
@@ -188,7 +188,6 @@ export default class WorkerIndividualComponent implements OnInit {
           this.paginateComments();
         }),
         switchMap((worker: WorkerUser) => {
-          const count = worker.countProfileVisits;
           if (worker.countProfileVisits) {
             worker.countProfileVisits++;
           } else {
@@ -199,7 +198,6 @@ export default class WorkerIndividualComponent implements OnInit {
             worker,
             null
           );
-          // return of();
         })
       )
       .subscribe();
@@ -216,6 +214,26 @@ export default class WorkerIndividualComponent implements OnInit {
       count = count + comment.score;
     });
     return count / sizeComments;
+  }
+  /**
+   * Acción de clic en el botón de WA
+   * Se aumenta un conteo de clic para saber a quienes
+   * buscan más seguido
+   */
+  handleWaButton() {
+    const sateliteData = this.workerSignal();
+    const typeUser = sateliteData?.typeUSer;
+    if (sateliteData && typeUser) {
+      if (sateliteData.countContactViaWa) {
+        sateliteData.countContactViaWa++;
+      } else {
+        sateliteData.countContactViaWa = 1;
+      }
+      this.worksService
+        .updateUser(typeUser, sateliteData, null)
+        .pipe(takeUntil(this.destroy$), take(1))
+        .subscribe();
+    }
   }
   /**
    *

@@ -38,6 +38,7 @@
             <strong>Teléfono:</strong> {{ workerSignal()?.phone }}
             <app-wa-button
               [phoneNumber]="workerSignal()?.phone"
+              (buttonClicked)="handleWaButton()"
             ></app-wa-button>
           </p>
         </div>

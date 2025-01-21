@@ -1,16 +1,8 @@
-import {
-  AfterViewInit,
-  Component,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
-import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { Component, inject, signal } from '@angular/core';
+import { first, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { WorksService } from '../../services/works.service';
-import { SateliteUser } from '../models/satelite.model';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import CardSateliteComponent from '../../../shared/ui/card-satelite/card-satelite.component';
 import { TallerUSer } from '../models/talleres.model';
 import {
   FormGroup,
@@ -26,6 +18,7 @@ import CardPositionComponent from '../../../shared/ui/card-position/card-positio
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
 import { toast } from 'ngx-sonner';
 import { AnalyticsService } from '../../../shared/data-access/analytics.service';
+import { TypeUser } from '../models/type-user.model';
 
 const COLLECTION_DATA = 'talleres';
 
@@ -181,16 +174,28 @@ export default class TallerIndividualComponent {
   loadWorker(collectionName: string, tallerId: string) {
     this.worksService
       .getUserByIdAndCollection(tallerId, collectionName)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((worker: any) => {
-        const validationUSer = worker as TallerUSer;
-        this.tallerSignal.set(validationUSer);
-        this.analyticsService.logCustomEvent('page-visit', {
-          page: 'taller-individual',
-          sateliteData: validationUSer,
-        });
-        this.paginateComments();
-      });
+      .pipe(
+        first(),
+        takeUntil(this.destroy$),
+        tap((taller: any) => {
+          const validationUSer = taller as TallerUSer;
+          this.tallerSignal.set(validationUSer);
+          this.analyticsService.logCustomEvent('page-visit', {
+            page: 'taller-individual',
+            sateliteData: validationUSer,
+          });
+          this.paginateComments();
+        }),
+        switchMap((taller: TallerUSer) => {
+          if (taller.countProfileVisits) {
+            taller.countProfileVisits++;
+          } else {
+            taller.countProfileVisits = 1;
+          }
+          return this.worksService.updateUser(TypeUser.TALLER, taller, null);
+        })
+      )
+      .subscribe();
   }
   /**
    *

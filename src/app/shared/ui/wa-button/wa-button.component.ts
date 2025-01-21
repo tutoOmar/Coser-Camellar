@@ -13,7 +13,7 @@ export default class WaButtonComponent {
   // Recibe el número de teléfono como input
   @Input() phoneNumber: string | undefined = '';
   @Input() messageToSend: string =
-    'Hola,te vi en Cociendo & Camellando, me gustaría hacer contacto contigo!!';
+    'Hola,te vi en Coser & Camellar, me gustaría hacer contacto contigo!!';
   // Emite una señal cuando el botón es presionado
   @Output() buttonClicked: EventEmitter<void> = new EventEmitter<void>();
 

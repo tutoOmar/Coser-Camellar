@@ -34,6 +34,10 @@
     <p class="text-sm text-gray-500 dark:text-gray-400">
       {{ worker()?.city }}, {{ worker()?.country }}
     </p>
+    <app-wa-button
+      (buttonClicked)="handleWaButton()"
+      [phoneNumber]="worker()?.phone"
+    ></app-wa-button>
     <p class="text-gray-700 dark:text-gray-300">
       <strong>Especialidades:</strong>
       {{ removeHyphens(worker()?.specialty) }}
@@ -95,11 +99,6 @@
     <p *ngIf="authState" class="text-gray-700 dark:text-gray-300 mt-2">
       <strong>Teléfono:</strong> {{ worker()?.phone }}
     </p>
-    <app-wa-button
-      (buttonClicked)="handleWaButton()"
-      [phoneNumber]="worker()?.phone"
-    ></app-wa-button>
-
     <a
       (click)="onViewMoreComments()"
       class="text-blue-500 hover:underline text-xl"
