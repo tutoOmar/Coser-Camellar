@@ -29,6 +29,7 @@
             <strong>Teléfono:</strong> {{ sateliteSignal()?.phone }}
             <app-wa-button
               [phoneNumber]="sateliteSignal()?.phone"
+              (buttonClicked)="handleWaButton()"
             ></app-wa-button>
           </p>
         </div>

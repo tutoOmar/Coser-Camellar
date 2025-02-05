@@ -75,9 +75,7 @@ export default class EditProductComponent implements OnInit {
         takeUntil(this.destroy$),
         switchMap((stateUser) => {
           if (stateUser && stateUser.uid && currentProductId) {
-            return this.marketplaceService.getOneProductById<Product>(
-              currentProductId
-            );
+            return this.marketplaceService.getOneProductById(currentProductId);
           } else {
             return of();
           }

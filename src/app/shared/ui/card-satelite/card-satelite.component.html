@@ -33,6 +33,11 @@
     <p class="text-sm text-gray-500 dark:text-gray-400">
       {{ satelite()?.country }}, {{ satelite()?.city }}
     </p>
+    <app-wa-button
+      [phoneNumber]="satelite()?.phone"
+      (buttonClicked)="handleWaButton()"
+    ></app-wa-button>
+
     <p class="text-sm text-gray-500 dark:text-gray-400">
       <strong>Ubicación: </strong> {{ satelite()?.neighborhood }}
     </p>
@@ -97,8 +102,6 @@
     <p *ngIf="authState" class="text-gray-700 dark:text-gray-300 mt-2">
       <strong>Teléfono:</strong> {{ satelite()?.phone }}
     </p>
-    <app-wa-button [phoneNumber]="satelite()?.phone"></app-wa-button>
-
     <div class="bg-gray-100 rounded-lg p-4 shadow-sm mt-2 mb-2">
       <div
         *ngFor="let comment of satelite()?.comments?.slice(0, 2)"

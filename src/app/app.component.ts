@@ -21,12 +21,16 @@ export class AppComponent implements OnInit {
   // Inyección servicios
   private services = inject(RegisterUserService);
 
-  constructor(private meta: Meta, private title_: Title) {}
+  constructor(
+    private meta: Meta,
+    private title_: Title,
+    private _router: Router
+  ) {}
 
   ngOnInit() {
     this.startModalTimer();
     this.title_.setTitle(
-      'Confección - Encuentra Profesionales de Costura y Talleres'
+      'Coser y Camellar - Encuentra Profesionales de Costura y Talleres'
     );
     this.meta.addTags([
       {
@@ -41,7 +45,7 @@ export class AppComponent implements OnInit {
       },
       {
         property: 'og:title',
-        content: 'Confección - Profesionales de Costura y Talleres',
+        content: 'Coser y Camellar - Profesionales de Costura y Talleres',
       },
       {
         property: 'og:description',

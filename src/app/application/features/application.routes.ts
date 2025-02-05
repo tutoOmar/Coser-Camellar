@@ -32,4 +32,8 @@ export default [
     path: 'newNews/:id',
     loadComponent: () => import('./news-form/news-form.component'),
   },
+  {
+    path: 'sobre-nosotros',
+    loadComponent: () => import('./landing-page/landing-page.component'),
+  },
 ] as Routes;

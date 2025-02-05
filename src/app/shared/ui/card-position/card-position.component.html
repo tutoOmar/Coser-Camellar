@@ -49,7 +49,9 @@
     <app-wa-button
       [phoneNumber]="position()?.phone"
       [messageToSend]="
-        'Hola,%20Me%20interesa%20la%20posición%20de%20trabajo%20y%20quiero%20hacer%20contacto%20contigo%20!'
+        'Hola, Me interesa la posición de trabajo ' +
+        position()?.name +
+        ' y quiero hacer contacto contigo!'
       "
     ></app-wa-button>
     <!-- Estado de la posición -->

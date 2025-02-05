@@ -5,7 +5,7 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { WorksService } from '../../services/works.service';
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
 import { of, switchMap, tap, Subject, takeUntil } from 'rxjs';
@@ -21,6 +21,7 @@ import { Position, StatusPositionEnum } from '../models/position.model';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import LoadingComponent from '../../../shared/ui/loading/loading.component';
 import { AnalyticsService } from '../../../shared/data-access/analytics.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-profile',
@@ -48,6 +49,7 @@ export default class ProfileComponent implements OnInit, AfterViewInit {
   businessSignal = signal<TallerUSer | SateliteUser | null>(null);
   positionStatus = signal<boolean>(false);
   isLoadingPage = signal<boolean>(true);
+  createProfileButton = signal<boolean>(false);
   //
   userId!: string | undefined;
   // Inyecciones de  servicios y otros necesarios
@@ -55,6 +57,7 @@ export default class ProfileComponent implements OnInit, AfterViewInit {
   private userService = inject(WorksService);
   private positionService = inject(PositionsService);
   private analyticsService = inject(AnalyticsService);
+  private _router = inject(Router);
   /**
    *
    */
@@ -86,6 +89,21 @@ export default class ProfileComponent implements OnInit, AfterViewInit {
                 this.isLoadingPage.set(false);
               }
             }
+          } else {
+            Swal.fire({
+              title: '¡Completa tu perfil!',
+              text: 'Para que tu perfil sea visible te recomendamos completarlo y así poder aparecer en las busquedas de otras personas.  ',
+              icon: 'info',
+              showCancelButton: true, // Muestra el botón de cancelar
+              confirmButtonText: 'Completar perfil', // Texto del botón de confirmación
+              cancelButtonText: 'Luego lo completo', // Texto del botón de cancelar
+            }).then((result) => {
+              if (result.isConfirmed) {
+                this._router.navigate(['/auth/register']);
+              } else if (result.isDismissed) {
+                Swal.close();
+              }
+            });
           }
         })
       )

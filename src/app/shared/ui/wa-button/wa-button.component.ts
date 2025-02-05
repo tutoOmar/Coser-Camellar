@@ -13,20 +13,26 @@ export default class WaButtonComponent {
   // Recibe el número de teléfono como input
   @Input() phoneNumber: string | undefined = '';
   @Input() messageToSend: string =
-    'Hola,te vi en Cociendo & Camellando, me gustaría hacer contacto contigo!!';
+    'Hola,te vi en Coser & Camellar, me gustaría hacer contacto contigo!!';
   // Emite una señal cuando el botón es presionado
-  @Output() buttonClicked: EventEmitter<string> = new EventEmitter<string>();
+  @Output() buttonClicked: EventEmitter<void> = new EventEmitter<void>();
 
   constructor(
     private whatsAppService: WhatsAppService,
     private analyticsService: AnalyticsService
   ) {}
-
+  /**
+   * Esta función abre WA para que el usuario se comunique
+   */
   openWhatsApp() {
+    //Emitimios el evento de clic
+    this.buttonClicked.emit();
+    // Se envian analiticas
     this.analyticsService.logCustomEvent('go-to-WA', {
       phoneNumber: this.phoneNumber,
       message: this.messageToSend,
     });
+    // Se llama al service para abrir WA
     this.whatsAppService.openWhatsAppAction(
       this.phoneNumber,
       this.messageToSend

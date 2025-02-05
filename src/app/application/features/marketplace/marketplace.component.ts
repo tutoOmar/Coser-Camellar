@@ -24,6 +24,7 @@ import LoadingComponent from '../../../shared/ui/loading/loading.component';
 import WaButtonComponent from '../../../shared/ui/wa-button/wa-button.component';
 import { WorksService } from '../../../works/services/works.service';
 import { AnalyticsService } from '../../../shared/data-access/analytics.service';
+import { AuthStateService } from '../../../shared/data-access/auth-state.service';
 interface ProductWithPhone extends Product {
   userPhone: string | null; // null si no hay usuario asociado
 }
@@ -41,12 +42,13 @@ export default class MarketplaceComponent implements AfterViewInit {
   private productService = inject(MarketplaceService);
   private userService = inject(WorksService);
   private analyticsService = inject(AnalyticsService);
+  private authService = inject(AuthStateService);
 
   // Datos de los productos
   private products = signal<ProductWithPhone[]>([]);
   // Computed signal para filtrar y procesar productos si es necesario
   isLoadingPage = signal<boolean>(true);
-
+  isLoginUser = signal<boolean>(false);
   filteredItems = computed(() => this.products());
   selectedImage: string | null = null;
 
@@ -55,6 +57,18 @@ export default class MarketplaceComponent implements AfterViewInit {
   ngOnInit(): void {
     // Simula la carga de datos desde un archivo JSON
     this.loadProducts();
+
+    this.authService.isAuthenticated$.pipe(takeUntil(this.destroy$)).subscribe({
+      next: (state) => {
+        if (state) {
+          this.isLoginUser.set(true);
+        }
+      },
+      error: (error) => {
+        //this.loading.set(false);
+        console.error(error);
+      },
+    });
   }
   /**
    *
@@ -80,7 +94,7 @@ export default class MarketplaceComponent implements AfterViewInit {
    */
   loadProducts() {
     this.productService
-      .loadProducts<Product[]>()
+      .loadProducts()
       .pipe(
         takeUntil(this.destroy$),
         tap(() => this.isLoadingPage.set(false)),
@@ -88,15 +102,21 @@ export default class MarketplaceComponent implements AfterViewInit {
           if (!products || products.length === 0) {
             return of();
           }
-          const uniqueUserIds = Array.from(
-            new Set(products.map((product) => product.userId))
-          ); // Elimina IDs duplicados
+          const uniqueUserIds: string[] = Array.from(
+            new Set(
+              products
+                .map((product: Product) => product.userId)
+                .filter(
+                  (id: any): id is string => typeof id === 'string' && id !== ''
+                )
+            )
+          );
           return this.userService.getUsersByIds(uniqueUserIds).pipe(
             map((users) => {
               // Crea un Map para una búsqueda eficiente de usuarios por userId
               const userMap = new Map(users.map((user) => [user.userId, user]));
               // Asocia cada producto con el teléfono del usuario correspondiente
-              const productsWithPhone = products.map((product) => {
+              const productsWithPhone = products.map((product: Product) => {
                 const user = userMap.get(product.userId); // Busca al usuario directamente por userId
                 return {
                   ...product,
@@ -133,7 +153,7 @@ export default class MarketplaceComponent implements AfterViewInit {
    */
   personalizeMessage(title: string): string {
     return (
-      'Hola vi que ofrecias el siguiente producto en Coser&Camellar: ' +
+      'Hola vi que ofrecias el siguiente producto en Coser & Camellar: ' +
       '*' +
       title +
       '*' +
