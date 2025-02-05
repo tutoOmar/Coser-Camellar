@@ -21,7 +21,11 @@ export class AppComponent implements OnInit {
   // Inyección servicios
   private services = inject(RegisterUserService);
 
-  constructor(private meta: Meta, private title_: Title) {}
+  constructor(
+    private meta: Meta,
+    private title_: Title,
+    private _router: Router
+  ) {}
 
   ngOnInit() {
     this.startModalTimer();

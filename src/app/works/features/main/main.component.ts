@@ -10,18 +10,9 @@ import CardCalificationComponent from '../../../shared/ui/card-calification/card
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { WorksService } from '../../services/works.service';
-import {
-  Subject,
-  catchError,
-  debounceTime,
-  distinctUntilChanged,
-  switchMap,
-  takeUntil,
-  tap,
-} from 'rxjs';
+import { Subject, catchError, filter, switchMap, takeUntil, tap } from 'rxjs';
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
 import LoadingComponent from '../../../shared/ui/loading/loading.component';
-import { Analytics, getAnalytics, logEvent } from '@angular/fire/analytics';
 import { AnalyticsService } from '../../../shared/data-access/analytics.service';
 import Swal from 'sweetalert2';
 
@@ -40,6 +31,8 @@ import Swal from 'sweetalert2';
 })
 export default class MainComponent implements OnInit, AfterViewInit {
   private destroy$ = new Subject<void>();
+  private isComponentActive = true;
+  // Inyecciones
   private authState = inject(AuthStateService);
   private userService = inject(WorksService);
   private _router = inject(Router);
@@ -100,6 +93,7 @@ export default class MainComponent implements OnInit, AfterViewInit {
     this.authState.isAuthenticated$
       .pipe(
         takeUntil(this.destroy$),
+        filter(() => this.isComponentActive),
         tap((authStatus) => this.currentStatusState.set(authStatus)),
         switchMap(() => {
           return this.userService.checkUserExists();
@@ -203,5 +197,13 @@ export default class MainComponent implements OnInit, AfterViewInit {
       default:
         return '';
     }
+  }
+  /**
+   * Destruir el componete destruye susbcripciones
+   */
+  ngOnDestroy() {
+    this.isComponentActive = false;
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

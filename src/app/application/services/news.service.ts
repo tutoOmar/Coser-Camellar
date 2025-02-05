@@ -93,7 +93,7 @@ export class NewsService {
   private loadNews(): void {
     const newsCollection = collection(this.firestore, 'news');
     collectionData(newsCollection, { idField: 'id' }).subscribe(
-      (data: NewsItem[]) => {
+      (data: any[]) => {
         this.newsSignal.set(data as NewsItem[]);
       }
     );

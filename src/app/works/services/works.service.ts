@@ -281,7 +281,10 @@ export class WorksService {
     const docRef = doc(_collection, idUser);
     return from(updateDoc(docRef, { ...user }));
   }
-  // Método para verificar si el usuario ya existe en alguna de las colecciones
+  /**
+   * Método para verificar si el usuario ya existe en alguna de las colecciones
+   * @returns TRue o false si el usuario ya tiene un perfil como trabajador o satelite o taller.
+   */
   checkUserExists(): Observable<boolean> {
     const currentUserId = this._auth.currentUser?.uid;
     if (!currentUserId) {

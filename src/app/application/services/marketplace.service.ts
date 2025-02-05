@@ -22,6 +22,8 @@ import { Product } from '../models/product.model';
 import { Router } from '@angular/router';
 const PATH = 'marketplace';
 
+type DocumentData = { [field: string]: any };
+
 @Injectable()
 export class MarketplaceService {
   private productSignal = signal<Product[]>([]); // Signal para los usuarios
@@ -112,30 +114,30 @@ export class MarketplaceService {
    * En esta función se obtiene la lista en la colección de 'Product'
    *  para obtener todos los productos,
    */
-  loadProducts<T>(): Observable<T> {
+  loadProducts(): Observable<any> {
     const productCollection = collection(this.firestore, PATH);
-    return collectionData<T>(productCollection, { idField: 'id' });
+    return collectionData(productCollection, { idField: 'id' });
   }
   /**
    * En esta función se obtiene la lista en la colección de 'Product'
    *  para obtener los productos que pertenecen a un usuario
    */
-  loadProductsByUserId<T>(userId: string): Observable<T> {
+  loadProductsByUserId(userId: string): Observable<any> {
     const productCollection = collection(this.firestore, PATH);
     const queryCollection = query(
       productCollection,
       where('userId', '==', userId)
     );
 
-    return collectionData<T>(queryCollection, { idField: 'id' });
+    return collectionData(queryCollection, { idField: 'id' });
   }
   /**
    *
    */
-  getOneProductById<T>(idProduct: string): Observable<T> {
+  getOneProductById(idProduct: string): Observable<any> {
     const docRef = doc(this.firestore, `${PATH}/${idProduct}`);
-    return docData<T>(docRef).pipe(
-      map((data: T) => ({ ...data, id: idProduct })) // Agregamos el ID manualmente
+    return docData(docRef).pipe(
+      map((data: any) => ({ ...data, id: idProduct })) // Agregamos el ID manualmente
     );
   }
 

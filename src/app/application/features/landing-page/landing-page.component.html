@@ -1,0 +1,116 @@
+<!-- app.component.html -->
+<div class="min-h-screen bg-white">
+  <!-- Hero Section -->
+  <section
+    class="container mx-auto px-4 grid md:grid-cols-2 gap-4 items-center"
+  >
+    <div class="relative overflow-hidden">
+      <!-- Background Image -->
+      <!-- <div
+        class="absolute inset-0 bg-cover bg-center opacity-20"
+        style="
+          background-image: url('https://firebasestorage.googleapis.com/v0/b/tu-chamba-cf127.appspot.com/o/users%2Fmachine-4895548_1280.jpg?alt=media&token=1f84761f-d9c4-404e-b4c9-6f5d4b065a9b');
+        "
+      ></div> -->
+
+      <!-- Content Overlay -->
+      <div class="relative z-10 container mx-auto px-4 py-16">
+        <div class="max-w-xl">
+          <h1 class="text-4xl font-bold mb-4 text-gray-800">
+            Conectamos talento en confección con empresas que lo necesitan
+          </h1>
+          <p class="text-xl text-gray-800 mb-6">
+            Facilitamos la búsqueda de profesionales en confección, desde
+            costureros, mecánicos de máquinas, hasta satélites. Generamos
+            confianza entre talentos y empresas.
+          </p>
+          <button
+            (click)="openWhatsApp()"
+            class="bg-[#1d4ed8] text-white px-6 py-3 rounded-lg hover:bg-blue-800 transition"
+          >
+            Contáctanos
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <img
+        src="https://firebasestorage.googleapis.com/v0/b/tu-chamba-cf127.appspot.com/o/users%2Fpexels-shkrabaanthony-6665030.jpg?alt=media&token=c2f8b8db-de07-4bf8-959d-27dff29086ed"
+        alt="taller"
+        class="rounded-lg shadow-lg"
+      />
+    </div>
+  </section>
+
+  <!-- Servicios -->
+  <section class="bg-gray-50 py-16">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-center mb-12">Nuestros Servicios</h2>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <h3 class="text-xl font-semibold mb-4">Conexión de Talento</h3>
+          <p>
+            Conectamos empresas con profesionales del sector de la confección
+          </p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <h3 class="text-xl font-semibold mb-4">Investigación Profunda</h3>
+          <p>
+            Verificamos personalmente la calidad de cada taller y profesional
+          </p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <h3 class="text-xl font-semibold mb-4">Inteligencia Artificial</h3>
+          <p>Usamos IA para filtrar y recomendar los mejores perfiles</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonios -->
+  <section class="container mx-auto px-4 py-16">
+    <h2 class="text-3xl font-bold text-center mb-12">Casos de Éxito</h2>
+    <div class="grid md:grid-cols-2 gap-8">
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <p class="italic mb-4 text-lg">
+          "Gracias a Coser y Camellar, estoy cerca de contratar mis primeros 5
+          talleres"
+        </p>
+        <div class="mb-4">
+          <img
+            src="https://firebasestorage.googleapis.com/v0/b/tu-chamba-cf127.appspot.com/o/users%2FIMG-20241111-WA0002.jpg?alt=media&token=8e2c0299-9e10-494a-8dae-ffae26e6a84d"
+            alt="Taller Soldier Fox"
+            class="w-full h-96 object-cover rounded-lg"
+          />
+        </div>
+        <p class="font-semibold">
+          - Ernesto Ortiz, Taller: <strong>Soldier Fox</strong>
+        </p>
+      </div>
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <p class="italic mb-4 text-lg">
+          "En Coser y Camellar, he podido expandir mi negocio encontrando muy
+          buenos satélites"
+        </p>
+        <div class="mb-4">
+          <img
+            src="https://firebasestorage.googleapis.com/v0/b/tu-chamba-cf127.appspot.com/o/users%2FFB_IMG_1731516062179.jpg?alt=media&token=068f9417-5f4d-49dd-b732-93854dee1811"
+            alt="Manufacturas Militares Mary"
+            class="w-full h-96 object-cover rounded-lg"
+          />
+        </div>
+        <p class="font-semibold">
+          - Mary, Taller: <strong>Manufacturas Militares Mary</strong>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-[#1d4ed8] text-white py-8">
+    <div class="container mx-auto px-4 text-center">
+      <p>© 2024 Coser y Camellar. Servicio inicialmente en Colombia.</p>
+    </div>
+  </footer>
+</div>

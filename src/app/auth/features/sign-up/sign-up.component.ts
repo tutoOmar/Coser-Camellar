@@ -23,14 +23,26 @@ import { toast } from 'ngx-sonner';
 import { Router, RouterLink } from '@angular/router';
 import { GoogleButtonComponent } from '../../ui/google-button/google-button.component';
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
-import { Subject, takeUntil } from 'rxjs';
+import {
+  catchError,
+  EMPTY,
+  filter,
+  from,
+  Subject,
+  switchMap,
+  takeUntil,
+  tap,
+} from 'rxjs';
 import { FacebookButtonComponent } from '../../ui/facebook-button/facebook-button.component';
 import { AnalyticsService } from '../../../shared/data-access/analytics.service';
 import { CommonModule } from '@angular/common';
-
+import { RegisterUserService } from '../../../shared/data-access/register-user.service';
+import Swal from 'sweetalert2';
+import { WorksService } from '../../../works/services/works.service';
 interface FormSingUp {
   email: FormControl<string | null>;
   password: FormControl<string | null>;
+  phone: FormControl<number | null>;
 }
 
 @Component({
@@ -54,6 +66,9 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
   // Estado actual
   private authState = inject(AuthStateService);
   private analyticsService = inject(AnalyticsService);
+  private registerService = inject(RegisterUserService);
+  private usersService = inject(WorksService);
+  /** --------------------- */
   authMethod: 'email' | 'phone' = 'email';
   codeSent = false;
   private recaptchaInitialized = false;
@@ -62,6 +77,8 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
     phone: ['', [Validators.required, Validators.pattern(/^\+[1-9]\d{1,14}$/)]],
     verificationCode: [''],
   });
+
+  private flagPhoneValidation: boolean = false;
 
   @ViewChild('phoneSignIn') phoneSignInButton!: ElementRef;
   private confirmationResult: any;
@@ -96,6 +113,7 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
       Validators.email,
       Validators.minLength(6),
     ]),
+    phone: this._formBuilder.control(null, [Validators.required]), // Valor inicial como null
   });
   /**
    * Inicialización del componente
@@ -106,7 +124,7 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
     this.authState.isAuthenticated$
       .pipe(takeUntil(this.destroy$))
       .subscribe((state) => {
-        if (state) {
+        if (state && this.flagPhoneValidation) {
           this.router.navigate(['/works']);
         }
       });
@@ -141,14 +159,18 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
     // Validación del formulario
     if (this.form.invalid) return;
     //Obtenemos el formulario
-    const { email, password } = this.form.value;
+    const { email, password, phone } = this.form.value;
     //validamos que venga algo
     try {
-      if (!email || !password) return;
+      if (!email || !password || phone === null) return;
       await this.authService.signUp({
         password: password,
         email: email,
       });
+      this.registerService
+        .createUserWithPhoneNoProfile({ email, phone })
+        .pipe(takeUntil(this.destroy$))
+        .subscribe();
       toast.success('usuario creado Correctamente');
       this.router.navigate(['/works']);
     } catch (error: any) {
@@ -159,32 +181,80 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
       }
     }
   }
-  /**
-   *  funcion que se encarga de manejar eventos del registro con cuenta de google
-   */
   async submitWithGoogle() {
     try {
-      await this.authService.signInWithGoogle();
-      toast.success('Usuario creado Correctamente');
-      this.router.navigate(['/works']);
-    } catch (error: any) {
-      if (error.code === 'auth/account-exists-with-different-credential') {
-        toast.error('Ya existe una cuenta con esta cuenta de Facebook');
-      } else {
-        toast.error('ocurrio un error');
+      const userCredential = await this.authService.signInWithGoogle();
+      const email = userCredential.user?.email;
+      const userId = userCredential.user?.uid;
+      //** Validamos que sí haya un correo y userId */
+      if (!email && userId) {
+        toast.error('No se pudo obtener el correo del usuario');
+        return;
       }
-    }
-  }
-  /**
-   *  funcion que se encarga de manejar eventos del inicio de sesión con cuenta de facebook
-   */
-  async submitWithFacebook() {
-    try {
-      await this.authService.signInWithFacebook();
-      toast.success('Inicio de sesión exitosa');
-      this.router.navigate(['/works']);
-    } catch (error) {
-      toast.error('ocurrio un error');
+
+      this.usersService
+        //Esta primera validación es para saber si el usuario no tiene perfil
+        .checkUserExists()
+        .pipe(
+          takeUntil(this.destroy$),
+          tap((isRegisterProfile) => {
+            // SI es true significa que ya tiene perfil solo que inicia sesión desde registro
+            // Es un feature que no podemos evitar
+            if (isRegisterProfile) {
+              this.router.navigate(['/works']);
+              toast.success('Bievenido(a) de nuevo');
+            }
+          }),
+          filter((isRegisterProfile) => !isRegisterProfile),
+          switchMap(() =>
+            this.registerService.checkUserHadLeftTheNumberButNoProfileComplete()
+          ),
+          tap((isRegisterNumberButNoProfile) => {
+            // SI es true significa que ya guardó el número pero aún no tiene perfil
+            if (isRegisterNumberButNoProfile) {
+              this.router.navigate(['/works']);
+              toast.success('Bievenido(a) de nuevo');
+            }
+          }),
+          filter((isRegisterProfile) => !isRegisterProfile),
+          switchMap(() => from(this.askForPhoneNumber())), // Llama al modal para pedir el teléfono
+          filter((phone) => !!phone), // Asegura que se haya proporcionado un número
+          switchMap((phone) =>
+            this.registerService.createUserWithPhoneNoProfile({
+              email,
+              phone,
+              userId,
+            })
+          ),
+          tap(() => {
+            this.flagPhoneValidation = true;
+            toast.success('Teléfono registrado correctamente');
+            this.router.navigate(['/works']);
+          }),
+          catchError((error) => {
+            this.handleError(error);
+            return EMPTY; // Manejo de errores para evitar que el flujo RxJS se rompa
+          })
+        )
+        .subscribe();
+
+      // const phone = await this.askForPhoneNumber();
+
+      // if (phone) {
+      //   this.registerService
+      //     .createUserWithPhoneNoProfile({ email, phone, userId })
+      //     .pipe(takeUntil(this.destroy$))
+      //     .subscribe({
+      //       next: () => {
+      //         this.flagPhoneValidation = true;
+      //         toast.success('Teléfono registrado correctamente');
+      //         this.router.navigate(['/works']);
+      //       },
+      //       error: (error) => this.handleError(error),
+      //     });
+      // }
+    } catch (error: any) {
+      this.handleError(error);
     }
   }
   /**
@@ -225,6 +295,47 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
       this.recaptchaInitialized = true;
     }
   }
+  /**
+   * Modal de sweet alert
+   * @returns
+   */
+  private async askForPhoneNumber(): Promise<string | null> {
+    const { value: phone } = await Swal.fire({
+      title: 'Número de teléfono',
+      text: 'Por favor, ingresa tu número de teléfono',
+      input: 'tel',
+      inputPlaceholder: '3001234567',
+      inputValidator: this.validatePhoneNumber.bind(this),
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      backdrop: true,
+      confirmButtonText: 'Guardar',
+    });
+    return phone;
+  }
+  /**
+   * Validación del numero de telfono en el modal
+   * @param value
+   * @returns
+   */
+  private validatePhoneNumber(value: string): string | null {
+    if (!value.trim()) {
+      return 'Por favor, ingresa un número de teléfono';
+    }
+    return null;
+  }
+  /**
+   *
+   */
+  private handleError(error: any): void {
+    if (error.code === 'auth/account-exists-with-different-credential') {
+      toast.error('Ya existe una cuenta con esta cuenta de Facebook');
+    } else {
+      toast.error('Ocurrió un error inesperado');
+    }
+    console.error('Error:', error); // Mantén un registro detallado del error
+  }
+
   // Método OnDestroy para completar el Subject cuando el componente se destruya
   ngOnDestroy(): void {
     this.destroy$.next(); // Emite un valor para finalizar las suscripciones

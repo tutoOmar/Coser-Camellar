@@ -71,9 +71,7 @@ export default class MyProductsComponent implements AfterViewInit {
         takeUntil(this.destroy$),
         switchMap((user) => {
           if (user && user.uid) {
-            return this.productService.loadProductsByUserId<Product[]>(
-              user.uid
-            );
+            return this.productService.loadProductsByUserId(user.uid);
           } else {
             return of([]);
           }

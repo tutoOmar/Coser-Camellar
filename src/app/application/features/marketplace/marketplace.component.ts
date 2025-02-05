@@ -94,7 +94,7 @@ export default class MarketplaceComponent implements AfterViewInit {
    */
   loadProducts() {
     this.productService
-      .loadProducts<Product[]>()
+      .loadProducts()
       .pipe(
         takeUntil(this.destroy$),
         tap(() => this.isLoadingPage.set(false)),
@@ -102,15 +102,21 @@ export default class MarketplaceComponent implements AfterViewInit {
           if (!products || products.length === 0) {
             return of();
           }
-          const uniqueUserIds = Array.from(
-            new Set(products.map((product) => product.userId))
-          ); // Elimina IDs duplicados
+          const uniqueUserIds: string[] = Array.from(
+            new Set(
+              products
+                .map((product: Product) => product.userId)
+                .filter(
+                  (id: any): id is string => typeof id === 'string' && id !== ''
+                )
+            )
+          );
           return this.userService.getUsersByIds(uniqueUserIds).pipe(
             map((users) => {
               // Crea un Map para una búsqueda eficiente de usuarios por userId
               const userMap = new Map(users.map((user) => [user.userId, user]));
               // Asocia cada producto con el teléfono del usuario correspondiente
-              const productsWithPhone = products.map((product) => {
+              const productsWithPhone = products.map((product: Product) => {
                 const user = userMap.get(product.userId); // Busca al usuario directamente por userId
                 return {
                   ...product,

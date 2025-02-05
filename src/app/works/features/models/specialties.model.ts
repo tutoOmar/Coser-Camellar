@@ -14,6 +14,8 @@ export enum Specialty {
   COSTURA_CHAQUETAS = 'costura-chaquetas',
   COSTURA_CAMISAS = 'costura-camisas',
   COSTURA_DISFRACES = 'costura-disfraces',
+  COSTURA_CHALECOS = 'costura-chalecos',
+  COSTURA_DOTACIONES = 'costura-dotaciones',
   ESTAMPADO = 'estampado',
   /** Patinaje */
   PATINAJE = 'patinaje',
