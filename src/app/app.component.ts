@@ -7,11 +7,18 @@ import ModalFormComponent from './shared/ui/modal-form/modal-form.component';
 import { RegisterUserService } from './shared/data-access/register-user.service';
 import Swal from 'sweetalert2';
 import { Meta, Title } from '@angular/platform-browser';
+import RegisterModalComponent from './shared/ui/register-modal/register-modal.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, NgxSonnerToaster, CommonModule, ModalFormComponent],
+  imports: [
+    RouterOutlet,
+    NgxSonnerToaster,
+    CommonModule,
+    ModalFormComponent,
+    RegisterModalComponent,
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })

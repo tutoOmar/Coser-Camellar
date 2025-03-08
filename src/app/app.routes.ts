@@ -21,6 +21,10 @@ export const routes: Routes = [
     loadChildren: () => import('./works/features/works.routes'),
   },
   {
+    path: 'comercial',
+    loadChildren: () => import('./comercial/comercial.routes'),
+  },
+  {
     path: '**',
     redirectTo: '/works',
     pathMatch: 'full',
