@@ -1,0 +1,26 @@
+/* Transición suave para el carrusel */
+.flex {
+  transition: transform 0.5s ease-in-out;
+}
+
+/* Asegurar que las imágenes no excedan el tamaño del contenedor */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Estilos para el modal */
+.modal-content {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
