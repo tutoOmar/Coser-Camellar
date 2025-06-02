@@ -25,11 +25,17 @@ import { Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
 import { WorksService } from '../../../works/services/works.service';
 import { AnalyticsService } from '../../../shared/data-access/analytics.service';
+import { SanitizeInputDirective } from '../../../shared/directives/sanitize-input.directive';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    SanitizeInputDirective,
+  ],
   providers: [LocationService],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
@@ -165,7 +171,9 @@ export default class RegisterComponent implements OnInit, AfterViewInit {
   selectType(type: string) {
     this.selectedForm = type;
   }
-
+  goBack() {
+    window.history.back();
+  }
   // Método para registrar un trabajador
   registerWorker(workeForm: any, workerForm: any) {
     this.loading.set(true);

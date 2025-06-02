@@ -6,6 +6,10 @@ export default [
     loadComponent: () => import('./landing-page/landing-page.component'),
   },
   {
+    path: 'blog',
+    loadComponent: () => import('./blog/blog.component'),
+  },
+  {
     path: '',
     loadComponent: () => import('./landing-page/landing-page.component'),
   },
