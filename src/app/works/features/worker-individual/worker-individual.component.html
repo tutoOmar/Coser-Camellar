@@ -13,7 +13,7 @@
             [src]="
               workerSignal()?.photo
                 ? workerSignal()?.photo
-                : 'https://avatar.iran.liara.run/public/54'
+                : 'https://firebasestorage.googleapis.com/v0/b/tu-chamba-cf127.appspot.com/o/avataWoman.png?alt=media&token=0543d8bd-17a9-41b6-87f1-52579642c271'
             "
             alt="Foto de {{ workerSignal()?.name }}"
           />
@@ -23,7 +23,7 @@
             [src]="
               workerSignal()?.photo
                 ? workerSignal()?.photo
-                : 'https://avatar.iran.liara.run/public/5'
+                : 'https://firebasestorage.googleapis.com/v0/b/tu-chamba-cf127.appspot.com/o/avatarMan.png?alt=media&token=0df1900c-9055-4310-8fd9-6486c922bf50'
             "
             alt="Foto de {{ workerSignal()?.name }}"
           />
@@ -31,12 +31,14 @@
         <div class="worker-info">
           <h2 class="mt-2">{{ workerSignal()?.name }}</h2>
           <p class="mt-2">
+            Ubicación:
             {{ workerSignal()?.city }}, {{ workerSignal()?.country }}
           </p>
-          <p class="mt-2" *ngIf="authStateService.isAuthenticated$ | async">
+          <p class="mt-2" *ngIf="stateAuth()">
             <strong>Teléfono:</strong> {{ workerSignal()?.phone }}
             <app-wa-button
               [phoneNumber]="workerSignal()?.phone"
+              (buttonClicked)="handleWaButton()"
             ></app-wa-button>
           </p>
         </div>

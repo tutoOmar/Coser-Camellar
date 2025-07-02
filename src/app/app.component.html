@@ -1,1 +1,10 @@
 <router-outlet /><ngx-sonner-toaster />
+<!-- <app-modal-form
+  *ngIf="showModal"
+  (close)="closeModal()"
+  (submit)="handleFormSubmit($event)"
+></app-modal-form> -->
+<app-register-modal
+  *ngIf="showModal"
+  (close)="closeModal()"
+></app-register-modal>

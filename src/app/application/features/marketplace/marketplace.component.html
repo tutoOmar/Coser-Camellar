@@ -1,24 +1,70 @@
-<h1 class="text-3xl text-blue-700 ml-6 mb-4 font-semibold">Marketplace</h1>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mx-6">
-  <div
-    *ngFor="let item of filteredItems()"
-    class="border rounded-lg shadow-md p-4"
+<h1 class="text-3xl text-blue-700 ml-6 mb-4 font-semibold">Compra y venta</h1>
+<div class="flex flex-row">
+  <button
+    *ngIf="isLoginUser()"
+    class="m-5 text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-3 py-2.5 text-center me-2 mb-2"
+    [routerLink]="['/aplication/marketplace/add']"
   >
-    <img
-      [src]="item.image"
-      alt="{{ item.title }}"
-      class="w-full h-48 object-cover rounded-md mb-4"
-    />
-    <h2 class="text-lg font-semibold mb-2">{{ item.title }}</h2>
-    <p class="text-gray-600 mb-2">{{ item.description }}</p>
-    <p class="text-blue-600 font-bold text-lg mb-4">
-      $ {{ item.price | number : "1.0-0" }}
-    </p>
-    <button
-      (click)="onBuy(item.id)"
-      class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-    >
-      Comprar
-    </button>
-  </div>
+    + Vender un producto
+  </button>
+  <button
+    *ngIf="isLoginUser()"
+    class="m-5 text-white bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-3 py-2.5 text-center me-2 mb-2"
+    [routerLink]="['/aplication/marketplace/my-products']"
+  >
+    Ver mis productos
+  </button>
 </div>
+
+<div *ngIf="isLoadingPage(); else showWorkers" class="mt-3">
+  <app-loading></app-loading>
+</div>
+
+<ng-template #showWorkers>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mx-6">
+    <div
+      *ngFor="let item of filteredItems()"
+      class="border rounded-lg shadow-md p-4"
+    >
+      <img
+        [src]="item.image"
+        alt="{{ item.title }}"
+        class="w-full h-48 object-cover rounded-md mb-4 cursor-pointer"
+        (click)="openImage(item.image)"
+      />
+      <h2 class="text-lg font-semibold mb-2">{{ item.title }}</h2>
+      <p class="text-gray-600 mb-2">{{ item.description }}</p>
+      <p class="text-blue-600 font-bold text-lg mb-2">
+        $ {{ item.price | number : "1.0-0" }}
+      </p>
+      <p class="text-sm font-medium mb-4">
+        Estado: {{ translateState(item.state) }}
+      </p>
+      <app-wa-button
+        [messageToSend]="personalizeMessage(item.title)"
+        [phoneNumber]="item.userPhone ? item.userPhone : ''"
+      ></app-wa-button>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div
+    *ngIf="selectedImage"
+    class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+    (click)="closeImage()"
+  >
+    <div class="relative" (click)="$event.stopPropagation()">
+      <img
+        [src]="selectedImage"
+        alt="Full Image"
+        class="max-w-full max-h-screen rounded-md"
+      />
+      <button
+        (click)="closeImage()"
+        class="absolute top-2 right-2 bg-blue-600 text-white rounded-full p-2 hover:bg-red-600"
+      >
+        Cerrar <span class="text-red-400">X</span>
+      </button>
+    </div>
+  </div>
+</ng-template>

@@ -13,4 +13,9 @@ export default [
     path: 'register',
     loadComponent: () => import('./register/register.component'),
   },
+  {
+    path: 'register-ux',
+    loadComponent: () =>
+      import('./register-experience/register-experience.component'),
+  },
 ] as Routes;

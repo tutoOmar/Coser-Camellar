@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import {
   FormArray,
   FormBuilder,
@@ -24,6 +30,7 @@ import { SateliteUser } from '../../models/satelite.model';
 import { TallerUSer } from '../../models/talleres.model';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { PositionsService } from '../../../services/positions.service';
+import { AnalyticsService } from '../../../../shared/data-access/analytics.service';
 @Component({
   selector: 'app-add-position',
   standalone: true,
@@ -31,11 +38,12 @@ import { PositionsService } from '../../../services/positions.service';
   templateUrl: './add-position.component.html',
   styleUrl: './add-position.component.scss',
 })
-export default class AddPositionComponent implements OnInit {
+export default class AddPositionComponent implements OnInit, AfterViewInit {
   // Inyeccion de los servicios
   private authService = inject(AuthStateService);
   private worksService = inject(WorksService);
   private positionsService = inject(PositionsService);
+  private analyticsService = inject(AnalyticsService);
   // Subject para desturir componente
   private destroy$ = new Subject<void>();
   // Variables de control
@@ -118,7 +126,15 @@ export default class AddPositionComponent implements OnInit {
       )
       .subscribe();
   }
-
+  /**
+   *
+   */
+  ngAfterViewInit() {
+    this.analyticsService.logPageVisit('anadir-oferta-laboral ');
+  }
+  /**
+   *
+   */
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
@@ -168,8 +184,8 @@ export default class AddPositionComponent implements OnInit {
   }
   // Form submission
   submitPosition() {
+    this.loading.set(true);
     if (this.positionForm.valid) {
-      this.loading.set(true);
       const newPosition: Position = {
         ...this.positionForm.value,
         id: crypto.randomUUID(), // You might want to handle this differently
@@ -178,7 +194,7 @@ export default class AddPositionComponent implements OnInit {
       if (currentUser && currentUser.typeUSer) {
         //currentUser.positions.push(newPosition);
         this.positionsService
-          .updateUserPosition(
+          .updateUserNewPosition(
             currentUser.typeUSer,
             currentUser,
             newPosition,

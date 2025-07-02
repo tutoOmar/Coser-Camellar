@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Coser &amp; Camellar</string>
+    <string name="title_activity_main">Coser &amp; Camellar</string>
+    <string name="package_name">com.coser.y.camellar</string>
+    <string name="custom_url_scheme">com.coser.y.camellar</string>
+</resources>

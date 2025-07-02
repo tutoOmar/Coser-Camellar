@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, inject, signal } from '@angular/core';
 import {
   FormsModule,
   ReactiveFormsModule,
@@ -8,7 +8,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { first, Subject, switchMap, take, takeUntil, tap } from 'rxjs';
 import { WorksService } from '../../services/works.service';
 import { WorkerUser } from '../models/worker.model';
 import { Comment } from '../models/comment.model';
@@ -17,6 +17,8 @@ import CardPositionComponent from '../../../shared/ui/card-position/card-positio
 import WaButtonComponent from '../../../shared/ui/wa-button/wa-button.component';
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
 import { toast } from 'ngx-sonner';
+import { AnalyticsService } from '../../../shared/data-access/analytics.service';
+import { TypeUser } from '../models/type-user.model';
 
 @Component({
   selector: 'app-satelite-individual',
@@ -33,8 +35,10 @@ import { toast } from 'ngx-sonner';
   styleUrl: './satelite-individual.component.scss',
 })
 export default class SateliteIndividualComponent {
-  //Current User
+  // inyeccion de servicios
   private authState = inject(AuthStateService);
+  private analyticsService = inject(AnalyticsService);
+
   // Crear signal para guardar el usuario individual
   sateliteSignal = signal<SateliteUser | null>(null);
   //
@@ -68,7 +72,6 @@ export default class SateliteIndividualComponent {
     this.initializeForm();
     this.paginateComments(); // Cargar los primeros comentarios
   }
-
   // Método para paginar los comentarios en grupos de 5
   paginateComments() {
     setTimeout(() => {
@@ -170,12 +173,32 @@ export default class SateliteIndividualComponent {
   loadWorker(collectionName: string, sateliteId: string) {
     this.worksService
       .getUserByIdAndCollection(sateliteId, collectionName)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((worker: any) => {
-        const validationUSer = worker as SateliteUser;
-        this.sateliteSignal.set(validationUSer);
-        this.paginateComments();
-      });
+      .pipe(
+        first(),
+        takeUntil(this.destroy$),
+        tap((satelite: any) => {
+          const validationUSer = satelite as SateliteUser;
+          this.sateliteSignal.set(validationUSer);
+          this.analyticsService.logCustomEvent('page-visit', {
+            page: 'satelite-individual',
+            sateliteData: validationUSer,
+          });
+          this.paginateComments();
+        }),
+        switchMap((satelite: SateliteUser) => {
+          if (satelite.countProfileVisits) {
+            satelite.countProfileVisits++;
+          } else {
+            satelite.countProfileVisits = 1;
+          }
+          return this.worksService.updateUser(
+            TypeUser.SATELITE,
+            satelite,
+            null
+          );
+        })
+      )
+      .subscribe();
   }
   /**
    *
@@ -196,6 +219,26 @@ export default class SateliteIndividualComponent {
    */
   countPosition(position: any[] | undefined) {
     // console.log(position);
+  }
+  /**
+   * Acción de clic en el botón de WA
+   * Se aumenta un conteo de clic para saber a quienes
+   * buscan más seguido
+   */
+  handleWaButton() {
+    const sateliteData = this.sateliteSignal();
+    const typeUser = sateliteData?.typeUSer;
+    if (sateliteData && typeUser) {
+      if (sateliteData.countContactViaWa) {
+        sateliteData.countContactViaWa++;
+      } else {
+        sateliteData.countContactViaWa = 1;
+      }
+      this.worksService
+        .updateUser(typeUser, sateliteData, null)
+        .pipe(takeUntil(this.destroy$), take(1))
+        .subscribe();
+    }
   }
   /**
    *

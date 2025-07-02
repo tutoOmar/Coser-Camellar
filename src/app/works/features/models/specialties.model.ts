@@ -3,6 +3,7 @@ export enum Specialty {
   COSTURA_ROPA = 'costura-ropa',
   COSTURA_LENCERIA = 'costura-lenceria',
   COSTURA_TELA = 'costura-tela',
+  COSTURA_LONA = 'costura-lona',
   COSTURA_MORRALES = 'costura-morrales',
   COSTURA_ARTICULOS_MILITARES = 'costura-articulos-militares',
   COSTURA_ROPA_DEPORTIVA = 'costura-ropa-deportiva',
@@ -13,11 +14,16 @@ export enum Specialty {
   COSTURA_CHAQUETAS = 'costura-chaquetas',
   COSTURA_CAMISAS = 'costura-camisas',
   COSTURA_DISFRACES = 'costura-disfraces',
+  COSTURA_CHALECOS = 'costura-chalecos',
+  COSTURA_DOTACIONES = 'costura-dotaciones',
+  ESTAMPADO = 'estampado',
   /** Patinaje */
   PATINAJE = 'patinaje',
+  GUARNECEDOR = 'guarnecedor',
   /** Corte */
   CORTE_TELA = 'corte-tela',
   CORTE_LONA = 'corte-lona',
+  CORTE_PESADO = 'corte-pesado',
   CORTE_CUERO = 'corte-cuero',
   CORTE_PLASTICOS_ESPUMAS = 'corte-plasticos-espumas',
   /** Arreglo maquinas */
@@ -27,6 +33,7 @@ export enum Specialty {
   ARREGLO_MAQUINAS_ELECTRONICAS = 'arreglo-maquinas-electronicas',
   ARREGLO_MAQUINAS_TRIPLE_TRANSPORTE = 'arreglo-maquinas-triple-transporte',
   ARREGLO_MAQUINAS_FILETEADORAS = 'arreglo-maquinas-fileteadoras',
+  ARREGLO_MAQUINAS_DE_CORTE = 'arreglo-maquinas-de-corte',
   /** Patronaje */
   PATRONAJE_FEMENINO = 'patronaje-femenino',
   PATRONAJE_MASCULINO = 'patronaje-masculino',
