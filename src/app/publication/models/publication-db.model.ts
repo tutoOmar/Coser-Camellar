@@ -11,9 +11,10 @@ export interface PublicationDB {
   city: string; // obligatorio
   neighborhood: string; // obligatorio
   typeContact: string;
-  state: string;
+  state: StateEnum;
   limiteContactos?: number; // p. ej., 5 semanales
   contacts: number;
+  updatedAt?: string;
 }
 
 export enum StateEnum {

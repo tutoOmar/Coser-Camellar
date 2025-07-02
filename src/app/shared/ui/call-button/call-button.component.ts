@@ -1,40 +1,35 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { WhatsAppService } from '../../data-access/whats-app.service';
 import { AnalyticsService } from '../../data-access/analytics.service';
+import { WhatsAppService } from '../../data-access/whats-app.service';
+import { CallService } from '../../data-access/call.service';
 
 @Component({
-  selector: 'app-wa-button',
+  selector: 'app-call-button',
   standalone: true,
   imports: [],
-  templateUrl: './wa-button.component.html',
+  templateUrl: './call-button.component.html',
 })
-export default class WaButtonComponent {
+export class CallButtonComponent {
   // Recibe el número de teléfono como input
   @Input() phoneNumber: string | undefined = '';
-  @Input() messageToSend: string =
-    'Hola,te vi en Coser & Camellar, me gustaría hacer contacto contigo!!';
   // Emite una señal cuando el botón es presionado
   @Output() buttonClicked: EventEmitter<void> = new EventEmitter<void>();
 
   constructor(
-    private whatsAppService: WhatsAppService,
+    private callService: CallService,
     private analyticsService: AnalyticsService
   ) {}
   /**
    * Esta función abre WA para que el usuario se comunique
    */
-  openWhatsApp() {
+  initiateCall() {
     //Emitimios el evento de clic
     this.buttonClicked.emit();
     // Se envian analiticas
-    this.analyticsService.logCustomEvent('go-to-WA', {
+    this.analyticsService.logCustomEvent('call-to-this-number', {
       phoneNumber: this.phoneNumber,
-      message: this.messageToSend,
     });
     // Se llama al service para abrir WA
-    this.whatsAppService.openWhatsAppAction(
-      this.phoneNumber,
-      this.messageToSend
-    );
+    this.callService.initiateCallAction(this.phoneNumber);
   }
 }

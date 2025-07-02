@@ -1,0 +1,230 @@
+<!-- Modal para crear publicación -->
+<div
+  *ngIf="mostrar"
+  class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+  (click)="cerrarModal()"
+>
+  <div
+    class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Header del modal -->
+    <div
+      class="px-6 py-4 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white"
+    >
+      <h2 class="text-xl font-semibold text-gray-900">Crear publicación</h2>
+      <button
+        class="text-gray-400 hover:text-gray-600 p-1"
+        (click)="cerrarModal()"
+      >
+        <svg
+          class="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          ></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Contenido del modal -->
+    <form #formCrearPublicacion="ngForm" (ngSubmit)="enviarFormulario()">
+      <div class="px-6 py-4 space-y-6">
+        <!-- Información del usuario -->
+        <div class="flex items-center gap-3">
+          <div
+            class="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center"
+          >
+            <img
+              [src]="
+                photoUser() ||
+                'https://firebasestorage.googleapis.com/v0/b/tu-chamba-cf127.appspot.com/o/avatarNormal.png?alt=media&token=e99bcd5b-0f98-40ba-a662-c50042122a7d'
+              "
+              alt="Tu avatar"
+              class="w-full h-full object-cover"
+            />
+          </div>
+        </div>
+
+        <!-- Descripción del servicio -->
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">
+            Descripción del servicio *
+          </label>
+          <textarea
+            [(ngModel)]="formPublication.description"
+            name="descripcion"
+            rows="4"
+            placeholder="Describe detalladamente el servicio que ofreces o el servicio que buscas en confeccións"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            required
+          ></textarea>
+        </div>
+
+        <!-- Ubicación -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700"
+              >Ciudad *</label
+            >
+            <input
+              type="text"
+              [(ngModel)]="formPublication.city"
+              name="ciudad"
+              placeholder="Ciudad"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            />
+          </div>
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700"
+              >Barrio *</label
+            >
+            <input
+              type="text"
+              [(ngModel)]="formPublication.neighborhood"
+              name="barrio"
+              placeholder="Barrio"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            />
+          </div>
+        </div>
+
+        <!-- Método de contacto -->
+        <div class="space-y-4">
+          <label class="block text-sm font-medium text-gray-700">
+            Método de contacto *
+          </label>
+
+          <!-- Opciones de contacto -->
+          <div class="flex flex-wrap gap-3">
+            <label class="flex items-center">
+              <input
+                type="radio"
+                [(ngModel)]="formPublication.typeContact"
+                name="tipoContacto"
+                value="whatsapp"
+                class="mr-2 text-green-500 focus:ring-green-500"
+                required
+              />
+              <span class="text-sm">Solo WhatsApp</span>
+            </label>
+            <label class="flex items-center">
+              <input
+                type="radio"
+                [(ngModel)]="formPublication.typeContact"
+                name="tipoContacto"
+                value="call"
+                class="mr-2 text-blue-500 focus:ring-blue-500"
+                required
+              />
+              <span class="text-sm">Solo llamadas</span>
+            </label>
+            <label class="flex items-center">
+              <input
+                type="radio"
+                [(ngModel)]="formPublication.typeContact"
+                name="tipoContacto"
+                value="both"
+                class="mr-2 text-purple-500 focus:ring-purple-500"
+                required
+              />
+              <span class="text-sm">Ambos</span>
+            </label>
+          </div>
+
+          <!-- Input del número -->
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700">
+              Número de contacto *
+            </label>
+            <input
+              type="tel"
+              [(ngModel)]="formPublication.numberContact"
+              name="numeroContacto"
+              placeholder="Ej: +57 300 123 4567"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            />
+          </div>
+        </div>
+
+        <!-- Sección de imágenes al crear -->
+        <div *ngIf="actionPublicationModal === 'create'">
+          <app-images-selector
+            [state]="stateImages"
+            [imagenesSeleccionadas]="imagenesSeleccionadas"
+            (imagenesChange)="onImagenesChange($event)"
+          >
+          </app-images-selector>
+        </div>
+        <!-- Sección de imagenes al editar -->
+        <div *ngIf="actionPublicationModal === 'edit'">
+          <app-images-selector
+            [state]="stateImages"
+            [imagenesSubidasAlServidor]="imagesInTheServer"
+            [imagenesSeleccionadas]="imagenesSeleccionadas"
+            (imagenesChange)="onImagenesChange($event)"
+            (imagenesServidorChange)="onImagenesServidorChange($event)"
+          >
+          </app-images-selector>
+        </div>
+      </div>
+
+      <!-- Footer del modal -->
+      <div
+        class="px-6 py-4 border-t border-gray-200 flex items-center justify-end gap-3 sticky bottom-0 bg-white"
+      >
+        <button
+          type="button"
+          (click)="cerrarModal()"
+          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          [disabled]="!formCrearPublicacion.form.valid || isSaving"
+          class="px-6 py-2 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <span *ngIf="!isSaving">{{
+            actionPublicationModal === "create" ? "Publicar" : "Editar"
+          }}</span>
+          <span *ngIf="isSaving" class="flex items-center">
+            <svg
+              class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            {{
+              actionPublicationModal === "create"
+                ? "Publicando..."
+                : "Editando..."
+            }}
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

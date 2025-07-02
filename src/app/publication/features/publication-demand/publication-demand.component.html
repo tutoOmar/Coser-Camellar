@@ -1,7 +1,75 @@
+<!-- Card inicial para crear publicación -->
+<div
+  class="bg-white rounded-lg shadow-md overflow-hidden max-w-2xl mx-auto mb-6"
+  *ngIf="userData() as user"
+>
+  <div class="px-4 py-4">
+    <div
+      class="flex items-center gap-3 cursor-pointer"
+      (click)="abrirModalCrearPublicacion()"
+    >
+      <!-- Avatar del usuario actual -->
+      <div
+        class="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center"
+      >
+        <img
+          [src]="
+            user.photo ||
+            'https://firebasestorage.googleapis.com/v0/b/tu-chamba-cf127.appspot.com/o/avatarNormal.png?alt=media&token=e99bcd5b-0f98-40ba-a662-c50042122a7d'
+          "
+          alt="Tu avatar"
+          class="w-full h-full object-cover"
+        />
+      </div>
+
+      <!-- Input simulado -->
+      <div
+        class="flex-1 bg-gray-100 rounded-full px-4 py-3 text-gray-500 hover:bg-gray-200 transition-colors"
+      >
+        ¿Qué servicio ofreces hoy?
+      </div>
+
+      <!-- Botón de imagen -->
+      <button
+        class="p-3 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
+        (click)="$event.stopPropagation(); abrirModalCrearPublicacion()"
+      >
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path
+            d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"
+          />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+<!-- Modal para crear o editar publicación -->
+<app-publicaction-modal-register
+  [mostrar]="mostrarModalCrear || mostrarModalEditar"
+  [usuarioActual]="userData()"
+  [isSaving]="estaCreandoPublicacion || estaEditandoPublicacion"
+  [publicationToEdit]="this.publicationToEdit"
+  [actionPublicationModal]="actionPublication"
+  (cerrar)="cerrarModalCrearPublicacion()"
+  (crearOEditar)="crearOEditarPublicacion($event)"
+></app-publicaction-modal-register>
+<!-- Modal de Reporte --->
+<app-publication-report-modal
+  [mostrar]="mostrarModalReporte"
+  [publicacion]="publicacionAReportar"
+  [isSubmitting]="enviandoReporte"
+  [usuarioActual]="userData()"
+  (cerrar)="cerrarModalReporte()"
+  (enviar)="procesarReporte($event)"
+></app-publication-report-modal>
+<!-- Resto de publicaciones existentes -->
 <div class="grid grid-cols-1 md:grid-cols-1 gap-4 p-4">
   <app-publication-card
     *ngFor="let pub of publications"
     [publicacion]="pub"
+    (eliminate)="eliminatePublication($event)"
+    (edit)="editPublication($event)"
+    (report)="reportPublication($event)"
   ></app-publication-card>
 
   <!-- Loading indicator -->
@@ -34,7 +102,7 @@
   <!-- No more publications message -->
   <div
     class="text-center py-8"
-    *ngIf="!hasMore && publicaciones.length > 0 && !loading"
+    *ngIf="!hasMore && publications.length > 0 && !loading"
   >
     <div class="bg-gray-50 rounded-lg p-6">
       <svg
@@ -60,7 +128,7 @@
   <!-- Empty state -->
   <div
     class="text-center py-16"
-    *ngIf="publicaciones.length === 0 && !loading && !initialLoading"
+    *ngIf="publications.length === 0 && !loading && !initialLoading"
   >
     <div class="bg-gray-50 rounded-lg p-8">
       <svg

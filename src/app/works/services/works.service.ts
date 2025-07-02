@@ -21,15 +21,11 @@ import {
 import {
   catchError,
   combineLatest,
-  first,
-  forkJoin,
   from,
   map,
-  merge,
   Observable,
   of,
   switchMap,
-  tap,
 } from 'rxjs';
 import { WorkerUser } from '../features/models/worker.model';
 import { AuthStateService } from '../../shared/data-access/auth-state.service';
@@ -49,7 +45,11 @@ export class WorksService {
   private _auth = inject(AuthStateService);
   private firestore = inject(Firestore);
 
-  // Método para subir un archivo (imagen)
+  /**
+   * Método para subir imagenes incialmente, aunque como está programado se puede subir de todo en el momento
+   * @param file
+   * @returns
+   */
   private uploadImage(file: File): Observable<string> {
     const filepath = `news/${file.name}`;
     const fileRef = ref(this.storage, filepath);
@@ -182,9 +182,9 @@ export class WorksService {
       where('userId', '==', userId),
       limit(1) // Limita a solo un documento
     );
-
     return collectionData(userQuery, { idField: 'id' }).pipe(
       catchError((error) => {
+        console.log('Hubo error');
         return of(null);
       }) // Si hay un error (usuario no encontrado), retorna null
     );

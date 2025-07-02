@@ -43,6 +43,7 @@ interface FormSingUp {
   email: FormControl<string | null>;
   password: FormControl<string | null>;
   phone: FormControl<number | null>;
+  name: FormControl<string | null>;
 }
 
 @Component({
@@ -87,7 +88,7 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
    * @param field
    * @returns
    */
-  isRequired(field: 'email' | 'password' | 'phone') {
+  isRequired(field: 'email' | 'password' | 'phone' | 'name') {
     return isRequired(field, this.form);
   }
   /**
@@ -114,6 +115,10 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
       Validators.minLength(6),
     ]),
     phone: this._formBuilder.control(null, [Validators.required]), // Valor inicial como null
+    name: this._formBuilder.control('', [
+      Validators.required,
+      Validators.minLength(2),
+    ]),
   });
   /**
    * Inicialización del componente
@@ -158,29 +163,53 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
   async submit() {
     // Validación del formulario
     if (this.form.invalid) return;
-    //Obtenemos el formulario
-    const { email, password, phone } = this.form.value;
-    //validamos que venga algo
+
+    // Obtenemos el formulario
+    const { email, password, phone, name } = this.form.value;
+
+    // Validamos que venga algo
+    if (!email || !password || phone === null || !name) return;
+
     try {
-      if (!email || !password || phone === null) return;
-      await this.authService.signUp({
+      // Creamos el usuario en Firebase Auth
+      const userCredential = await this.authService.signUp({
         password: password,
         email: email,
       });
-      this.registerService
-        .createUserWithPhoneNoProfile({ email, phone })
-        .pipe(takeUntil(this.destroy$))
-        .subscribe();
-      toast.success('usuario creado Correctamente');
+
+      // Obtenemos el UID del usuario recién creado
+      const uid = userCredential.user?.uid;
+
+      if (!uid) {
+        toast.error('Error de registro');
+      }
+      // Creamos el documento en Firestore con el UID
+      await this.registerService
+        .createUserWithNameAndPhoneNoProfile({
+          userId: uid,
+          email,
+          phone,
+          name,
+          typeUser: 'noProfile', // Corregí el typo 'typeUSer'
+        })
+        .toPromise(); // Cambiamos a toPromise() para manejar mejor los errores
+
+      toast.success('Usuario creado correctamente');
       this.router.navigate(['/works']);
     } catch (error: any) {
       if (error.code === 'auth/email-already-in-use') {
         toast.error('Correo ya existe, inicia sesión');
       } else if (error.code === 'auth/weak-password') {
-        toast.error('Contraseña debil, intenta con una contraseña más fuerte');
+        toast.error('Contraseña débil, intenta con una contraseña más fuerte');
+      } else {
+        toast.error('Error al crear el usuario. Intenta nuevamente.');
       }
     }
   }
+  /**
+   *
+   * @returns
+   */
   async submitWithGoogle() {
     try {
       const userCredential = await this.authService.signInWithGoogle();
@@ -217,12 +246,16 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
             }
           }),
           filter((isRegisterProfile) => !isRegisterProfile),
-          switchMap(() => from(this.askForPhoneNumber())), // Llama al modal para pedir el teléfono
-          filter((phone) => !!phone), // Asegura que se haya proporcionado un número
-          switchMap((phone) =>
-            this.registerService.createUserWithPhoneNoProfile({
+          switchMap(() => from(this.askForPhoneAndName())), // Llama al modal para pedir nombre y teléfono
+          filter(
+            (userInfo) => !!userInfo && !!userInfo.name && !!userInfo.phone
+          ), // Asegura que se hayan proporcionado ambos datos
+          switchMap((userInfo) =>
+            this.registerService.createUserWithNameAndPhoneNoProfile({
               email,
-              phone,
+              name: userInfo?.name, ///////////////////////////////Revisar este compoente
+              phone: userInfo?.phone,
+              typeUSer: 'noProfile',
               userId,
             })
           ),
@@ -296,10 +329,33 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
     }
   }
   /**
-   * Modal de sweet alert
-   * @returns
+   * Modal secuencial para obtener nombre y teléfono
+   * @returns Promise con objeto que contiene name y phone
    */
-  private async askForPhoneNumber(): Promise<string | null> {
+  private async askForPhoneAndName(): Promise<{
+    name: string;
+    phone: string;
+  } | null> {
+    // Primer modal: Nombre
+    const { value: name } = await Swal.fire({
+      title: 'Nombre completo',
+      text: 'Por favor, ingresa tu nombre completo',
+      input: 'text',
+      inputPlaceholder: 'Juan Pérez',
+      inputValidator: (value) => {
+        if (!value || value.trim().length < 2) {
+          return 'El nombre debe tener al menos 2 caracteres';
+        }
+        return undefined;
+      },
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      confirmButtonText: 'Siguiente',
+    });
+
+    if (!name) return null;
+
+    // Segundo modal: Teléfono
     const { value: phone } = await Swal.fire({
       title: 'Número de teléfono',
       text: 'Por favor, ingresa tu número de teléfono',
@@ -308,10 +364,17 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
       inputValidator: this.validatePhoneNumber.bind(this),
       allowOutsideClick: false,
       allowEscapeKey: false,
-      backdrop: true,
       confirmButtonText: 'Guardar',
+      showCancelButton: true,
+      cancelButtonText: 'Volver',
     });
-    return phone;
+
+    if (!phone) {
+      // Si cancela, volver a pedir el nombre
+      return this.askForPhoneAndName();
+    }
+
+    return { name: name.trim(), phone: phone.trim() };
   }
   /**
    * Validación del numero de telfono en el modal

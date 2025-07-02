@@ -1,105 +1,74 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, signal, Signal } from '@angular/core';
 import { PublicationCardComponent } from '../publication-card/publication-card.component';
 import { CommonModule } from '@angular/common';
 import { Publication } from '../../models/publication.model';
-import { Subject, takeUntil, finalize } from 'rxjs';
+import { Subject, takeUntil, finalize, tap, switchMap, map } from 'rxjs';
 import { PublicationDemandService } from '../../services/publication-demand.services';
 import { TypeUser } from '../../../works/features/models/type-user.model';
-interface Publicacion {
-  id: string;
-  description: string;
-  images: string[]; // máx 5 URLs
-  autorId: string;
-  timestamp: Date;
-  number: string;
-  city: string; // obligatorio
-  neighborhood: string; // obligatorio
-  typeContact: string;
-  state: string;
-  limiteContactos?: number; // p. ej., 5 semanales
-  contacts: number;
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { PublicactionModalRegisterComponent } from './publicaction-modal-register/publicaction-modal-register.component';
+import { AuthStateService } from '../../../shared/data-access/auth-state.service';
+import { WorksService } from '../../../works/services/works.service';
+import Swal from 'sweetalert2';
+import { Router } from '@angular/router';
+import { PublicationDB, StateEnum } from '../../models/publication-db.model';
+import { toast } from 'ngx-sonner';
+import { ActionPublicationEnum } from '../../models/actionPublicationEnum';
+import { PublicationReportModalComponent } from '../publication-report-modal/publication-report-modal.component';
+import { TallerUSer } from '../../../works/features/models/talleres.model';
+import { WorkerUser } from '../../../works/features/models/worker.model';
+import { SateliteUser } from '../../../works/features/models/satelite.model';
+import { ReportsService } from '../../../shared/data-access/reports.service';
+import { AnalyticsService } from '../../../shared/data-access/analytics.service';
+
+export interface PublicationModalData {
+  formulario: {
+    description: string;
+    city: string;
+    neighborhood: string;
+    typeContact: string;
+    numberContact: string;
+  };
+  imagenes: [];
+  imagesInTheServer?: string[];
+  imagesEliminatedFromServer?: string[];
 }
 @Component({
   selector: 'app-publication-demand',
   standalone: true,
-  imports: [CommonModule, PublicationCardComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    PublicationCardComponent,
+    PublicactionModalRegisterComponent,
+    PublicationReportModalComponent,
+  ],
   templateUrl: './publication-demand.component.html',
   styleUrl: './publication-demand.component.scss',
 })
 export default class PublicationDemandComponent {
-  publicaciones: Publication[] = [
-    {
-      id: '1',
-      description: 'Buscamos costurera con experiencia en licra y overlock.',
-      images: ['https://picsum.photos/200/300'],
-      autorId: 'u123',
-      autorType: TypeUser.TRABAJADOR,
-      timestamp: new Date().toString(),
-      number: '3001112233',
-      typeContact: 'whatsapp',
-      city: 'Medellín',
-      neighborhood: 'Belén',
-      state: 'activa',
-      limiteContactos: 2,
-      contacts: 1,
-      autor: {
-        name: 'Juan',
-        imageAvatarUrl: 'https://picsum.photos/150/210',
-      },
-    },
-    {
-      id: '2',
-      description: 'Trabajo externo con material enviado por nosotros.',
-      images: [
-        'https://picsum.photos/200/300',
-        'https://picsum.photos/210/340',
-      ],
-      autorId: 'u123',
-      autorType: TypeUser.TRABAJADOR,
-      timestamp: new Date().toString(),
-      number: '3001112233',
-      typeContact: 'whatsapp',
-      city: 'Calí',
-      neighborhood: 'Belén',
-      state: 'activa',
-      limiteContactos: 2,
-      contacts: 2,
-      autor: {
-        name: 'Lau',
-        imageAvatarUrl: 'https://picsum.photos/100/150',
-      },
-    },
-    {
-      id: '3',
-      description: 'Trabajo en taller con contrato fijo.',
-      images: [],
-      autorId: 'u123',
-      autorType: TypeUser.TRABAJADOR,
-
-      timestamp: new Date().toString(),
-      number: '3001112233',
-      typeContact: 'whatsapp',
-      city: 'Bogotá',
-      neighborhood: 'Belén',
-      state: 'activa',
-      limiteContactos: 2,
-      contacts: 12,
-      autor: {
-        name: 'Mary',
-        imageAvatarUrl: 'https://picsum.photos/210/340',
-      },
-    },
-  ];
   publications: Publication[] = [];
+  userData = signal<any>(null);
   loading = false;
   initialLoading = true;
   hasMore = true;
   private destroy$ = new Subject<void>();
 
-  constructor(private publicationService: PublicationDemandService) {}
+  constructor(
+    private publicationService: PublicationDemandService,
+    private authStateService: AuthStateService,
+    private userService: WorksService,
+    private _router: Router,
+    private reportService: ReportsService,
+    private analyticsService: AnalyticsService
+  ) {}
 
   ngOnInit(): void {
     this.loadInitialPublications();
+    this.loadUserData();
+    this.analyticsService.logCustomEvent('page-visit', {
+      page: 'publication-demand',
+    });
   }
 
   ngOnDestroy(): void {
@@ -137,7 +106,6 @@ export default class PublicationDemandComponent {
       .subscribe({
         next: (publications) => {
           this.publications = publications;
-          console.log(publications);
           this.hasMore = publications.length === 10; // Si trajo menos de 10, no hay más
         },
         error: (error) => {
@@ -183,164 +151,427 @@ export default class PublicationDemandComponent {
     this.hasMore = true;
     this.loadInitialPublications();
   }
-
   /**
-   * Testeo para publicaicones
+   * Carga y asigna los datos del usuario autenticado a una signal reactiva (`userData`).
+   *
+   * 1. Escucha el estado de autenticación a través de `authStateService.authState$`.
+   * 2. Obtiene el `uid` del usuario autenticado.
+   * 3. Usa el `uid` para buscar al usuario en cualquier colección disponible (trabajador, satélite o taller).
+   * 4. Extrae el primer resultado de la base de datos y lo asigna como valor a la signal `userData`.
+   * 5. Si no se encuentra el usuario en la base de datos, se asigna `null` por defecto.
+   *
+   * La función utiliza programación reactiva con `toSignal`, permitiendo que `userData` se actualice automáticamente
+   * si el observable fuente cambia (ideal para integrarse con signals y `computed` en Angular moderno).
+   *
    */
-  testPost = [
-    {
-      description:
-        'Ofrezco servicio de fileteado industrial, experiencia en prendas deportivas.',
-      images: [],
-      autorId: 'f2szc2WH07VuzKkl7OlkK2AZ1fG2',
-      autorType: TypeUser.SATELITE,
-      timestamp: '2024-02-16T08:30:00Z',
-      number: '+57 310 456 7890',
-      city: 'Cali',
-      neighborhood: 'Aguablanca',
-      typeContact: 'both',
-      state: 'active',
-      contacts: 2,
-    },
-    {
-      description:
-        'Busco operarias para confección de jeans, pago por prenda, excelente ambiente laboral.',
-      images: [],
-      autorId: 'B85Su0OCBvU4E4BQVELvIAcPfQ82',
-      autorType: TypeUser.TALLER,
-      timestamp: '2024-02-16T09:15:00Z',
-      number: '+57 311 789 4561',
-      city: 'Medellín',
-      neighborhood: 'Belén',
-      typeContact: 'whatsapp',
-      state: 'active',
-      limiteContactos: 15,
-      contacts: 4,
-    },
-    {
-      description:
-        'Vendo máquina plana industrial Brother en excelente estado, poco uso.',
-      images: [
-        'https://picsum.photos/200/300?random=31',
-        'https://picsum.photos/200/300?random=32',
-      ],
-      autorId: 'aGmUsZWKwUU0lEoRgccA2SheHVW2',
-      autorType: TypeUser.TALLER,
-      timestamp: '2024-02-16T10:00:00Z',
-      number: '+57 312 567 8902',
-      city: 'Bogotá',
-      neighborhood: 'Kennedy',
-      typeContact: 'both',
-      state: 'active',
-      contacts: 1,
-    },
-    {
-      description:
-        'Ofrezco servicios de corte y confección para pijamas y ropa interior.',
-      images: [],
-      autorId: '4Vd3Uw1vz8hCSUfrCXJCppYoVI13',
-      autorType: TypeUser.TRABAJADOR,
-      timestamp: '2024-02-16T11:30:00Z',
-      number: '+57 313 678 9012',
-      city: 'Barranquilla',
-      neighborhood: 'El Prado',
-      typeContact: 'whatsapp',
-      state: 'active',
-      limiteContactos: 10,
-      contacts: 2,
-    },
-    {
-      description:
-        'Se alquilan máquinas para satélites: fileteadora y recubridora.',
-      images: [],
-      autorId: 'f2szc2WH07VuzKkl7OlkK2AZ1fG2',
-      autorType: TypeUser.SATELITE,
-      timestamp: '2024-02-16T12:00:00Z',
-      number: '+57 314 321 4567',
-      city: 'Manizales',
-      neighborhood: 'La Enea',
-      typeContact: 'both',
-      state: 'active',
-      contacts: 0,
-    },
-    {
-      description: 'Vendo rollo de tela algodón licrado, ideal para camisetas.',
-      images: ['https://picsum.photos/200/300?random=33'],
-      autorId: 'aGmUsZWKwUU0lEoRgccA2SheHVW2',
-      autorType: TypeUser.TALLER,
-      timestamp: '2024-02-16T13:20:00Z',
-      number: '+57 315 234 5670',
-      city: 'Pereira',
-      neighborhood: 'Centro',
-      typeContact: 'both',
-      state: 'active',
-      contacts: 1,
-    },
-    {
-      description:
-        'Se requiere cortador con experiencia para prendas de vestir femeninas.',
-      images: [],
-      autorId: 'B85Su0OCBvU4E4BQVELvIAcPfQ82',
-      autorType: TypeUser.TALLER,
-      timestamp: '2024-02-16T14:45:00Z',
-      number: '+57 316 567 8910',
-      city: 'Cartagena',
-      neighborhood: 'Pie de la Popa',
-      typeContact: 'whatsapp',
-      state: 'active',
-      limiteContactos: 5,
-      contacts: 3,
-    },
-    {
-      description:
-        'Ofrezco servicio de bordado personalizado para empresas y marcas.',
-      images: ['https://picsum.photos/200/300?random=34'],
-      autorId: '4Vd3Uw1vz8hCSUfrCXJCppYoVI13',
-      autorType: TypeUser.TRABAJADOR,
-      timestamp: '2024-02-16T15:30:00Z',
-      number: '+57 317 678 2345',
-      city: 'Bucaramanga',
-      neighborhood: 'Cabecera',
-      typeContact: 'both',
-      state: 'active',
-      contacts: 4,
-    },
-    {
-      description: 'Vendo lote de botones metálicos para chaquetas, nuevos.',
-      images: ['https://picsum.photos/200/300?random=35'],
-      autorId: 'f2szc2WH07VuzKkl7OlkK2AZ1fG2',
-      autorType: TypeUser.SATELITE,
-      timestamp: '2024-02-16T16:00:00Z',
-      number: '+57 318 234 6789',
-      city: 'Ibagué',
-      neighborhood: 'Jardín',
-      typeContact: 'both',
-      state: 'active',
-      contacts: 2,
-    },
-    {
-      description: 'Se busca operaria con experiencia en manejo de collarín.',
-      images: [],
-      autorId: 'B85Su0OCBvU4E4BQVELvIAcPfQ82',
-      autorType: TypeUser.TALLER,
-      timestamp: '2024-02-16T17:15:00Z',
-      number: '+57 319 876 5432',
-      city: 'Soacha',
-      neighborhood: 'San Mateo',
-      typeContact: 'whatsapp',
-      state: 'active',
-      limiteContactos: 7,
-      contacts: 3,
-    },
-  ];
-  // Método temporal para poblar la base de datos
-  loadTestData(): void {
-    const testPublications = this.testPost; // El JSON de arriba
-    this.publicationService
-      .addMultiplePublications(testPublications)
-      .subscribe({
-        next: (ids) => console.log('✅ Datos de prueba creados:', ids),
-        error: (error) => console.error('❌ Error creando datos:', error),
+  loadUserData() {
+    this.authStateService.authState$
+      .pipe(
+        switchMap((userDataAuth) =>
+          /**busca en la collection de users */
+          this.userService.getUserByUserIdAndCollection(
+            userDataAuth.uid,
+            'users'
+          )
+        ),
+        map((userDataInDB) => userDataInDB[0] || null)
+      )
+      .subscribe((userDataInDB) => this.userData.set(userDataInDB));
+  }
+  //============================================================================
+  /**
+   *          Variables para el modal de crear y editar publicación
+   *
+   *
+   * ============================================================================ */
+  mostrarModalCrear = false;
+  mostrarModalEditar = false;
+  estaCreandoPublicacion = false;
+  estaEditandoPublicacion = false;
+  // Manejo de imágenes
+  imagenesSeleccionadas: Array<{ file: File; preview: string }> = [];
+  publicationToEdit!: Publication | null;
+  actionPublication!: ActionPublicationEnum;
+  /**
+   * Publicación vacias
+   */
+  EMPTY_PUBLICATION: PublicationDB = {
+    id: '',
+    description: '',
+    images: [],
+    autorId: '',
+    autorType: TypeUser.TRABAJADOR,
+    timestamp: '',
+    number: '',
+    city: '',
+    neighborhood: '',
+    typeContact: '',
+    state: StateEnum.ACTIVE,
+    limiteContactos: 0,
+    contacts: 0,
+  };
+  // Métodos del modal
+  abrirModalCrearPublicacion(): void {
+    if (!this.userData()) {
+      Swal.fire({
+        title: '¡No tienes cuenta!',
+        text: 'Para poder publicar debes tener cuenta y crear tu perfil',
+        icon: 'info',
+        showCancelButton: true, // Muestra el botón de cancelar
+        confirmButtonText: 'Crear perfil', // Texto del botón de confirmación
+        cancelButtonText: 'Luego lo completo', // Texto del botón de cancelar
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this._router.navigate(['/auth/register']);
+        } else if (result.isDismissed) {
+          Swal.close();
+        }
       });
+      return;
+    }
+    this.actionPublication = ActionPublicationEnum.CREATE;
+    this.mostrarModalCrear = true;
+  }
+
+  cerrarModalCrearPublicacion(): void {
+    this.analyticsService.logCustomEvent('close-modal', {
+      pubication: this.userData().id,
+    });
+    this.publicationToEdit = null;
+    this.mostrarModalCrear = false;
+    this.mostrarModalEditar = false;
+  }
+  // Métodos para manejo de imágenes
+  onImagenesSeleccionadas(event: any): void {
+    const files = Array.from(event.target.files) as File[];
+
+    if (this.imagenesSeleccionadas.length + files.length > 5) {
+      alert('Máximo 5 imágenes permitidas');
+      return;
+    }
+
+    files.forEach((file) => {
+      if (file.size > 5 * 1024 * 1024) {
+        // 5MB
+        alert(`La imagen ${file.name} excede el tamaño máximo de 5MB`);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.imagenesSeleccionadas.push({
+          file: file,
+          preview: e.target.result,
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Limpiar input
+    event.target.value = '';
+  }
+
+  eliminarImagen(index: number): void {
+    this.imagenesSeleccionadas.splice(index, 1);
+  }
+  /**
+   * Función para crear la publicación
+   * @param event
+   * @returns
+   */
+  crearOEditarPublicacion(event: any): void {
+    if (!this.validarFormulario(event)) {
+      return;
+    }
+    /**
+     *
+     */
+    if (this.actionPublication === 'create') {
+      this.estaCreandoPublicacion = true;
+      const publication = this.convertToCreateForms(event);
+      /**
+       * ESto es importante porque al servicio debe llegar un archivo tipo File,
+       * esta event.images tiene un array con un tipo que tiene un
+       * {
+       *  file: File
+       *  previewImage: string
+       * }
+       *
+       * Y solo se debe procesar file
+       */
+      const images = event.imagenes.map(
+        (fileAndPreview: any) => fileAndPreview.file as File
+      );
+      this.publicationService
+        .addPublication(publication, images)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (publications) => {
+            toast.success('Publicación creada con éxito');
+            this.estaCreandoPublicacion = false;
+            this.cerrarModalCrearPublicacion();
+            this.refreshPublications();
+            this.analyticsService.logCustomEvent('create-a-new-publication', {
+              pubication: publication,
+            });
+          },
+          error: (error) => {
+            toast.error('Erro al crear tu publicación');
+          },
+        });
+    }
+    // Opción para editar la pulicacoón
+    else if (this.actionPublication === 'edit') {
+      this.estaEditandoPublicacion = true;
+      // convierte a formato publicacion
+      const publication = this.convertToEditForms(event);
+      const imagesEliminatedFromServer = event.imagesEliminatedFromServer;
+      const newImages = event.imagenes.map(
+        (fileAndPreview: any) => fileAndPreview.file as File
+      );
+      this.publicationService
+        .updatePublicationEdit(
+          publication,
+          newImages,
+          imagesEliminatedFromServer
+        )
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (result) => {
+            toast.success('Publicación actualizada con éxito');
+            this.estaEditandoPublicacion = false;
+            this.cerrarModalCrearPublicacion();
+            this.refreshPublications();
+            this.analyticsService.logCustomEvent('edit-a-publication', {
+              pubication: publication,
+            });
+          },
+          error: (error) => {
+            console.error('Error:', error);
+          },
+        });
+      // Elminar imagenes del servidor,
+      // Añade publicaciones con nuevas imagenes --TODO crear nuevo método
+      //
+    }
+  }
+  /**
+   * Metodo usado para crear el formulario inicial para crear una publicación.
+   * ToDo: Me enredé haciendo esta función
+   */
+  convertToCreateForms(data: PublicationModalData): Omit<PublicationDB, 'id'> {
+    // Retorna el json listo para enviar a publicaiones en firebase
+    const userType = this.userData().typeUSer;
+    const userId = this.userData().userId;
+    return {
+      description: data.formulario.description,
+      images: [],
+      autorId: userId,
+      autorType: userType,
+      timestamp: new Date().toISOString(),
+      number: data.formulario.numberContact,
+      city: data.formulario.city,
+      neighborhood: data.formulario.neighborhood,
+      typeContact: data.formulario.typeContact,
+      state: StateEnum.ACTIVE,
+      limiteContactos: 5,
+      contacts: 0,
+    };
+  }
+  /**
+   * Metodo usado para crear el formulario inicial para crear una publicación.
+   * ToDo: Me enredé haciendo esta función
+   */
+  convertToEditForms(data: PublicationModalData): PublicationDB {
+    // Valida la existencia de los datos
+    if (!this.publicationToEdit || !data.imagesInTheServer) {
+      return this.EMPTY_PUBLICATION;
+    } else {
+      const currentPublication = data.formulario;
+      const previewPublication = this.publicationToEdit;
+      const currentImages = data.imagesInTheServer;
+      return {
+        id: previewPublication.id,
+        description: currentPublication.description,
+        images: currentImages,
+        autorId: previewPublication.autorId,
+        autorType: previewPublication.autorType,
+        timestamp: previewPublication.timestamp,
+        number: currentPublication.numberContact,
+        city: currentPublication.city,
+        neighborhood: currentPublication.neighborhood,
+        typeContact: currentPublication.typeContact,
+        state: previewPublication.state,
+        limiteContactos: previewPublication.limiteContactos,
+        contacts: previewPublication.contacts,
+      };
+    }
+  }
+  /**
+   * Función que valida los datos que vienen del formulario
+   * @param data
+   * @returns
+   */
+  private validarFormulario(data: any): boolean {
+    if (!data) {
+      return false;
+    } else {
+      const formulario = data.formulario;
+      const images = data.imagenes;
+      if (
+        !formulario.description &&
+        formulario.city &&
+        formulario.neighborhood &&
+        formulario.typeContact &&
+        formulario.numberContact &&
+        images.length <= 5
+      ) {
+        return false;
+      }
+    }
+    return true;
+  }
+  /**
+   * Método para eliminar una publicación en cuestión
+   * OJO para esto debe ser el mismo autor, de resto no puede borrar publicaciones
+   * de otros.
+   * @param id
+   */
+  eliminatePublication(id: string) {
+    this.publicationService
+      .eliminatePublication(id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (eliminado) => {
+          if (eliminado) {
+            // Mostrar mensaje de éxito
+            toast.success('Publicación eliminada con éxito');
+            this.refreshPublications();
+            this.analyticsService.logCustomEvent('elimnate-a-publication', {});
+          }
+        },
+        error: (error) => {
+          toast.error('Hubo un error al eliminar la publicación');
+        },
+        complete: () => {},
+      });
+  }
+  /**
+   * Método para abrir el modal que permite editar unas publicación
+   * @param publication
+   */
+  editPublication(publication: Publication) {
+    if (!this.userData()) {
+      Swal.fire({
+        title: '¡No tienes cuenta!',
+        text: 'Para poder publicar debes tener cuenta y crear tu perfil',
+        icon: 'info',
+        showCancelButton: true, // Muestra el botón de cancelar
+        confirmButtonText: 'Crear perfil', // Texto del botón de confirmación
+        cancelButtonText: 'Luego lo completo', // Texto del botón de cancelar
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this._router.navigate(['/auth/register']);
+        } else if (result.isDismissed) {
+          Swal.close();
+        }
+      });
+      return;
+    }
+    this.actionPublication = ActionPublicationEnum.EDIT;
+    this.publicationToEdit = publication;
+    this.mostrarModalEditar = true;
+  }
+  /*** ============================================================================
+   *
+   *
+   *                Propiedades para el modal de reporte
+   *
+   *
+   * ===========================================================================*/
+  mostrarModalReporte = false;
+  publicacionAReportar: any = null;
+  enviandoReporte = false;
+
+  // Método que se ejecuta cuando se hace clic en reportar desde publication-card
+  reportPublication(publicacion: any): void {
+    this.publicacionAReportar = publicacion;
+    this.mostrarModalReporte = true;
+  }
+
+  // Método para cerrar el modal de reporte
+  cerrarModalReporte(): void {
+    this.mostrarModalReporte = false;
+    this.publicacionAReportar = null;
+    this.enviandoReporte = false;
+  }
+
+  // Método para procesar el reporte enviado desde el modal
+  procesarReporte(reporteData: any): void {
+    this.enviandoReporte = true;
+    const details = reporteData.detalles as string;
+    const publication = reporteData.publicacion as Publication;
+    const reason = reporteData.razon as string;
+    const userReporter = reporteData.usuarioReportador as
+      | WorkerUser
+      | TallerUSer
+      | SateliteUser;
+
+    if (!details && !publication && !reason && !userReporter) {
+      return;
+    }
+    // Crear el objeto del reporte con toda la información
+    const reporte = {
+      publicacionAutor: {
+        id: publication.autorId,
+        publicationId: publication.id,
+        name: publication.autor.name,
+        number: publication.number,
+      },
+      reportadoPor: {
+        id: userReporter.id,
+        name: userReporter.name,
+        number: userReporter.phone,
+      },
+      razon: reason,
+      detalles: details,
+      fechaReporte: new Date(),
+      estado: 'pendiente',
+    };
+    this.reportService
+      .crearReporte(reporte)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (result) => {
+          this.onReporteExitoso();
+          this.analyticsService.logCustomEvent('create-a-report-publication', {
+            pubication: publication.id,
+          });
+        },
+        error: (error) => {
+          this.onReporteError(error);
+          this.analyticsService.logCustomEvent(
+            'error-to-create-a-report-publication',
+            {
+              pubication: publication.id,
+            }
+          );
+        },
+      });
+  }
+
+  // Método para manejar el éxito del reporte
+  private onReporteExitoso(): void {
+    this.enviandoReporte = false;
+    this.cerrarModalReporte();
+    toast.success(
+      'Reporte creando con éxito, estaremos revisando tu reporte ¡Gracias!'
+    );
+  }
+
+  // Método para manejar errores del reporte
+  private onReporteError(error: any): void {
+    this.enviandoReporte = false;
+    toast.error('Error al enviar el reporte');
   }
 }

@@ -13,11 +13,26 @@ import {
   DocumentData,
   addDoc,
   where,
+  deleteDoc,
+  updateDoc,
 } from '@angular/fire/firestore';
-import { from, switchMap, map, forkJoin, Observable } from 'rxjs';
+import {
+  from,
+  switchMap,
+  map,
+  forkJoin,
+  Observable,
+  of,
+  catchError,
+  throwError,
+  tap,
+} from 'rxjs';
 import { Publication } from '../models/publication.model';
 import { PublicationDB } from '../models/publication-db.model';
+import { UploadImagesService } from '../../shared/data-access/upload-images.service';
+import { toast } from 'ngx-sonner';
 
+const PATH = 'posts';
 @Injectable({
   providedIn: 'root',
 })
@@ -25,7 +40,10 @@ export class PublicationDemandService {
   private lastVisible: QueryDocumentSnapshot<DocumentData> | null = null;
   private readonly PAGE_SIZE = 10;
 
-  constructor(private firestore: Firestore) {}
+  constructor(
+    private firestore: Firestore,
+    private uploadImagesService: UploadImagesService
+  ) {}
 
   // Método para obtener la primera página de publicaciones
   getInitialPublications(): Observable<Publication[]> {
@@ -40,10 +58,13 @@ export class PublicationDemandService {
     }
     return this.getPublications(false);
   }
-
-  // Método privado que maneja la lógica de consulta
+  /**
+   * Método para obtener las publicaciones
+   * @param isInitial
+   * @returns
+   */
   private getPublications(isInitial: boolean): Observable<Publication[]> {
-    const postsRef = collection(this.firestore, 'posts');
+    const postsRef = collection(this.firestore, PATH);
 
     let q;
     if (isInitial || !this.lastVisible) {
@@ -79,12 +100,8 @@ export class PublicationDemandService {
         );
         // Si no hay posts, retornar array vacío
         if (posts.length === 0) {
-          console.log('⛔ [Servicio] No hay posts, retornando array vacío');
           return from([]);
         }
-
-        console.log('👥 [Servicio] Obteniendo autores para', posts, 'posts');
-
         // Para cada post, obtener el autor
         const postsWithAuthor$ = posts.map((post) => {
           const userQuery = query(
@@ -92,22 +109,11 @@ export class PublicationDemandService {
             where('userId', '==', post.autorId),
             limit(1)
           );
-          console.log('Query', userQuery);
           return from(getDocs(userQuery)).pipe(
             map((querySnapshot) => {
-              console.log(
-                '👤 [Servicio] Autor para post',
-                post.id,
-                ':',
-                querySnapshot.docs.length > 0 ? 'encontrado' : 'no encontrado'
-              );
-
               const authorDoc =
                 querySnapshot.docs.length > 0 ? querySnapshot.docs[0] : null;
               const authorData = authorDoc ? authorDoc.data() : null;
-
-              console.log('AutorData', authorData);
-
               return {
                 ...post,
                 autor: authorData
@@ -132,49 +138,123 @@ export class PublicationDemandService {
   // Método para verificar si hay más publicaciones disponibles
   hasMorePublications(): boolean {
     const hasMore = this.lastVisible !== null;
-    //console.log('🔍 [Servicio] hasMorePublications:', hasMore, 'lastVisible:', this.lastVisible?.id || 'null');
     return hasMore;
   }
   // Método para resetear la paginación
   resetPagination(): void {
-    console.log('🔄 [Servicio] Reseteando paginación');
     this.lastVisible = null;
   }
+  /**
+   * Se crea una publicaciónn
+   * @param publication
+   * @param files
+   * @returns
+   */
+  addPublication(
+    publication: Omit<PublicationDB, 'id'>,
+    files: File[]
+  ): Observable<string> {
+    if (files && files.length > 0) {
+      return this.uploadImagesService.uploadImages(files).pipe(
+        switchMap((imagesUrls: string[]) => {
+          const postsRef = collection(this.firestore, PATH);
+          const docData = {
+            ...publication,
+            timestamp: new Date(), // Asegurar timestamp actual
+            contacts: publication.contacts || 0,
+            images: imagesUrls,
+          };
 
-  // Añadir una sola publicación
-  addPublication(publication: Omit<PublicationDB, 'id'>): Observable<string> {
-    console.log('➕ [Servicio] Añadiendo nueva publicación:', publication);
+          return from(addDoc(postsRef, docData)).pipe(
+            map((docRef) => {
+              return docRef.id;
+            })
+          );
+        })
+      );
+    } else {
+      const postsRef = collection(this.firestore, PATH);
+      const docData = {
+        ...publication,
+        timestamp: new Date(), // Asegurar timestamp actual
+        contacts: publication.contacts || 0,
+      };
 
-    const postsRef = collection(this.firestore, 'posts');
-    const docData = {
-      ...publication,
-      timestamp: new Date(), // Asegurar timestamp actual
-      contacts: publication.contacts || 0,
-    };
-
-    return from(addDoc(postsRef, docData)).pipe(
-      map((docRef) => {
-        console.log('✅ [Servicio] Publicación añadida con ID:', docRef.id);
-        return docRef.id;
-      })
+      return from(addDoc(postsRef, docData)).pipe(
+        map((docRef) => {
+          return docRef.id;
+        })
+      );
+    }
+  }
+  /**
+   * Método que elimina en firebase la publicación del id enviado
+   * @param id
+   */
+  eliminatePublication(id: string) {
+    const postCollection = collection(this.firestore, PATH);
+    const docRef = doc(postCollection, id);
+    return from(deleteDoc(docRef)).pipe(
+      map(() => true) // Eliminación exitosa
     );
   }
+  /**
+   *
+   * @param publicationToEdit
+   * @param images
+   * @param imagesToDelete
+   * @returns
+   */
+  updatePublicationEdit(
+    publicationToEdit: PublicationDB,
+    images: File[],
+    imagesToDelete: string[]
+  ): Observable<any> {
+    return of(null).pipe(
+      //1. Verificamos si toca subir imagenes
+      switchMap(() => {
+        if (images && images.length > 0) {
+          return this.uploadImagesService.uploadImages(images);
+        } else {
+          return of([]);
+        }
+      }),
+      // 2. Preparar las imagenes ya subidas
+      switchMap((newImageUrls: string[]) => {
+        let updateImages: string[] = [...(publicationToEdit.images || [])];
 
-  // Añadir múltiples publicaciones (para testing)
-  addMultiplePublications(
-    publications: Omit<PublicationDB, 'id'>[]
-  ): Observable<string[]> {
-    console.log(
-      '➕ [Servicio] Añadiendo múltiples publicaciones:',
-      publications.length
-    );
-
-    const addPromises = publications.map((pub) => this.addPublication(pub));
-
-    return forkJoin(addPromises).pipe(
-      map((ids) => {
-        console.log('✅ [Servicio] Todas las publicaciones añadidas:', ids);
-        return ids;
+        if (newImageUrls.length > 0) {
+          updateImages.push(...newImageUrls);
+        }
+        const updatedPublication: PublicationDB = {
+          ...publicationToEdit,
+          images: updateImages,
+          updatedAt: new Date().toISOString(),
+        };
+        //Actualizamos en la base de datos
+        const _collection = collection(this.firestore, PATH);
+        const docRef = doc(_collection, publicationToEdit.id);
+        return from(updateDoc(docRef, { ...updatedPublication }));
+      }),
+      // 3. Eliminar las imagenes
+      switchMap(() => {
+        if (imagesToDelete && imagesToDelete.length > 0) {
+          const deletedObservables = imagesToDelete.map((imageUrl) =>
+            this.uploadImagesService.deleteImageFromStorage(imageUrl).pipe(
+              catchError((error) => {
+                console.error(`Error al eliminar imagen ${imageUrl}:`, error);
+                return of(null); // Continúa aunque falle una imagen
+              })
+            )
+          );
+          return forkJoin(deletedObservables);
+        } else {
+          return of(null);
+        }
+      }),
+      catchError((error) => {
+        console.error('Error al actualizar la publicación:', error);
+        return throwError(() => error);
       })
     );
   }
