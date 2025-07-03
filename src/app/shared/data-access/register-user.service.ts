@@ -142,8 +142,8 @@ export class RegisterUserService {
    * y se un usuario con telefono para poder contactarlo después si
    * no creó un perfil
    */
-  createUserWithPhoneNoProfile(dataUser: any) {
-    const _collection = collection(this._firestore, 'userNoProfile');
+  createUserWithNameAndPhoneNoProfile(dataUser: any) {
+    const _collection = collection(this._firestore, 'users');
     return from(
       addDoc(_collection, {
         ...dataUser,

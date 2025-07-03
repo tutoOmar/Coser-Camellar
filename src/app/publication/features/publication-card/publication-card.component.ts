@@ -1,43 +1,46 @@
-import { Component, HostListener, Input, OnInit } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  HostListener,
+  Input,
+  OnInit,
+  Output,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Publication } from '../../models/publication.model';
 import { WhatsAppService } from '../../../shared/data-access/whats-app.service';
 import { CallService } from '../../../shared/data-access/call.service';
 import { SocialShareService } from '../../../shared/data-access/social-share.service';
-
-interface Publicacion {
-  id: string;
-  description: string;
-  images: string[]; // máx 5 URLs
-  autorId: string;
-  timestamp: Date;
-  number: string;
-  city: string; // obligatorio
-  neighborhood: string; // obligatorio
-  typeContact: string;
-  state: string;
-  limiteContactos?: number; // p. ej., 5 semanales
-  contacts: number;
-}
-
+import WaButtonComponent from '../../../shared/ui/wa-button/wa-button.component';
+import { AuthService } from '../../../auth/data-access/auth.service';
+import { AuthStateService } from '../../../shared/data-access/auth-state.service';
+import { CallButtonComponent } from '../../../shared/ui/call-button/call-button.component';
+import { AnalyticsService } from '../../../shared/data-access/analytics.service';
 @Component({
   selector: 'app-publication-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, WaButtonComponent, CallButtonComponent],
   templateUrl: './publication-card.component.html',
   styleUrl: './publication-card.component.scss',
 })
 export class PublicationCardComponent implements OnInit {
   // Publicaciones que vienen desde el componente padre
   @Input() publicacion!: Publication;
+  // Acción que suceden dentro del componente
+  @Output() eliminate = new EventEmitter<string>();
+  @Output() edit = new EventEmitter<Publication>();
+  @Output() report = new EventEmitter<Publication>();
 
+  //
   compartiendo = false; // Para mostrar loading state
 
   constructor(
     private whatsAppService: WhatsAppService,
     private callService: CallService,
-    private socialShareService: SocialShareService
+    private socialShareService: SocialShareService,
+    private userAuthService: AuthStateService,
+    private analyticsService: AnalyticsService
   ) {}
 
   // Propiedad para controlar la visibilidad del menú
@@ -61,11 +64,58 @@ export class PublicationCardComponent implements OnInit {
       return `hace ${minutos} minutos`;
     } else if (horas < 24) {
       return `hace ${horas} horas`;
-    } else {
+    } else if (dias < 30) {
       return `hace ${dias} días`;
+    } else {
+      return `Hace ${this.convertDaysToYearsMonths(dias)}`;
     }
   }
-
+  /**
+   * Convierte días en una representación de años, meses y días
+   * @param days - Número de días a convertir
+   * @param format - Formato de salida: 'object' | 'string' | 'short'
+   * @returns Conversión en el formato especificado
+   */
+  convertDaysToYearsMonths(days: number): string {
+    if (days < 0) {
+      throw new Error('El número de días no puede ser negativo');
+    }
+    // Constantes para cálculo aproximado
+    const DAYS_PER_YEAR = 365.25; // Incluye años bisiestos
+    const DAYS_PER_MONTH = 30.44; // Promedio de días por mes (365.25/12)
+    // Cálculos
+    const years = Math.floor(days / DAYS_PER_YEAR);
+    const remainingDaysAfterYears = days - years * DAYS_PER_YEAR;
+    const months = Math.floor(remainingDaysAfterYears / DAYS_PER_MONTH);
+    const remainingDays = Math.floor(
+      remainingDaysAfterYears - months * DAYS_PER_MONTH
+    );
+    const stringParts = [];
+    if (years > 0) {
+      stringParts.push(`${years} ${years === 1 ? 'año' : 'años'}`);
+    }
+    if (months > 0) {
+      stringParts.push(`${months} ${months === 1 ? 'mes' : 'meses'}`);
+    }
+    if (remainingDays > 0) {
+      stringParts.push(
+        `${remainingDays} ${remainingDays === 1 ? 'día' : 'días'}`
+      );
+    }
+    if (stringParts.length === 0) {
+      return '0 días';
+    } else if (stringParts.length === 1) {
+      return stringParts[0];
+    } else if (stringParts.length === 2) {
+      return stringParts.join(' y ');
+    } else {
+      return (
+        stringParts.slice(0, -1).join(', ') +
+        ' y ' +
+        stringParts[stringParts.length - 1]
+      );
+    }
+  }
   /**
    * Maneja el click en el botón de WhatsApp
    */
@@ -91,27 +141,6 @@ export class PublicationCardComponent implements OnInit {
       this.handleContactError('WhatsApp');
     }
   }
-
-  /**
-   * Maneja el click en el botón de llamada
-   */
-  makeCall(): void {
-    if (!this.isPhoneValid()) {
-      this.handleInvalidPhone();
-      return;
-    }
-
-    try {
-      this.callService.makePhoneCall(this.publicacion.number);
-
-      // Opcional: Tracking de evento para analytics
-      this.trackContactEvent('call');
-    } catch (error) {
-      console.error('Error al realizar la llamada:', error);
-      this.handleContactError('llamada');
-    }
-  }
-
   /**
    * Valida si el número de teléfono es válido
    * @returns true si el número es válido
@@ -184,7 +213,12 @@ export class PublicationCardComponent implements OnInit {
     this.mostrarMenu = !this.mostrarMenu;
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    const user = this.userAuthService.currentUser;
+    if (user?.uid === this.publicacion.autorId) {
+      this.esAutor = true;
+    }
+  }
 
   /**
    * Métodos para compartir en redes sociales
@@ -202,6 +236,7 @@ export class PublicationCardComponent implements OnInit {
     } else {
       // Mostrar opciones sociales
       this.mostrarOpcionesSociales = !this.mostrarOpcionesSociales;
+      this.mostrarMenu = !this.mostrarMenu;
     }
   }
   /**
@@ -330,10 +365,9 @@ export class PublicationCardComponent implements OnInit {
    * @param platform - Plataforma donde se compartió
    */
   private onCompartirExitoso(platform: string): void {
-    // Aquí puedes agregar tracking de analytics
-    //this.trackShareEvent(platform, 'success');
-    // Mostrar notificación de éxito (opcional)
-    // this.toastService.success(`Compartido en ${platform}`);
+    this.analyticsService.logCustomEvent('shared-in-' + platform, {
+      pubication: this.publicacion.id,
+    });
   }
 
   /**
@@ -341,8 +375,39 @@ export class PublicationCardComponent implements OnInit {
    * @param platform - Plataforma donde falló
    */
   private onCompartirError(platform: string): void {
-    //this.trackShareEvent(platform, 'error');
-    // Mostrar notificación de error (opcional)
-    // this.toastService.error(`No se pudo compartir en ${platform}`);
+    this.analyticsService.logCustomEvent('error-share-in-' + platform, {
+      pubication: this.publicacion.id,
+    });
+  }
+  /**
+   * Mensaje personalizado
+   */
+  messagePersonalized(descriptionMessage: string): string {
+    return (
+      'Hola, vi tu publicación en Coser & Camellar sobre *' +
+      descriptionMessage +
+      '* quiero obtener más información'
+    );
+  }
+  /**
+   * Método que emita la acción de eliminar publicación
+   */
+  onEliminate() {
+    this.eliminate.emit(this.publicacion.id);
+    this.mostrarMenu = !this.mostrarMenu;
+  }
+  /**
+   * Método que emite la acción de editar la publicación
+   */
+  onEdit() {
+    this.mostrarMenu = !this.mostrarMenu;
+    this.edit.emit(this.publicacion);
+  }
+  /**
+   *
+   */
+  onReport() {
+    this.mostrarMenu = !this.mostrarMenu;
+    this.report.emit(this.publicacion);
   }
 }
