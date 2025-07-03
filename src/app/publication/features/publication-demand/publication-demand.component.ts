@@ -11,7 +11,11 @@ import { AuthStateService } from '../../../shared/data-access/auth-state.service
 import { WorksService } from '../../../works/services/works.service';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
-import { PublicationDB, StateEnum } from '../../models/publication-db.model';
+import {
+  OfferOrSearchJobEnum,
+  PublicationDB,
+  StateEnum,
+} from '../../models/publication-db.model';
 import { toast } from 'ngx-sonner';
 import { ActionPublicationEnum } from '../../models/actionPublicationEnum';
 import { PublicationReportModalComponent } from '../publication-report-modal/publication-report-modal.component';
@@ -28,6 +32,7 @@ export interface PublicationModalData {
     neighborhood: string;
     typeContact: string;
     numberContact: string;
+    offerOrSearchJob: string;
   };
   imagenes: [];
   imagesInTheServer?: string[];
@@ -44,7 +49,6 @@ export interface PublicationModalData {
     PublicationReportModalComponent,
   ],
   templateUrl: './publication-demand.component.html',
-  styleUrl: './publication-demand.component.scss',
 })
 export default class PublicationDemandComponent {
   publications: Publication[] = [];
@@ -229,12 +233,15 @@ export default class PublicationDemandComponent {
       });
       return;
     }
+    this.analyticsService.logCustomEvent('open-modal-create-publication', {
+      pubication: this.userData().id,
+    });
     this.actionPublication = ActionPublicationEnum.CREATE;
     this.mostrarModalCrear = true;
   }
 
   cerrarModalCrearPublicacion(): void {
-    this.analyticsService.logCustomEvent('close-modal', {
+    this.analyticsService.logCustomEvent('close-modal-ṕublication', {
       pubication: this.userData().id,
     });
     this.publicationToEdit = null;
@@ -376,6 +383,8 @@ export default class PublicationDemandComponent {
       state: StateEnum.ACTIVE,
       limiteContactos: 5,
       contacts: 0,
+      offerOrSearchJob: data.formulario
+        .offerOrSearchJob as OfferOrSearchJobEnum,
     };
   }
   /**
@@ -478,6 +487,9 @@ export default class PublicationDemandComponent {
       });
       return;
     }
+    this.analyticsService.logCustomEvent('open-modal-edit-publication', {
+      pubication: this.userData().id,
+    });
     this.actionPublication = ActionPublicationEnum.EDIT;
     this.publicationToEdit = publication;
     this.mostrarModalEditar = true;
@@ -497,6 +509,9 @@ export default class PublicationDemandComponent {
   reportPublication(publicacion: any): void {
     this.publicacionAReportar = publicacion;
     this.mostrarModalReporte = true;
+    this.analyticsService.logCustomEvent('open-modal-report-publication', {
+      pubication: this.userData().id,
+    });
   }
 
   // Método para cerrar el modal de reporte

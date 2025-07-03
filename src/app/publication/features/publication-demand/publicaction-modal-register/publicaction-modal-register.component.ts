@@ -17,6 +17,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Publication } from '../../../models/publication.model';
 import {
+  OfferOrSearchJobEnum,
   StateEnum,
   typeContactEnum,
 } from '../../../models/publication-db.model';
@@ -33,6 +34,7 @@ export interface FormularioPublicacion {
   neighborhood: string;
   typeContact: TypeContactEnum | '';
   numberContact: string;
+  offerOrSearchJob: OfferOrSearchJobEnum | '';
 }
 // Interfaces para los datos que se envian para crear la publiacion o editarla
 interface DatosParaCrearPublicacion {
@@ -137,6 +139,7 @@ export class PublicactionModalRegisterComponent implements OnChanges {
     neighborhood: '',
     typeContact: '',
     numberContact: '',
+    offerOrSearchJob: '',
   };
 
   imagenesSeleccionadas: ImagenSeleccionada[] = [];
@@ -199,11 +202,12 @@ export class PublicactionModalRegisterComponent implements OnChanges {
       neighborhood: '',
       typeContact: '',
       numberContact: '',
+      offerOrSearchJob: '',
     };
     this.imagenesSeleccionadas = [];
   }
   /**
-   *
+   * Carga datos para editar los archivos
    */
   cargarDatosParaEdicion() {
     if (this.publicationToEdit) {
@@ -215,6 +219,7 @@ export class PublicactionModalRegisterComponent implements OnChanges {
           this.publicationToEdit.typeContact
         ),
         numberContact: this.publicationToEdit.number,
+        offerOrSearchJob: this.publicationToEdit.offerOrSearchJob || '',
       };
       this.imagesInTheServer = this.publicationToEdit.images;
     }

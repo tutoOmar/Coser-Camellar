@@ -15,6 +15,7 @@ export interface PublicationDB {
   limiteContactos?: number; // p. ej., 5 semanales
   contacts: number;
   updatedAt?: string;
+  offerOrSearchJob?: OfferOrSearchJobEnum;
 }
 
 export enum StateEnum {
@@ -28,4 +29,9 @@ export enum typeContactEnum {
   CALL = 'call',
   WHATSAPP = 'whatsapp',
   BOTH = 'both',
+}
+
+export enum OfferOrSearchJobEnum {
+  OFFER = 'offer',
+  SEARCH = 'search',
 }
