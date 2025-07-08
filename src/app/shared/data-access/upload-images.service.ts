@@ -21,8 +21,8 @@ export class UploadImagesService {
    * @param file
    * @returns
    */
-  private uploadImage(file: File): Observable<string> {
-    const filepath = this.generateUniqueName(file);
+  uploadImage(file: File, pathToSave = 'post'): Observable<string> {
+    const filepath = this.generateUniqueName(file, pathToSave);
     const fileRef = ref(this.storage, filepath);
     const uploadTask = uploadBytesResumable(fileRef, file);
     return new Observable<string>((observer) => {
@@ -64,12 +64,12 @@ export class UploadImagesService {
    * @param file
    * @returns
    */
-  generateUniqueName(file: File): string {
+  generateUniqueName(file: File, pathToSave: string): string {
     const timestamp = new Date().getTime(); // o usar Date.now()
     const extension = file.name.split('.').pop(); // para conservar la extensión
     const baseName = file.name.split('.').slice(0, -1).join('.'); // sin la extensión
 
-    return `posts/${baseName}_${timestamp}.${extension}`;
+    return `${pathToSave}/${baseName}_${timestamp}.${extension}`;
   }
   /**
    * Elimina una imagen del Firebase Storage

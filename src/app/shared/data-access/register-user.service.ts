@@ -9,6 +9,7 @@ import {
   query,
   updateDoc,
   where,
+  getDocs,
 } from '@angular/fire/firestore';
 import { SateliteUser } from '../../works/features/models/satelite.model';
 import { TallerUSer } from '../../works/features/models/talleres.model';
@@ -21,8 +22,9 @@ import {
   Storage,
   uploadBytesResumable,
 } from '@angular/fire/storage';
-import { timeStamp } from 'console';
-
+import { UploadImagesService } from './upload-images.service';
+import { EmpresaUser } from '../../works/features/models/empresa.model';
+import { NaturalPersonUser } from '../../works/features/models/natural-person.model';
 @Injectable({
   providedIn: 'root',
 })
@@ -30,6 +32,7 @@ export class RegisterUserService {
   private _firestore = inject(Firestore);
   private _authState = inject(AuthStateService);
   private _storage = inject(Storage);
+  private _imageService = inject(UploadImagesService);
 
   loading = signal<boolean>(true);
   constructor() {}
@@ -107,7 +110,7 @@ export class RegisterUserService {
     });
   }
   /**
-   *
+   * Actualiza un usuario por id
    * @param userInfo
    * @param path
    * @param id
@@ -171,6 +174,72 @@ export class RegisterUserService {
     return collectionData(userQuery).pipe(
       map((data: any) => data.length > 0), // Devuelve true si encuentra un documento
       catchError(() => of(false)) // En caso de error, devuelve false
+    );
+  }
+  /**
+   * Método para actualizar el usuario en la base de datos de fireStore
+   * Este actualización se hace con base al userId que es adquirido al crear un usuario
+   */
+  updateByUserIdTheUser(
+    collectionSelected: string,
+    user:
+      | Omit<WorkerUser, 'id'>
+      | Omit<TallerUSer, 'id'>
+      | Omit<SateliteUser, 'id'>
+      | Omit<EmpresaUser, 'id'>
+      | Omit<NaturalPersonUser, 'id'>,
+    image: File | null
+  ): Observable<any> {
+    console.log('colection', collectionSelected, 'user', user, 'image', image);
+    if (image) {
+      // Si hay imagen, la subimos y luego actualizamos el usuario
+      return this._imageService.uploadImage(image).pipe(
+        switchMap((imageUrl: string) => {
+          const userWithImage = {
+            ...user,
+            photo: imageUrl,
+            userId: this._authState.currentUser?.uid,
+          };
+          console.log('Se sube la imagen', imageUrl, userWithImage);
+          return this.updateUserByUserId(collectionSelected, userWithImage);
+        })
+      );
+    } else {
+      // Si no hay imagen, solo actualizamos el usuario
+      const userWithoutImage = {
+        ...user,
+        userId: this._authState.currentUser?.uid,
+      };
+      return this.updateUserByUserId(collectionSelected, userWithoutImage);
+    }
+  }
+
+  // Método auxiliar para actualizar por userId
+  private updateUserByUserId(
+    collectionSelected: string,
+    user:
+      | Omit<WorkerUser, 'id'>
+      | Omit<TallerUSer, 'id'>
+      | Omit<SateliteUser, 'id'>
+      | Omit<EmpresaUser, 'id'>
+      | Omit<NaturalPersonUser, 'id'>
+  ): Observable<any> {
+    const _collection = collection(this._firestore, collectionSelected);
+    // Crear query para buscar por userId
+    const q = query(_collection, where('userId', '==', user.userId));
+    console.log('User', user, 'Colection', collectionSelected);
+    return from(getDocs(q)).pipe(
+      switchMap((querySnapshot) => {
+        if (querySnapshot.empty) {
+          throw new Error('No se encontró ningún usuario con ese userId');
+        }
+        console.log('Pasó esto');
+        // Obtener el primer documento que coincida
+        const docSnap = querySnapshot.docs[0];
+        const docRef = doc(this._firestore, collectionSelected, docSnap.id);
+        // Actualizar el documento
+        return from(updateDoc(docRef, { ...user }));
+      })
     );
   }
 }

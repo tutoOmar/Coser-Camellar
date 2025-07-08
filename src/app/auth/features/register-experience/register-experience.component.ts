@@ -247,7 +247,7 @@ export default class RegisterExperienceComponent implements OnInit {
     const baseData = {
       ...this.mainForm.value.basicInfo,
       ...this.mainForm.value.experienceInfo,
-      typeUser: this.userType,
+      typeUSer: this.userType,
       status: Status.LIBRE,
     };
 

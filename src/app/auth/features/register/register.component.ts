@@ -26,6 +26,11 @@ import { AuthStateService } from '../../../shared/data-access/auth-state.service
 import { WorksService } from '../../../works/services/works.service';
 import { AnalyticsService } from '../../../shared/data-access/analytics.service';
 import { SanitizeInputDirective } from '../../../shared/directives/sanitize-input.directive';
+import { RegisterEmpresasComponent } from '../register-empresas/register-empresas.component';
+import { RegisterNaturalPersonComponent } from '../register-natural-person/register-natural-person.component';
+import { EmpresaUser } from '../../../works/features/models/empresa.model';
+import { NaturalPersonUser } from '../../../works/features/models/natural-person.model';
+import { ImagenSeleccionada } from '../../../shared/models/imagen-seleccionada.model';
 
 @Component({
   selector: 'app-register',
@@ -35,6 +40,8 @@ import { SanitizeInputDirective } from '../../../shared/directives/sanitize-inpu
     FormsModule,
     ReactiveFormsModule,
     SanitizeInputDirective,
+    RegisterEmpresasComponent,
+    RegisterNaturalPersonComponent,
   ],
   providers: [LocationService],
   templateUrl: './register.component.html',
@@ -153,11 +160,12 @@ export default class RegisterComponent implements OnInit, AfterViewInit {
         takeUntil(this.destroy$),
         switchMap((res) => {
           return this.userService.checkUserExists();
-        })
+        }) /// pongale algo para que tenga un guard si aún no ha inicado sesión
       )
       .subscribe((state) => {
+        console.log(state); // Ojo esta logica debe sí o sí ser reemplazada por guards
         if (state) {
-          this.router.navigate(['/works']);
+          this.router.navigate(['/auth/sign-in']);
         }
       });
   }
@@ -170,6 +178,7 @@ export default class RegisterComponent implements OnInit, AfterViewInit {
   // Método para seleccionar el tipo de formulario
   selectType(type: string) {
     this.selectedForm = type;
+    this.removeImage();
   }
   goBack() {
     window.history.back();
@@ -196,10 +205,11 @@ export default class RegisterComponent implements OnInit, AfterViewInit {
     ) {
       this.newWorker.phone = `${this.newWorker.phone}`;
       const newWorker: WorkerUser = this.newWorker;
-      const path = this.newWorker.typeUSer ? this.newWorker.typeUSer : '';
+      // const path = this.newWorker.typeUSer ? this.newWorker.typeUSer : '';
+      const PATH = 'users'; // Nuevo path donde se guardarán todos los usarios
 
       this.registerService
-        .create(newWorker, path, this.selectedImage)
+        .updateByUserIdTheUser(PATH, newWorker, this.selectedImage)
         .pipe(takeUntil(this.destroy$)) // Detener la suscripción en la destrucción
         .subscribe({
           next: () => {
@@ -208,6 +218,7 @@ export default class RegisterComponent implements OnInit, AfterViewInit {
             this.router.navigate(['/works']);
           },
           error: (error) => {
+            console.log('Este errors', error);
             toast.error('Hubo un problema en el registro');
             this.loading.set(false);
           },
@@ -321,9 +332,11 @@ export default class RegisterComponent implements OnInit, AfterViewInit {
     ) {
       this.newBusiness.phone = `${this.newBusiness.phone}`;
       const newBusiness = this.newBusiness;
-      const path = this.newBusiness.typeUSer ? this.newBusiness.typeUSer : '';
+      //const path = this.newBusiness.typeUSer ? this.newBusiness.typeUSer : '';
+      const PATH = 'users'; // Nuevo path donde se guardarán todos los usarios
+
       this.registerService
-        .create(newBusiness, path, this.selectedImage)
+        .updateByUserIdTheUser(PATH, newBusiness, this.selectedImage)
         .pipe(takeUntil(this.destroy$)) // Detener la suscripción en la destrucción
         .subscribe({
           next: () => {
@@ -408,6 +421,10 @@ export default class RegisterComponent implements OnInit, AfterViewInit {
       this.availableMachines.push(machine); // Añadir de nuevo a la lista de disponibles
     }
   }
+  /**
+   *  Funciones compartidasa
+   */
+
   /**Remueve guiónes de las palabras que normalmente las lleva*/
   removeHyphens(wordWithHyphens: string | undefined): string {
     if (wordWithHyphens) {
@@ -426,22 +443,28 @@ export default class RegisterComponent implements OnInit, AfterViewInit {
   isMachineEnum(value: string): value is Machines {
     return Object.values(Machines).includes(value as Machines);
   }
-  // Carga la lista de paises
+  /**
+   * Metodo para traer los paises desde una base de datos
+   */
   loadCountries() {
-    this.locationService.getCountries().subscribe((data) => {
-      this.countries = data
-        .map((country) => ({
-          name: country.name.common,
-          code: country.cca2,
-        }))
-        .sort((a, b) => a.name.localeCompare(b.name));
-    });
+    this.locationService
+      .getCountries()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        this.countries = data
+          .map((country) => ({
+            name: country.name.common,
+            code: country.cca2,
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name));
+      });
   }
   // Carga la lista de ciudades
   onCountryChange() {
     if (this.newWorker.country) {
       this.locationService
         .getCities(this.newWorker.country)
+        .pipe(takeUntil(this.destroy$))
         .subscribe((data) => {
           this.cities = data.data.map((city: any) => city.name);
         });
@@ -496,5 +519,54 @@ export default class RegisterComponent implements OnInit, AfterViewInit {
   ngOnDestroy(): void {
     this.destroy$.next(); // Emite un valor para finalizar las suscripciones
     this.destroy$.complete(); // Completa el Subject
+  }
+
+  // Métodos para manejar formsSumit de los dos nuevos componentes
+  imageFromFormsEmpresaOrNaturalUser!: File;
+  onSubmitForm1(form: Omit<EmpresaUser, 'id'> | Omit<NaturalPersonUser, 'id'>) {
+    console.log('NeoForm', form);
+    this.loading.set(true);
+    if (form) {
+      form.phone = `${form.phone}`;
+      //const path = this.newBusiness.typeUSer ? this.newBusiness.typeUSer : '';
+      const PATH = 'users'; // Nuevo path donde se guardarán todos los usarios
+
+      this.registerService
+        .updateByUserIdTheUser(
+          PATH,
+          form,
+          this.imageFromFormsEmpresaOrNaturalUser
+        )
+        .pipe(takeUntil(this.destroy$)) // Detener la suscripción en la destrucción
+        .subscribe({
+          next: () => {
+            toast.success('Registro exitoso');
+            this.loading.set(false);
+            this.router.navigate(['/works']);
+          },
+          error: (error) => {
+            toast.error('Hubo un problema en el registro');
+            this.loading.set(false);
+          },
+        });
+    } else {
+      this.loading.set(false);
+      toast.error('Debes llenar todos los campos');
+    }
+    console.log(this.imageFromFormsEmpresaOrNaturalUser);
+  }
+  onImage(event: ImagenSeleccionada) {
+    this.imageFromFormsEmpresaOrNaturalUser = event.file;
+  }
+  /**
+   * Quita la imagen del usuario
+   */
+  removeImage() {
+    this.imagePreview = null;
+    // También resetear el input file si es necesario
+    const fileInput = document.getElementById('imageInput') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
   }
 }

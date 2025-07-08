@@ -33,6 +33,7 @@ import { UploadImagesService } from '../../shared/data-access/upload-images.serv
 import { toast } from 'ngx-sonner';
 
 const PATH = 'posts';
+const PATH_USER = 'users';
 @Injectable({
   providedIn: 'root',
 })
@@ -104,8 +105,9 @@ export class PublicationDemandService {
         }
         // Para cada post, obtener el autor
         const postsWithAuthor$ = posts.map((post) => {
+          console.log('Ahhh', post);
           const userQuery = query(
-            collection(this.firestore, post.autorType),
+            collection(this.firestore, PATH_USER),
             where('userId', '==', post.autorId),
             limit(1)
           );
@@ -114,6 +116,8 @@ export class PublicationDemandService {
               const authorDoc =
                 querySnapshot.docs.length > 0 ? querySnapshot.docs[0] : null;
               const authorData = authorDoc ? authorDoc.data() : null;
+              console.log('Querysanpshot', authorData);
+
               return {
                 ...post,
                 autor: authorData
@@ -135,6 +139,101 @@ export class PublicationDemandService {
     );
   }
 
+  /**
+   * Método optimizado para obtener las publicaciones de un usuario específico
+   * @param userId - ID del usuario del cual queremos obtener las publicaciones
+   * @returns Observable con las publicaciones del usuario incluyendo datos del autor
+   */
+  getUsersPublicationsByUserId(userId: string): Observable<Publication[]> {
+    const postsRef = collection(this.firestore, PATH);
+    if (userId) {
+      // Query para obtener las publicaciones del usuario
+      const q = query(
+        postsRef,
+        where('autorId', '==', userId), // Corregido: autorId en lugar de userId
+        orderBy('timestamp', 'desc')
+      );
+      console.log('Por acá si llego?', userId);
+      return from(getDocs(q)).pipe(
+        switchMap((snapshot) => {
+          console.log('snapshot', snapshot);
+          // Si no hay publicaciones, retornar array vacío
+          if (snapshot.docs.length === 0) {
+            return of([]);
+          }
+
+          const posts: PublicationDB[] = snapshot.docs.map(
+            (docSnap) =>
+              ({
+                id: docSnap.id,
+                ...docSnap.data(),
+                timestamp:
+                  docSnap.data()['timestamp']?.toDate?.() ||
+                  docSnap.data()['timestamp'],
+              } as PublicationDB)
+          );
+          console.log('post', posts);
+
+          // Obtener el tipo de autor de la primera publicación
+          // (todas tendrán el mismo autorId y autorType)
+          const firstPost = posts[0];
+          const authorType = firstPost.autorType;
+          const authorId = firstPost.autorId;
+
+          // Una sola consulta para obtener los datos del autor
+          const userQuery = query(
+            collection(this.firestore, PATH_USER),
+            where('userId', '==', authorId),
+            limit(1)
+          );
+
+          return from(getDocs(userQuery)).pipe(
+            map((querySnapshot) => {
+              const authorDoc =
+                querySnapshot.docs.length > 0 ? querySnapshot.docs[0] : null;
+              const authorData = authorDoc ? authorDoc.data() : null;
+
+              // Datos del autor que se reutilizarán para todas las publicaciones
+              const autor = authorData
+                ? {
+                    name: authorData['name'] || 'Usuario desconocido',
+                    imageAvatarUrl: authorData['photo'] || '',
+                  }
+                : {
+                    name: 'Usuario desconocido',
+                    imageAvatarUrl: '',
+                  };
+
+              // Aplicar los mismos datos del autor a todas las publicaciones
+              return posts.map((post) => ({
+                ...post,
+                autor,
+              })) as Publication[];
+            }),
+            catchError((error) => {
+              console.error('Error fetching author data:', error);
+              // En caso de error, retornar publicaciones sin datos del autor
+              return of(
+                posts.map((post) => ({
+                  ...post,
+                  autor: {
+                    name: 'Usuario desconocido',
+                    imageAvatarUrl: '',
+                  },
+                })) as Publication[]
+              );
+            })
+          );
+        }),
+        catchError((error) => {
+          console.error('Error fetching publications:', error);
+          return of([]);
+        })
+      );
+    } else {
+      return of([]);
+    }
+  }
   // Método para verificar si hay más publicaciones disponibles
   hasMorePublications(): boolean {
     const hasMore = this.lastVisible !== null;

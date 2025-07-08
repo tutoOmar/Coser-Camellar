@@ -1,0 +1,125 @@
+<div class="client-profile-container">
+  <!-- Botón Editar Perfil -->
+  <button
+    (click)="onEditProfile()"
+    class="w-64 text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+  >
+    Editar perfil
+  </button>
+
+  <!-- Estadísticas del perfil 
+   
+  Aun se debe pulir pero es un gran añadido al perfil 
+  -->
+  <!-- <div class="profile-stats mt-5 ml-4 flex flex-wrap gap-4">
+    <div *ngIf="profileData?.countProfileVisits" class="stat-item">
+      <strong>Visitas al perfil:</strong> {{ profileData?.countProfileVisits }}
+    </div>
+    <div *ngIf="profileData?.countContactViaWa" class="stat-item">
+      <strong>Contactos vía WhatsApp:</strong>
+      {{ profileData?.countContactViaWa }}
+    </div>
+  </div> -->
+
+  <!-- Información del perfil -->
+  <div class="profile-content flex flex-row justify-center">
+    <div class="profile-header-complete">
+      <div class="profile-header">
+        <!-- Foto del perfil -->
+        <div class="profile-photo">
+          <img
+            class="p-8 rounded-t-lg image"
+            [src]="getProfilePhoto()"
+            [alt]="'Foto de ' + profileData?.name"
+          />
+        </div>
+
+        <!-- Información básica -->
+        <div class="profile-info">
+          <h2 class="mt-2">{{ profileData?.name }}</h2>
+
+          <!-- Información específica para empresa -->
+          <div *ngIf="isEmpresa()">
+            <p class="text-sm text-black-500 dark:text-black-400">
+              <strong>Responsable:</strong> {{ getEmpresaData()?.responsable }}
+            </p>
+            <p
+              *ngIf="getEmpresaData()?.website"
+              class="text-sm text-black-500 dark:text-black-400"
+            >
+              <strong>Sitio web:</strong>
+              <a
+                [href]="getEmpresaData()?.website"
+                target="_blank"
+                class="text-blue-600 hover:underline"
+              >
+                {{ getEmpresaData()?.website }}
+              </a>
+            </p>
+          </div>
+
+          <!-- Ubicación -->
+          <p class="mt-2">
+            {{ getLocation() }}
+          </p>
+
+          <!-- Barrio/Neighborhood -->
+          <p
+            *ngIf="getNeighborhood()"
+            class="text-sm text-black-500 dark:text-black-400"
+          >
+            <strong>Ubicación:</strong> {{ getNeighborhood() }}
+          </p>
+
+          <!-- Teléfono -->
+          <p class="mt-2">
+            <strong>Teléfono:</strong> {{ profileData?.phone }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Detalles adicionales -->
+      <div class="profile-details mt-3 ml-2">
+        <!-- Descripción -->
+        <p *ngIf="getDescription()" class="mt-2">
+          <strong>Descripción:</strong> {{ getDescription() }}
+        </p>
+
+        <!-- Especialidades (solo para empresa) -->
+        <div *ngIf="isEmpresa() && getEmpresaData()?.specialties?.length">
+          <p class="mt-2">
+            <strong>Especialidades:</strong>
+            {{ formatSpecialties(getEmpresaData()?.specialties) }}
+          </p>
+        </div>
+
+        <!-- Qué busca (solo para empresa) -->
+        <p *ngIf="isEmpresa()" class="mt-2">
+          <strong>Busca:</strong>
+          {{ formatSearchType(getEmpresaData()?.busca) }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Sección de búsqueda de talento -->
+    <!-- <div *ngIf="isEmpresa()" class="search-section mt-6 ml-4">
+      <h3 class="text-xl font-semibold mb-3">Buscar talento</h3>
+      <div class="search-buttons flex flex-wrap gap-2">
+        <button
+          *ngIf="canSearchWorkers()"
+          (click)="onSearchWorkers()"
+          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+        >
+          Buscar trabajadores
+        </button>
+        <button
+          *ngIf="canSearchTalleres()"
+          (click)="onSearchTalleres()"
+          class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+        >
+          Buscar talleres
+        </button>
+      </div>
+    </div> -->
+  </div>
+</div>

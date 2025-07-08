@@ -5,7 +5,7 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { WorksService } from '../../services/works.service';
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
 import { of, switchMap, tap, Subject, takeUntil } from 'rxjs';
@@ -22,6 +22,12 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import LoadingComponent from '../../../shared/ui/loading/loading.component';
 import { AnalyticsService } from '../../../shared/data-access/analytics.service';
 import Swal from 'sweetalert2';
+import { TypeUser } from '../models/type-user.model';
+import { ProfileEmpresaOrNaturalPersonComponent } from './profile-empresa-or-natural-persona/profile-empresa-or-natural-person.component';
+import { EmpresaUser } from '../models/empresa.model';
+import { NaturalPersonUser } from '../models/natural-person.model';
+import { PublicationDemandService } from '../../../publication/services/publication-demand.services';
+import { OwnPublicationsComponent } from './own-publications/own-publications.component';
 
 @Component({
   selector: 'app-profile',
@@ -34,6 +40,8 @@ import Swal from 'sweetalert2';
     FormsModule,
     ReactiveFormsModule,
     LoadingComponent,
+    ProfileEmpresaOrNaturalPersonComponent,
+    OwnPublicationsComponent,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -47,9 +55,13 @@ export default class ProfileComponent implements OnInit, AfterViewInit {
   workerSignal = signal<WorkerUser | null>(null);
   // Señal donde guardaremos si es un satelite o un taller
   businessSignal = signal<TallerUSer | SateliteUser | null>(null);
+  // Señal donde guardaremos si es una empresa
+  empresaSignal = signal<EmpresaUser | null>(null);
+  // Señal donde guardaremos si es una persona natural
+  naturalPersonSignal = signal<NaturalPersonUser | null>(null);
+
   positionStatus = signal<boolean>(false);
   isLoadingPage = signal<boolean>(true);
-  createProfileButton = signal<boolean>(false);
   //
   userId!: string | undefined;
   // Inyecciones de  servicios y otros necesarios
@@ -58,6 +70,7 @@ export default class ProfileComponent implements OnInit, AfterViewInit {
   private positionService = inject(PositionsService);
   private analyticsService = inject(AnalyticsService);
   private _router = inject(Router);
+  private publicationService = inject(PublicationDemandService);
   /**
    *
    */
@@ -68,26 +81,37 @@ export default class ProfileComponent implements OnInit, AfterViewInit {
         switchMap((state: any) => {
           if (state && state.uid) {
             const userId = state.uid;
-            return this.loadWorker(userId);
+            return this.loadUser(userId);
           } else {
             return of(null);
           }
         }),
         tap((userFound) => {
-          if (userFound && userFound.length) {
+          console.log('usario', userFound);
+          if (
+            userFound &&
+            userFound.length &&
+            userFound[0]?.typeUSer !== TypeUser.NO_PROFILE // Si existe pero no tiene pefile muestra el Sweet Alert
+          ) {
             const user = userFound[0];
             if (user) {
               const typeUser = user.typeUSer;
               if (typeUser) {
                 this.typeUser.set(typeUser);
               }
-              if (typeUser == 'trabajadores') {
-                this.isLoadingPage.set(false);
+              if (typeUser == TypeUser.TRABAJADOR) {
                 this.workerSignal.set(user);
-              } else if (typeUser == 'satelite' || typeUser == 'talleres') {
+              } else if (
+                typeUser == TypeUser.SATELITE ||
+                typeUser == TypeUser.TALLER
+              ) {
                 this.businessSignal.set(user);
-                this.isLoadingPage.set(false);
+              } else if (typeUser == TypeUser.EMPRESA) {
+                this.empresaSignal.set(user);
+              } else if (typeUser == TypeUser.PERSONA_NATURAL) {
+                this.naturalPersonSignal.set(user);
               }
+              this.isLoadingPage.set(false);
             }
           } else {
             Swal.fire({
@@ -105,7 +129,11 @@ export default class ProfileComponent implements OnInit, AfterViewInit {
               }
             });
           }
-        })
+        }),
+        switchMap((userData) =>
+          this.publicationService.getUsersPublicationsByUserId(userData.userId)
+        ),
+        tap()
       )
       .subscribe();
   }
@@ -121,8 +149,9 @@ export default class ProfileComponent implements OnInit, AfterViewInit {
    * @param userId
    * @returns
    */
-  loadWorker(userId: string) {
-    return this.userService.getUserByUserIdInAnyCollection(userId);
+  loadUser(userId: string) {
+    const PATH = 'users'; // Esta es la collection donde se guardan todos los usuarios ahora
+    return this.userService.getUserByUserIdAndCollection(userId, PATH);
   }
   /**Remueve guiónes de las palabras que normalmente las lleva*/
   removeHyphens(wordWithHyphens: string[] | undefined): string {
@@ -205,5 +234,46 @@ export default class ProfileComponent implements OnInit, AfterViewInit {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+  /**
+   * Nuevos métodos para mostrar los perfiles de empresas y persona natural
+   */
+  onSearchWorkers(): void {
+    // Navegar a la página de búsqueda de trabajadores
+    this._router.navigate(['/works/search/workers']);
+  }
+
+  onSearchTalleres(): void {
+    // Navegar a la página de búsqueda de talleres
+    this._router.navigate(['/works/search/talleres']);
+  }
+
+  onEditProfile(profileId: string): void {
+    // Navegar a la página de edición según el tipo de usuario
+    const userType = this.typeUser();
+
+    if (userType === 'empresa') {
+      this._router.navigate(['/works/profile/edit-empresa', profileId]);
+    } else if (userType === 'persona-natural') {
+      this._router.navigate(['/works/profile/edit-natural-person', profileId]);
+    }
+  }
+  // Método para verificar si debe mostrar el botón de crear perfil
+  createProfileButtonValidation(): boolean {
+    const userType = this.typeUser();
+
+    switch (userType) {
+      case 'empresa':
+        return !!this.empresaSignal();
+      case 'persona-natural':
+        return !!this.naturalPersonSignal();
+      case 'trabajadores':
+        return !!this.workerSignal();
+      case 'satelite':
+      case 'talleres':
+        return !!this.businessSignal();
+      default:
+        return false;
+    }
   }
 }

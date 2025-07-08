@@ -16,6 +16,14 @@ export enum Specialty {
   COSTURA_DISFRACES = 'costura-disfraces',
   COSTURA_CHALECOS = 'costura-chalecos',
   COSTURA_DOTACIONES = 'costura-dotaciones',
+  COSTURA_FAJAS = 'costura-fajas',
+  COSTURA_UNIFORMES_EMPRESARIALES = 'costura-uniformes-empresariales',
+  COSTURA_UNIFORMES_ESCOLARES = 'costura-uniformes-escolares',
+  COSTURA_BEBES = 'costura-bebes',
+  COSTURA_ROPA_TALLAS_GRANDES = 'costura-ropa-tallas-grandes',
+  COSTURA_TERAPEUTICA_O_POSTQUIRURGICA = 'costura-terapeutica-postquirurgica',
+  COSTURA_CALZADO_TEXTIL = 'costura-calzado-textil',
+  COSTURA_CUERO = 'costura-cuero',
   ESTAMPADO = 'estampado',
   /** Patinaje */
   PATINAJE = 'patinaje',
@@ -45,4 +53,28 @@ export enum Specialty {
   PATRONAJE_BISUTERIA = 'patronaje-bisuteria',
   PATRONAJE_MARROQUINERIA = 'patronaje-marroquineria',
   PATRONAJE_DE_MASCOTAS = 'patronaje-de-mascotas',
+  /** Diseño y Planeación */
+  DISENADOR_MODA = 'disenador-moda',
+  FICHERO_TECNICO = 'fichero-tecnico',
+  PLANEADOR_PRODUCCION = 'planeador-produccion',
+  COORDINADOR_CALIDAD = 'coordinador-calidad',
+  ASISTENTE_DE_MODA = 'asistente-de-moda',
+  SUPERVISOR_PRODUCCION = 'supervisor-produccion',
+  /** Control de Calidad */
+  INSPECTOR_CALIDAD_ENTRADA = 'inspector-calidad-entrada',
+  INSPECTOR_CALIDAD_EN_PROCESO = 'inspector-calidad-en-proceso',
+  INSPECTOR_CALIDAD_FINAL = 'inspector-calidad-final',
+  AUDITOR_INTERNO_CALIDAD = 'auditor-interno-calidad',
+  /** Alistamiento y Acabado */
+  PLANCHADO_INDUSTRIAL = 'planchado-industrial',
+  OPERARIO_EMPAQUE = 'operario-empaque',
+  DOBLADOR_TELA = 'doblador-tela',
+  ALISTADOR_PEDIDOS = 'alistador-pedidos',
+  DESPACHADOR = 'despachador',
+  /** Marroquinería */
+  ARMADOR_MORRALES = 'armador-morrales',
+  ESTAMPADO_CUERO = 'estampado-cuero',
+  /** Otros Técnicos */
+  MANTENIMIENTO_MAQUINAS_INDUSTRIALES = 'mantenimiento-maquinas-industriales',
+  ELECTROMECANICO_TEXTIL = 'electromecanico-textil',
 }

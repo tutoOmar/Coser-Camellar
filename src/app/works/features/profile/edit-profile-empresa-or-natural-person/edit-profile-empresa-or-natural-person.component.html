@@ -1,0 +1,31 @@
+<div
+  *ngIf="empresaToEdit?.typeUSer === 'empresa'"
+  class="mt-8 p-6 bg-white rounded-lg shadow-lg max-w-md mx-auto"
+>
+  <app-register-empresas
+    [countries]="countries"
+    [cities]="cities"
+    [availableSpecialties]="specialties"
+    [loading]="loading()"
+    [existingEmpresa]="empresaToEdit"
+    [mode]="'edit'"
+    (formSubmit)="onUpdateEmpresa($event)"
+    (imageSelected)="onImageSelected($event)"
+    >>
+  </app-register-empresas>
+</div>
+<div
+  *ngIf="naturalUserToEdit?.typeUSer === 'persona-natural'"
+  class="mt-8 p-6 bg-white rounded-lg shadow-lg max-w-md mx-auto"
+>
+  <app-register-natural-person
+    [countries]="countries"
+    [cities]="cities"
+    [loading]="loading()"
+    [existingNaturalUser]="naturalUserToEdit"
+    [mode]="'edit'"
+    (formSubmit)="onUpdateNaturalPerson($event)"
+    (imageSelected)="onImageSelected($event)"
+    >>
+  </app-register-natural-person>
+</div>
