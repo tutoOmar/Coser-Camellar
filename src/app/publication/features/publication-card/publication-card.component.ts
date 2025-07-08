@@ -32,9 +32,13 @@ export class PublicationCardComponent implements OnInit {
   @Output() edit = new EventEmitter<Publication>();
   @Output() report = new EventEmitter<Publication>();
 
-  //
   compartiendo = false; // Para mostrar loading state
-
+  // Propiedad para controlar la visibilidad del menú
+  mostrarMenu = false;
+  // Propiedad para verificar si el usuario actual es el autor
+  esAutor = false;
+  isLogged = false;
+  /***===============  Ng functions ==============*/
   constructor(
     private whatsAppService: WhatsAppService,
     private callService: CallService,
@@ -43,11 +47,17 @@ export class PublicationCardComponent implements OnInit {
     private analyticsService: AnalyticsService
   ) {}
 
-  // Propiedad para controlar la visibilidad del menú
-  mostrarMenu = false;
-  // Propiedad para verificar si el usuario actual es el autor
-  esAutor = false;
+  ngOnInit() {
+    const user = this.userAuthService.currentUser;
+    if (user?.uid === this.publicacion.autorId) {
+      this.esAutor = true;
+    }
+    if (user && user.uid) {
+      this.isLogged = true;
+    }
+  }
 
+  /****************      Funcitions ================= */
   // Método para calcular tiempo transcurrido desde la publicación
   getTiempoTranscurrido(): string {
     if (!this.publicacion.timestamp) return 'Hace un momento';
@@ -211,13 +221,6 @@ export class PublicationCardComponent implements OnInit {
   // Método para abrir el menú de opciones
   toggleMenu(): void {
     this.mostrarMenu = !this.mostrarMenu;
-  }
-
-  ngOnInit() {
-    const user = this.userAuthService.currentUser;
-    if (user?.uid === this.publicacion.autorId) {
-      this.esAutor = true;
-    }
   }
 
   /**

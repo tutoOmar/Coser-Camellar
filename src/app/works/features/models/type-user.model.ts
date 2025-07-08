@@ -3,4 +3,6 @@ export enum TypeUser {
   SATELITE = 'satelite',
   TALLER = 'talleres',
   EMPRESA = 'empresa',
+  PERSONA_NATURAL = 'persona-natural',
+  NO_PROFILE = 'noProfile',
 }

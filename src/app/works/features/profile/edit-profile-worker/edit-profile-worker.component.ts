@@ -20,6 +20,7 @@ import { CommonModule } from '@angular/common';
 import { WorksService } from '../../../services/works.service';
 import { toast } from 'ngx-sonner';
 import { Status } from '../../models/status.model';
+import { UploadImagesService } from '../../../../shared/data-access/upload-images.service';
 @Component({
   selector: 'app-edit-profile-worker',
   standalone: true,
@@ -29,7 +30,7 @@ import { Status } from '../../models/status.model';
 })
 export default class EditProfileWorkerComponent implements OnInit {
   wokerService = inject(WorksService);
-
+  _imageService = inject(UploadImagesService);
   private destroy$ = new Subject<void>();
 
   selectedForm: string = '';
@@ -54,7 +55,7 @@ export default class EditProfileWorkerComponent implements OnInit {
     'Pereira',
     'Santa Marta',
     'Ibagué',
-    'Soacha',
+    -'Soacha',
     'Chía',
     'Cota',
     'Villavicencio',
@@ -123,7 +124,7 @@ export default class EditProfileWorkerComponent implements OnInit {
   ngOnInit(): void {
     const userId = this.currentRoute.snapshot.paramMap.get('id');
     if (userId) {
-      this.loadWorker('trabajadores', userId);
+      this.loadWorker('users', userId);
     }
   }
 
@@ -153,7 +154,6 @@ export default class EditProfileWorkerComponent implements OnInit {
         // Primero, limpia los FormArray para asegurarte de que están vacíos
         const machinesFormArray = this.workerForm.get('machines') as FormArray;
         machinesFormArray.clear();
-
         const specialtyFormArray = this.workerForm.get(
           'specialty'
         ) as FormArray;
@@ -324,13 +324,13 @@ export default class EditProfileWorkerComponent implements OnInit {
       };
       // Validamos el usuario a actualizar
       if (updatedUser && updatedUser.typeUSer) {
+        const PATH = 'users'; //Collection donde se guardan todos los usuarios
         this.wokerService
-          .updateUser(updatedUser.typeUSer, updatedUser, this.selectedImage)
+          .updateUser(PATH, updatedUser, this.selectedImage)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
             next: (successMessage) => {
               // Mostrar mensaje de éxito en un toast
-
               toast.success('Ususario actualizado con éxito');
               // Redirigir a otra ruta
               this.loading.set(false);

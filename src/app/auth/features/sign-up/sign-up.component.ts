@@ -39,6 +39,8 @@ import { CommonModule } from '@angular/common';
 import { RegisterUserService } from '../../../shared/data-access/register-user.service';
 import Swal from 'sweetalert2';
 import { WorksService } from '../../../works/services/works.service';
+import { TypeUser } from '../../../works/features/models/type-user.model';
+import { UsersService } from '../../../shared/data-access/users.service';
 interface FormSingUp {
   email: FormControl<string | null>;
   password: FormControl<string | null>;
@@ -68,7 +70,7 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
   private authState = inject(AuthStateService);
   private analyticsService = inject(AnalyticsService);
   private registerService = inject(RegisterUserService);
-  private usersService = inject(WorksService);
+  private usersService = inject(UsersService);
   /** --------------------- */
   authMethod: 'email' | 'phone' = 'email';
   codeSent = false;
@@ -187,10 +189,9 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
       await this.registerService
         .createUserWithNameAndPhoneNoProfile({
           userId: uid,
-          email,
           phone,
           name,
-          typeUser: 'noProfile', // Corregí el typo 'typeUSer'
+          typeUSer: TypeUser.NO_PROFILE, // Corregí el typo 'typeUSer'
         })
         .toPromise(); // Cambiamos a toPromise() para manejar mejor los errores
 
@@ -223,7 +224,7 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
 
       this.usersService
         //Esta primera validación es para saber si el usuario no tiene perfil
-        .checkUserExists()
+        .checkUserHaveProfile()
         .pipe(
           takeUntil(this.destroy$),
           tap((isRegisterProfile) => {
@@ -235,27 +236,15 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
             }
           }),
           filter((isRegisterProfile) => !isRegisterProfile),
-          switchMap(() =>
-            this.registerService.checkUserHadLeftTheNumberButNoProfileComplete()
-          ),
-          tap((isRegisterNumberButNoProfile) => {
-            // SI es true significa que ya guardó el número pero aún no tiene perfil
-            if (isRegisterNumberButNoProfile) {
-              this.router.navigate(['/works']);
-              toast.success('Bievenido(a) de nuevo');
-            }
-          }),
-          filter((isRegisterProfile) => !isRegisterProfile),
           switchMap(() => from(this.askForPhoneAndName())), // Llama al modal para pedir nombre y teléfono
           filter(
             (userInfo) => !!userInfo && !!userInfo.name && !!userInfo.phone
           ), // Asegura que se hayan proporcionado ambos datos
           switchMap((userInfo) =>
             this.registerService.createUserWithNameAndPhoneNoProfile({
-              email,
               name: userInfo?.name, ///////////////////////////////Revisar este compoente
               phone: userInfo?.phone,
-              typeUSer: 'noProfile',
+              typeUSer: TypeUser.NO_PROFILE,
               userId,
             })
           ),
@@ -265,28 +254,14 @@ export default class SignUpComponent implements OnInit, AfterViewInit {
             this.router.navigate(['/works']);
           }),
           catchError((error) => {
+            toast.error('Hubo un error al registrar tus datos');
             this.handleError(error);
             return EMPTY; // Manejo de errores para evitar que el flujo RxJS se rompa
           })
         )
         .subscribe();
-
-      // const phone = await this.askForPhoneNumber();
-
-      // if (phone) {
-      //   this.registerService
-      //     .createUserWithPhoneNoProfile({ email, phone, userId })
-      //     .pipe(takeUntil(this.destroy$))
-      //     .subscribe({
-      //       next: () => {
-      //         this.flagPhoneValidation = true;
-      //         toast.success('Teléfono registrado correctamente');
-      //         this.router.navigate(['/works']);
-      //       },
-      //       error: (error) => this.handleError(error),
-      //     });
-      // }
     } catch (error: any) {
+      toast.error('Hubo un error al registrar tus datos');
       this.handleError(error);
     }
   }

@@ -11,6 +11,7 @@ import {
   query,
   where,
   limit,
+  getDocs,
 } from '@angular/fire/firestore';
 import {
   Storage,
@@ -31,6 +32,10 @@ import { WorkerUser } from '../features/models/worker.model';
 import { AuthStateService } from '../../shared/data-access/auth-state.service';
 import { TallerUSer } from '../features/models/talleres.model';
 import { SateliteUser } from '../features/models/satelite.model';
+import { EmpresaUser } from '../features/models/empresa.model';
+import { NaturalPersonUser } from '../features/models/natural-person.model';
+import { NoProfileUser } from '../features/models/no-profile.model';
+import { UploadImagesService } from '../../shared/data-access/upload-images.service';
 
 @Injectable({
   providedIn: 'root',
@@ -44,7 +49,7 @@ export class WorksService {
 
   private _auth = inject(AuthStateService);
   private firestore = inject(Firestore);
-
+  private _imageService = inject(UploadImagesService);
   /**
    * Método para subir imagenes incialmente, aunque como está programado se puede subir de todo en el momento
    * @param file
@@ -191,12 +196,22 @@ export class WorksService {
   }
   /**
    * Obtiene cualquier usuario en cualquier coleccion de las actuales, pero usando el filtro de userId y no el ID directo
+   * 5 Julio ToDo: Este método queda depreciado porque ahora todos los usuarios están en 'users' ya no toca buscar en todas las collections
+   * Cuando se pueda se debe eliminar, asegurandose que nadie lo lee
    * @param userId
    * @returns
    */
   getUserByUserIdInAnyCollection(
     userId: string
-  ): Observable<WorkerUser[] | TallerUSer[] | SateliteUser[] | null[]> {
+  ): Observable<
+    | WorkerUser[]
+    | TallerUSer[]
+    | SateliteUser[]
+    | EmpresaUser[]
+    | NaturalPersonUser[]
+    | NoProfileUser[]
+    | null[]
+  > {
     const workerQuery = this.getUserByUserIdAndCollection(
       userId,
       'trabajadores'
@@ -239,7 +254,16 @@ export class WorksService {
    */
   getUsersByIds(
     userIds: string[]
-  ): Observable<(WorkerUser | TallerUSer | SateliteUser)[]> {
+  ): Observable<
+    (
+      | WorkerUser
+      | TallerUSer
+      | SateliteUser
+      | EmpresaUser
+      | NaturalPersonUser
+      | NoProfileUser
+    )[]
+  > {
     const userObservables = userIds.map((userId) =>
       this.getUserByUserIdInAnyCollection(userId).pipe(
         map((users) => users?.[0] || null), // Selecciona el primer usuario encontrado o null
@@ -312,15 +336,24 @@ export class WorksService {
       map((results) => results.some((exists) => exists)) // Devuelve true si algún resultado es true
     );
   }
-  // Método para actualizar el usuario en la base de datos de fireStore
+  /**
+   * Método para actualizar el usuario en la base de datos de fireStore
+   * Este actualización se hacer con base al id en firebase
+   */
   updateUser(
     collectionSelected: string,
-    user: WorkerUser | TallerUSer | SateliteUser,
+    user:
+      | WorkerUser
+      | TallerUSer
+      | SateliteUser
+      | EmpresaUser
+      | NaturalPersonUser,
     image: File | null
   ): Observable<any> {
+    console.log('Imagen', image);
     if (image) {
       // Si hay imagen, la subimos y luego creamos la noticia
-      return this.uploadImage(image).pipe(
+      return this._imageService.uploadImage(image, 'users').pipe(
         switchMap((imageUrl: string) => {
           const userWithImage = {
             ...user,
@@ -341,5 +374,55 @@ export class WorksService {
       return from(updateDoc(docRef, { ...userWithoutImage }));
     }
   }
-  //
+  /**
+   * Método para actualizar el usuario en la base de datos de fireStore
+   * Este actualización se hace con base al userId que es adquirido al crear un usuario
+   */
+  updateByUserIdTheUser(
+    collectionSelected: string,
+    user: WorkerUser | TallerUSer | SateliteUser,
+    image: File | null
+  ): Observable<any> {
+    if (image) {
+      // Si hay imagen, la subimos y luego actualizamos el usuario
+      return this._imageService.uploadImage(image, 'users').pipe(
+        switchMap((imageUrl: string) => {
+          const userWithImage = {
+            ...user,
+            photo: imageUrl,
+          };
+          return this.updateUserByUserId(collectionSelected, userWithImage);
+        })
+      );
+    } else {
+      // Si no hay imagen, solo actualizamos el usuario
+      const userWithoutImage = {
+        ...user,
+      };
+      return this.updateUserByUserId(collectionSelected, userWithoutImage);
+    }
+  }
+
+  // Método auxiliar para actualizar por userId
+  private updateUserByUserId(
+    collectionSelected: string,
+    user: WorkerUser | TallerUSer | SateliteUser
+  ): Observable<any> {
+    const _collection = collection(this.firestore, collectionSelected);
+    // Crear query para buscar por userId
+    const q = query(_collection, where('userId', '==', user.userId));
+
+    return from(getDocs(q)).pipe(
+      switchMap((querySnapshot) => {
+        if (querySnapshot.empty) {
+          throw new Error('No se encontró ningún usuario con ese userId');
+        }
+        // Obtener el primer documento que coincida
+        const docSnap = querySnapshot.docs[0];
+        const docRef = doc(this.firestore, collectionSelected, docSnap.id);
+        // Actualizar el documento
+        return from(updateDoc(docRef, { ...user }));
+      })
+    );
+  }
 }

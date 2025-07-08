@@ -8,15 +8,11 @@ import {
   ViewChild,
 } from '@angular/core';
 import Swal from 'sweetalert2';
+import { ImagenSeleccionada } from '../../models/imagen-seleccionada.model';
 
 export enum StateImages {
   CREATE = 'create',
   EDIT = 'edit',
-}
-
-export interface ImagenSeleccionada {
-  file: File;
-  preview: string;
 }
 
 @Component({

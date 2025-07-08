@@ -79,6 +79,20 @@ export default [
       import('./profile/edit-profile-business/edit-profile-business.component'),
   },
   {
+    path: 'profile/edit-empresa/:id',
+    loadComponent: () =>
+      import(
+        './profile/edit-profile-empresa-or-natural-person/edit-profile-empresa-or-natural-person.component'
+      ),
+  },
+  {
+    path: 'profile/edit-natural-person/:id',
+    loadComponent: () =>
+      import(
+        './profile/edit-profile-empresa-or-natural-person/edit-profile-empresa-or-natural-person.component'
+      ),
+  },
+  {
     path: 'politicas',
     loadComponent: () => import('./politicas/politicas.component'),
   },

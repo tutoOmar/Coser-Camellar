@@ -9,7 +9,6 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import {
-  ImagenSeleccionada,
   ImagesSelectorComponent,
   StateImages,
 } from '../../../../shared/ui/images-selector/images-selector.component';
@@ -22,6 +21,7 @@ import {
   typeContactEnum,
 } from '../../../models/publication-db.model';
 import { ActionPublicationEnum } from '../../../models/actionPublicationEnum';
+import { ImagenSeleccionada } from '../../../../shared/models/imagen-seleccionada.model';
 // models/enums.ts
 export enum TypeContactEnum {
   CALL = 'call',

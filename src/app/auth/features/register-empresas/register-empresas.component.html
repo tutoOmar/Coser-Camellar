@@ -1,0 +1,308 @@
+<div class="formEmpresa space-y-4">
+  <h2 class="text-xl font-semibold mb-4">{{ formTitle }}</h2>
+  <form
+    (ngSubmit)="onSubmit(empresaForm)"
+    #empresaForm="ngForm"
+    class="space-y-4"
+  >
+    <!-- Input para subir imagen -->
+    <label class="block text-gray-700 font-medium mb-2">
+      Agrega tu imagen (Opcional):
+    </label>
+    <div class="form-group">
+      <!-- Input file customizado -->
+      <div class="relative">
+        <input
+          type="file"
+          (change)="onImageSelected($event)"
+          accept="image/*"
+          class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          id="imageInput"
+        />
+        <label
+          for="imageInput"
+          class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
+        >
+          <div class="flex flex-col items-center justify-center pt-5 pb-6">
+            <svg
+              class="w-8 h-8 mb-2 text-gray-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+              ></path>
+            </svg>
+            <p class="text-sm text-gray-500">
+              <span class="font-semibold">Haz clic para subir</span> o arrastra
+              una imagen
+            </p>
+            <p class="text-xs text-gray-400">PNG, JPG, GIF hasta 10MB</p>
+          </div>
+        </label>
+      </div>
+
+      <!-- Preview de la imagen -->
+      <div *ngIf="imagePreview" class="mt-4">
+        <div class="relative inline-block">
+          <img
+            [src]="imagePreview"
+            alt="Imagen de la empresa"
+            class="w-24 h-24 object-cover rounded-lg border-2 border-gray-200 shadow-sm"
+          />
+          <!-- Botón para eliminar la imagen -->
+          <button
+            type="button"
+            (click)="removeImage()"
+            class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+          >
+            ×
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nombre de la empresa -->
+    <div class="form-group">
+      <label class="block text-gray-700 font-medium"
+        >Nombre de la empresa:</label
+      >
+      <input
+        type="text"
+        [(ngModel)]="empresaData.name"
+        name="name"
+        (blur)="nameTouched = true"
+        required
+        class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+        appSanitizeInput
+      />
+      <small
+        *ngIf="isFieldEmpty(empresaData.name) && nameTouched"
+        class="text-red-400"
+      >
+        Este campo es requerido
+      </small>
+    </div>
+
+    <!-- NIT -->
+    <div class="form-group">
+      <label class="block text-gray-700 font-medium">NIT (Opcional):</label>
+      <input
+        type="text"
+        [(ngModel)]="empresaData.nit"
+        name="nit"
+        class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+      />
+    </div>
+
+    <!-- Responsable -->
+    <div class="form-group">
+      <label class="block text-gray-700 font-medium">Responsable:</label>
+      <input
+        type="text"
+        [(ngModel)]="empresaData.responsable"
+        name="responsable"
+        (blur)="responsableTouched = true"
+        required
+        class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+        appSanitizeInput
+      />
+      <small
+        *ngIf="isFieldEmpty(empresaData.responsable) && responsableTouched"
+        class="text-red-400"
+      >
+        Este campo es requerido
+      </small>
+    </div>
+
+    <!-- Celular -->
+    <div class="form-group">
+      <label class="block text-gray-700 font-medium">Celular:</label>
+      <input
+        type="number"
+        [(ngModel)]="empresaData.phone"
+        (blur)="phoneTouched = true"
+        name="phone"
+        required
+        class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+      />
+      <small
+        *ngIf="isNumber(empresaData.phone) && phoneTouched"
+        class="text-red-400"
+      >
+        Este campo es requerido
+      </small>
+    </div>
+
+    <!-- País -->
+    <div class="form-group">
+      <label class="block text-gray-700 font-medium">País:</label>
+      <select
+        name="country"
+        [(ngModel)]="empresaData.country"
+        required
+        (blur)="countryTouched = true"
+        class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+      >
+        <option value="" disabled selected>Selecciona un país</option>
+        <option *ngFor="let country of countries" [value]="country.name">
+          {{ country.name }}
+        </option>
+      </select>
+      <small
+        *ngIf="isFieldEmpty(empresaData.country) && countryTouched"
+        class="text-red-400"
+      >
+        Debes seleccionar una opción
+      </small>
+    </div>
+
+    <!-- Ciudad -->
+    <div class="form-group" *ngIf="cities.length > 0">
+      <label class="block text-gray-700 font-medium">Ciudad:</label>
+      <select
+        name="city"
+        [(ngModel)]="empresaData.city"
+        required
+        (blur)="cityTouched = true"
+        class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+      >
+        <option value="" disabled selected>Selecciona una ciudad</option>
+        <option *ngFor="let city of cities">{{ city }}</option>
+      </select>
+      <small
+        *ngIf="isFieldEmpty(empresaData.city) && cityTouched"
+        class="text-red-400"
+      >
+        Debes seleccionar una opción
+      </small>
+    </div>
+
+    <!-- Barrio -->
+    <div class="form-group">
+      <label class="block text-gray-700 font-medium">Barrio:</label>
+      <input
+        type="text"
+        [(ngModel)]="empresaData.neighborhood"
+        name="neighborhood"
+        (blur)="neighborhoodTouched = true"
+        required
+        class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+      />
+      <small
+        *ngIf="isFieldEmpty(empresaData.neighborhood) && neighborhoodTouched"
+        class="text-red-400"
+      >
+        Este campo es requerido
+      </small>
+    </div>
+
+    <!-- Website -->
+    <div class="form-group">
+      <label class="block text-gray-700 font-medium"
+        >Sitio web (Opcional):</label
+      >
+      <input
+        type="url"
+        [(ngModel)]="empresaData.website"
+        name="website"
+        class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+        placeholder="https://ejemplo.com"
+      />
+    </div>
+
+    <!-- Separador -->
+    <div class="separator">
+      <h3 class="text-xl text-center font-semibold">
+        Información de Especialidades
+      </h3>
+    </div>
+
+    <!-- Especialidades -->
+    <div class="form-group">
+      <label class="block text-gray-700 font-medium">
+        Áreas de especialización:
+      </label>
+      <select
+        #specialtySelect
+        (blur)="specialtiesTouched = true"
+        (change)="addSpecialty($event)"
+        class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+        multiple
+      >
+        <option value="" disabled selected>Selecciona especialidades</option>
+        <option
+          *ngFor="let specialty of availableSpecialties"
+          [value]="specialty"
+        >
+          {{ removeHyphens(specialty) }}
+        </option>
+      </select>
+      <small
+        *ngIf="
+          !isSelectedAtLeastOne(empresaData.specialties) && specialtiesTouched
+        "
+        class="text-red-400"
+      >
+        Debes seleccionar al menos una especialidad.
+      </small>
+
+      <!-- Especialidades seleccionadas -->
+      <div class="mt-2" *ngIf="empresaData.specialties.length > 0">
+        <label class="block text-gray-700 font-medium">
+          Especialidades seleccionadas:
+        </label>
+        <div class="flex flex-wrap gap-2 mt-2">
+          <span
+            *ngFor="let specialty of empresaData.specialties"
+            class="flex items-center gap-1 px-3 py-1 bg-blue-200 text-blue-700 rounded-full"
+          >
+            {{ removeHyphens(specialty) }}
+            <button
+              (click)="removeSpecialty(specialty)"
+              class="text-red-500 hover:text-red-700"
+              type="button"
+            >
+              ×
+            </button>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Qué busca -->
+    <div class="form-group">
+      <label class="block text-gray-700 font-medium"
+        >¿Qué tipo de contacto buscas?</label
+      >
+      <select
+        name="busca"
+        [(ngModel)]="empresaData.busca"
+        required
+        (blur)="buscaTouched = true"
+        class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+      >
+        <option value="" disabled selected>Selecciona una opción</option>
+        <option [value]="Search.WORKERS">Trabajadores</option>
+        <option [value]="Search.TALLERES">Talleres</option>
+        <option [value]="Search.BOTH">Ambos</option>
+      </select>
+      <small *ngIf="!empresaData.busca && buscaTouched" class="text-red-400">
+        Debes seleccionar una opción
+      </small>
+    </div>
+
+    <!-- Botón de registro -->
+    <button
+      type="submit"
+      [disabled]="loading"
+      class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition duration-200"
+    >
+      {{ buttonText }}
+    </button>
+  </form>
+</div>

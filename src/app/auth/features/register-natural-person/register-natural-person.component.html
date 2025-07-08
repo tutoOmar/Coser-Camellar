@@ -1,0 +1,197 @@
+<div class="formNaturalPerson space-y-4">
+  <h2 class="text-xl font-semibold mb-4">{{ formTitle }}</h2>
+  <form
+    (ngSubmit)="onSubmit(naturalPersonForm)"
+    #naturalPersonForm="ngForm"
+    class="space-y-4"
+  >
+    <!-- Input para subir imagen -->
+    <!-- Input para subir imagen -->
+    <label class="block text-gray-700 font-medium mb-2">
+      Agrega tu imagen (Opcional):
+    </label>
+    <div class="form-group">
+      <!-- Input file customizado -->
+      <div class="relative">
+        <input
+          type="file"
+          (change)="onImageSelected($event)"
+          accept="image/*"
+          class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          id="imageInput"
+        />
+        <label
+          for="imageInput"
+          class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
+        >
+          <div class="flex flex-col items-center justify-center pt-5 pb-6">
+            <svg
+              class="w-8 h-8 mb-2 text-gray-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+              ></path>
+            </svg>
+            <p class="text-sm text-gray-500">
+              <span class="font-semibold">Haz clic para subir</span> o arrastra
+              una imagen
+            </p>
+            <p class="text-xs text-gray-400">PNG, JPG, GIF hasta 10MB</p>
+          </div>
+        </label>
+      </div>
+
+      <!-- Preview de la imagen -->
+      <div *ngIf="imagePreview" class="mt-4">
+        <div class="relative inline-block">
+          <img
+            [src]="imagePreview"
+            alt="Imagen de la empresa"
+            class="w-24 h-24 object-cover rounded-lg border-2 border-gray-200 shadow-sm"
+          />
+          <!-- Botón para eliminar la imagen -->
+          <button
+            type="button"
+            (click)="removeImage()"
+            class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+          >
+            ×
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nombre -->
+    <div class="form-group">
+      <label class="block text-gray-700 font-medium">Nombre:</label>
+      <input
+        type="text"
+        [(ngModel)]="naturalPersonData.name"
+        name="name"
+        (blur)="nameTouched = true"
+        required
+        class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+        appSanitizeInput
+      />
+      <small
+        *ngIf="isFieldEmpty(naturalPersonData.name) && nameTouched"
+        class="text-red-400"
+      >
+        Este campo es requerido
+      </small>
+    </div>
+
+    <!-- Celular -->
+    <div class="form-group">
+      <label class="block text-gray-700 font-medium">Celular:</label>
+      <input
+        type="number"
+        [(ngModel)]="naturalPersonData.phone"
+        (blur)="phoneTouched = true"
+        name="phone"
+        required
+        class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+      />
+      <small
+        *ngIf="isNumber(naturalPersonData.phone) && phoneTouched"
+        class="text-red-400"
+      >
+        Este campo es requerido
+      </small>
+    </div>
+
+    <!-- País -->
+    <div class="form-group">
+      <label class="block text-gray-700 font-medium">País:</label>
+      <select
+        name="country"
+        [(ngModel)]="naturalPersonData.country"
+        required
+        (blur)="countryTouched = true"
+        class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+      >
+        <option value="" disabled selected>Selecciona un país</option>
+        <option *ngFor="let country of countries" [value]="country.name">
+          {{ country.name }}
+        </option>
+      </select>
+      <small
+        *ngIf="isFieldEmpty(naturalPersonData.country) && countryTouched"
+        class="text-red-400"
+      >
+        Debes seleccionar una opción
+      </small>
+    </div>
+
+    <!-- Ciudad -->
+    <div class="form-group" *ngIf="cities.length > 0">
+      <label class="block text-gray-700 font-medium">Ciudad:</label>
+      <select
+        name="city"
+        [(ngModel)]="naturalPersonData.city"
+        required
+        (blur)="cityTouched = true"
+        class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+      >
+        <option value="" disabled selected>Selecciona una ciudad</option>
+        <option *ngFor="let city of cities">{{ city }}</option>
+      </select>
+      <small
+        *ngIf="isFieldEmpty(naturalPersonData.city) && cityTouched"
+        class="text-red-400"
+      >
+        Debes seleccionar una opción
+      </small>
+    </div>
+
+    <!-- Barrio -->
+    <div class="form-group">
+      <label class="block text-gray-700 font-medium">Barrio (Opcional):</label>
+      <input
+        type="text"
+        [(ngModel)]="naturalPersonData.neighborhood"
+        name="neighborhood"
+        class="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200"
+      />
+    </div>
+
+    <!-- Descripción -->
+    <div class="form-group">
+      <label for="description" class="block text-gray-700 font-medium">
+        Descripción:
+      </label>
+      <textarea
+        id="description"
+        name="description"
+        (blur)="descriptionTouched = true"
+        [(ngModel)]="naturalPersonData.description"
+        class="w-full h-32 border border-gray-300 rounded resize-none focus:outline-none focus:ring focus:ring-blue-200 align-top p-3"
+        placeholder="Describe tu marca personal o actividad (ej: Marca personal que manda a confeccionar ropa deportiva)"
+        appSanitizeInput
+      ></textarea>
+      <small
+        *ngIf="
+          isLengthCorrect(naturalPersonData.description) && descriptionTouched
+        "
+        class="text-red-400"
+      >
+        La descripción debe tener al menos 10 caracteres.
+      </small>
+    </div>
+
+    <!-- Botón de registro -->
+    <button
+      type="submit"
+      [disabled]="loading"
+      class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition duration-200"
+    >
+      {{ buttonText }}
+    </button>
+  </form>
+</div>

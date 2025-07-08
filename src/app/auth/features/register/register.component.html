@@ -27,7 +27,9 @@
   <h1 class="text-2xl font-bold mb-4 text-center mt-20 md:mt-0">
     ¿Qué tipo de cuenta quieres crear?
   </h1>
-  <div class="professions flex flex-row space-x-8 justify-center">
+  <div
+    class="professions grid grid-cols-2 md:grid-cols-4 gap-6 justify-center w-full max-w-4xl"
+  >
     <!-- Opción de trabajador -->
     <div
       class="flex flex-col items-center cursor-pointer transition-all transform hover:scale-105 hover:bg-blue-50 p-4 rounded-lg shadow"
@@ -35,14 +37,14 @@
     >
       <button class="text-blue-600 focus:outline-none">
         <svg
-          class="icon"
+          class="icon w-16 h-16"
           version="1.1"
           id="Uploaded to svgrepo.com"
           xmlns="http://www.w3.org/2000/svg"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           viewBox="0 0 32 32"
           xml:space="preserve"
-          fill="#000000"
+          fill="currentColor"
         >
           <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
           <g
@@ -54,12 +56,15 @@
             <path
               class="feather_een"
               d="M29,24V7c0-1.657-1.343-3-3-3H6C4.343,4,3,5.343,3,7v8c0,0.552,0.448,1,1,1v1c0,0.552,0.448,1,1,1h2 v1.5C7,19.776,7.224,20,7.5,20S8,19.776,8,19.5V18h2c0.552,0,1-0.448,1-1v-1c0.552,0,1-0.448,1-1h6v9H3c-1.105,0-2,0.895-2,2v1 c0,0.552,0.448,1,1,1h28c0.552,0,1-0.448,1-1v-1C31,24.895,30.105,24,29,24z M10,17H5v-1h5V17z M11,14v1H4V7c0-1.103,0.897-2,2-2h20 c1.103,0,2,0.897,2,2v17h-9V14H11z M30,27H2v-1c0-0.551,0.449-1,1-1h26c0.551,0,1,0.449,1,1V27z M16.5,7C15.119,7,14,8.119,14,9.5 c0,1.381,1.119,2.5,2.5,2.5c1.381,0,2.5-1.119,2.5-2.5C19,8.119,17.881,7,16.5,7z M16.5,11c-0.827,0-1.5-0.673-1.5-1.5 S15.673,8,16.5,8S18,8.673,18,9.5S17.327,11,16.5,11z M23.5,12c1.381,0,2.5-1.119,2.5-2.5C26,8.119,24.881,7,23.5,7 C22.119,7,21,8.119,21,9.5C21,10.881,22.119,12,23.5,12z M23.5,8C24.327,8,25,8.673,25,9.5S24.327,11,23.5,11S22,10.327,22,9.5 S22.673,8,23.5,8z M24,17h-1c-0.552,0-1,0.448-1,1v3c0,0.552,0.448,1,1,1h1c0.552,0,1-0.448,1-1v-3C25,17.448,24.552,17,24,17z M24,21h-1v-1h1V21z M24,19h-1v-1h1V19z"
-            ></path>
+            />
           </g>
         </svg>
       </button>
-      <span class="text-gray-700 mt-2 text-center">¿Eres un trabajador?</span>
+      <span class="text-gray-700 mt-2 text-center text-sm"
+        >¿Eres un trabajador?</span
+      >
     </div>
+
     <!-- Opción de negocio -->
     <div
       class="flex flex-col items-center cursor-pointer transition-all transform hover:scale-105 hover:bg-blue-50 p-4 rounded-lg shadow"
@@ -67,7 +72,7 @@
     >
       <button class="text-blue-600 focus:outline-none">
         <svg
-          class="icon"
+          class="icon w-16 h-16"
           version="1.1"
           id="Layer_1"
           xmlns="http://www.w3.org/2000/svg"
@@ -75,6 +80,7 @@
           viewBox="0 0 24 24"
           enable-background="new 0 0 24 24"
           xml:space="preserve"
+          fill="currentColor"
         >
           <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
           <g
@@ -85,18 +91,96 @@
           <g id="SVGRepo_iconCarrier">
             <path
               d="M4,18v2h4v-2H4 M4,14v2h10v-2H4 M10,18v2h4v-2H10 M16,14v2h4v-2H16 M16,18v2h4v-2H16 M2,22V8l5,4V8l5,4V8l5,4l1-10h3l1,10 v10H2z"
-            ></path>
+            />
             <rect fill="none" width="24" height="24"></rect>
           </g>
         </svg>
       </button>
-      <span class="text-gray-700 mt-2 text-center"
+      <span class="text-gray-700 mt-2 text-center text-sm"
         >¿Eres un taller o Satélite?</span
+      >
+    </div>
+
+    <!-- Opción de empresas -->
+    <div
+      class="flex flex-col items-center cursor-pointer transition-all transform hover:scale-105 hover:bg-blue-50 p-4 rounded-lg shadow"
+      (click)="selectType('empresa')"
+    >
+      <button class="text-blue-600 focus:outline-none">
+        <svg
+          class="icon w-16 h-16"
+          fill="#000000"
+          viewBox="0 0 50 50"
+          xmlns="http://www.w3.org/2000/svg"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+        >
+          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+          <g
+            id="SVGRepo_tracerCarrier"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ></g>
+          <g id="SVGRepo_iconCarrier">
+            <path
+              d="M8 2L8 6L4 6L4 48L15 48L15 39L19 39L19 48L30 48L30 6L26 6L26 2 Z M 10 10L12 10L12 12L10 12 Z M 14 10L16 10L16 12L14 12 Z M 18 10L20 10L20 12L18 12 Z M 22 10L24 10L24 12L22 12 Z M 32 14L32 18L34 18L34 20L32 20L32 22L34 22L34 24L32 24L32 26L34 26L34 28L32 28L32 30L34 30L34 32L32 32L32 34L34 34L34 36L32 36L32 38L34 38L34 40L32 40L32 42L34 42L34 44L32 44L32 48L46 48L46 14 Z M 10 15L12 15L12 19L10 19 Z M 14 15L16 15L16 19L14 19 Z M 18 15L20 15L20 19L18 19 Z M 22 15L24 15L24 19L22 19 Z M 36 18L38 18L38 20L36 20 Z M 40 18L42 18L42 20L40 20 Z M 10 21L12 21L12 25L10 25 Z M 14 21L16 21L16 25L14 25 Z M 18 21L20 21L20 25L18 25 Z M 22 21L24 21L24 25L22 25 Z M 36 22L38 22L38 24L36 24 Z M 40 22L42 22L42 24L40 24 Z M 36 26L38 26L38 28L36 28 Z M 40 26L42 26L42 28L40 28 Z M 10 27L12 27L12 31L10 31 Z M 14 27L16 27L16 31L14 31 Z M 18 27L20 27L20 31L18 31 Z M 22 27L24 27L24 31L22 31 Z M 36 30L38 30L38 32L36 32 Z M 40 30L42 30L42 32L40 32 Z M 10 33L12 33L12 37L10 37 Z M 14 33L16 33L16 37L14 37 Z M 18 33L20 33L20 37L18 37 Z M 22 33L24 33L24 37L22 37 Z M 36 34L38 34L38 36L36 36 Z M 40 34L42 34L42 36L40 36 Z M 36 38L38 38L38 40L36 40 Z M 40 38L42 38L42 40L40 40 Z M 10 39L12 39L12 44L10 44 Z M 22 39L24 39L24 44L22 44 Z M 36 42L38 42L38 44L36 44 Z M 40 42L42 42L42 44L40 44Z"
+            ></path>
+          </g>
+        </svg>
+      </button>
+      <span class="text-gray-700 mt-2 text-center text-sm"
+        >¿Eres una empresa?</span
+      >
+    </div>
+
+    <!-- Opción de persona natural -->
+    <div
+      class="flex flex-col items-center cursor-pointer transition-all transform hover:scale-105 hover:bg-blue-50 p-4 rounded-lg shadow"
+      (click)="selectType('natural')"
+    >
+      <button class="text-blue-600 focus:outline-none">
+        <svg
+          class="icon w-16 h-16"
+          version="1.1"
+          id="_x32_"
+          xmlns="http://www.w3.org/2000/svg"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          viewBox="0 0 512 512"
+          xml:space="preserve"
+          fill="#000000"
+        >
+          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+          <g
+            id="SVGRepo_tracerCarrier"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ></g>
+          <g id="SVGRepo_iconCarrier">
+            <style type="text/css">
+              .st0 {
+                fill: #0171ff;
+              }
+            </style>
+            <g>
+              <path
+                class="st0"
+                d="M458.159,404.216c-18.93-33.65-49.934-71.764-100.409-93.431c-28.868,20.196-63.938,32.087-101.745,32.087 c-37.828,0-72.898-11.89-101.767-32.087c-50.474,21.667-81.479,59.782-100.398,93.431C28.731,448.848,48.417,512,91.842,512 c43.426,0,164.164,0,164.164,0s120.726,0,164.153,0C463.583,512,483.269,448.848,458.159,404.216z"
+              ></path>
+              <path
+                class="st0"
+                d="M256.005,300.641c74.144,0,134.231-60.108,134.231-134.242v-32.158C390.236,60.108,330.149,0,256.005,0 c-74.155,0-134.252,60.108-134.252,134.242V166.4C121.753,240.533,181.851,300.641,256.005,300.641z"
+              ></path>
+            </g>
+          </g>
+        </svg>
+      </button>
+      <span class="text-gray-700 mt-2 text-center text-sm"
+        >¿Eres persona natural?</span
       >
     </div>
   </div>
 </div>
 
+<!-- Formularios para registrar -->
 <div
   class="main-container mt-8 p-6 bg-white rounded-lg shadow-lg max-w-md mx-auto"
 >
@@ -110,23 +194,66 @@
     >
       <!-- Campos comunes para todos los trabajadores -->
       <!-- Input para subir imagen -->
-      <label class="block text-gray-700 font-medium"
-        >Agrega tu imagen(Opcional):</label
-      >
+      <label class="block text-gray-700 font-medium mb-2">
+        Agrega tu imagen (Opcional):
+      </label>
       <div class="form-group">
-        <input
-          type="file"
-          (change)="onImageSelected($event)"
-          accept="image/*"
-        />
+        <!-- Input file customizado -->
+        <div class="relative">
+          <input
+            type="file"
+            (change)="onImageSelected($event)"
+            accept="image/*"
+            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            id="imageInput"
+          />
+          <label
+            for="imageInput"
+            class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
+          >
+            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+              <svg
+                class="w-8 h-8 mb-2 text-gray-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                ></path>
+              </svg>
+              <p class="text-sm text-gray-500">
+                <span class="font-semibold">Haz clic para subir</span> o
+                arrastra una imagen
+              </p>
+              <p class="text-xs text-gray-400">PNG, JPG, GIF hasta 10MB</p>
+            </div>
+          </label>
+        </div>
 
-        <!-- Mostrar la imagen si se ha seleccionado -->
-        <img
-          *ngIf="imagePreview"
-          [src]="imagePreview"
-          alt="Imagen de la noticia"
-        />
+        <!-- Preview de la imagen -->
+        <div *ngIf="imagePreview" class="mt-4">
+          <div class="relative inline-block">
+            <img
+              [src]="imagePreview"
+              alt="Imagen de la empresa"
+              class="w-24 h-24 object-cover rounded-lg border-2 border-gray-200 shadow-sm"
+            />
+            <!-- Botón para eliminar la imagen -->
+            <button
+              type="button"
+              (click)="removeImage()"
+              class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+            >
+              ×
+            </button>
+          </div>
+        </div>
       </div>
+      <!-- Datos -->
       <div class="form-group">
         <label class="block text-gray-700 font-medium">Nombre:</label>
         <input
@@ -359,7 +486,7 @@
     </form>
   </div>
 
-  <!-- ============================  Formulario para Negocios   =======================================================
+  <!-- ============================  Formulario para talleres   =======================================================
   =====================================================================================================================
   -->
   <div *ngIf="selectedForm === 'business'" class="formBusiness space-y-4">
@@ -371,23 +498,66 @@
     >
       <!-- Campos comunes para todos los trabajadores -->
       <!-- Input para subir imagen -->
-      <label class="block text-gray-700 font-medium"
-        >Agrega tu imagen(Opcional):</label
-      >
+      <label class="block text-gray-700 font-medium mb-2">
+        Agrega tu imagen (Opcional):
+      </label>
       <div class="form-group">
-        <input
-          type="file"
-          (change)="onImageSelected($event)"
-          accept="image/*"
-        />
+        <!-- Input file customizado -->
+        <div class="relative">
+          <input
+            type="file"
+            (change)="onImageSelected($event)"
+            accept="image/*"
+            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            id="imageInput"
+          />
+          <label
+            for="imageInput"
+            class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
+          >
+            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+              <svg
+                class="w-8 h-8 mb-2 text-gray-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                ></path>
+              </svg>
+              <p class="text-sm text-gray-500">
+                <span class="font-semibold">Haz clic para subir</span> o
+                arrastra una imagen
+              </p>
+              <p class="text-xs text-gray-400">PNG, JPG, GIF hasta 10MB</p>
+            </div>
+          </label>
+        </div>
 
-        <!-- Mostrar la imagen si se ha seleccionado -->
-        <img
-          *ngIf="imagePreview"
-          [src]="imagePreview"
-          alt="Imagen de tu negocio"
-        />
+        <!-- Preview de la imagen -->
+        <div *ngIf="imagePreview" class="mt-4">
+          <div class="relative inline-block">
+            <img
+              [src]="imagePreview"
+              alt="Imagen de la empresa"
+              class="w-24 h-24 object-cover rounded-lg border-2 border-gray-200 shadow-sm"
+            />
+            <!-- Botón para eliminar la imagen -->
+            <button
+              type="button"
+              (click)="removeImage()"
+              class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+            >
+              ×
+            </button>
+          </div>
+        </div>
       </div>
+      <!-- Formulario -->
       <div class="form-group">
         <label class="block text-gray-700 font-medium"
           >Nombre del negocio:</label
@@ -683,5 +853,28 @@
         {{ loading() ? "Cargando" : "Registrar mi negocio" }}
       </button>
     </form>
+  </div>
+  <!-- Formulario para Empresas -->
+  <div *ngIf="selectedForm === 'empresa'" class="formBusiness space-y-4">
+    <app-register-empresas
+      [cities]="cities"
+      [countries]="countries"
+      [availableSpecialties]="availableSpecialties"
+      [loading]="loading()"
+      [mode]="'create'"
+      (formSubmit)="onSubmitForm1($event)"
+      (imageSelected)="onImage($event)"
+    ></app-register-empresas>
+  </div>
+  <!-- Formulario para personas naturales -->
+  <div *ngIf="selectedForm === 'natural'" class="formBusiness space-y-4">
+    <app-register-natural-person
+      [cities]="cities"
+      [countries]="countries"
+      [loading]="loading()"
+      [mode]="'create'"
+      (formSubmit)="onSubmitForm1($event)"
+      (imageSelected)="onImage($event)"
+    ></app-register-natural-person>
   </div>
 </div>

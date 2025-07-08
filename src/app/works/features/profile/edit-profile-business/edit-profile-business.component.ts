@@ -137,11 +137,12 @@ export default class EditProfileBusinessComponent implements OnInit {
    * @param sateliteId
    */
   loadBusiness(businessId: string) {
+    const PATH = 'users';
     this.wokerService
-      .getUserByIdInAnyCollection(businessId)
+      .getUserByIdAndCollection(businessId, PATH)
       .pipe(takeUntil(this.destroy$))
       .subscribe((business: any) => {
-        const validationUser = business[0] as SateliteUser | TallerUSer;
+        const validationUser = business as SateliteUser | TallerUSer;
         this.userInfo = validationUser;
         if (validationUser) {
           // Usamos patchValue para setear los valores en el formulario
@@ -337,8 +338,9 @@ export default class EditProfileBusinessComponent implements OnInit {
       };
       // Validamos el usuario a actualizar
       if (updatedUser && updatedUser.typeUSer) {
+        const PATH = 'users';
         this.wokerService
-          .updateUser(updatedUser.typeUSer, updatedUser, this.selectedImage)
+          .updateUser(PATH, updatedUser, this.selectedImage)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
             next: (successMessage) => {

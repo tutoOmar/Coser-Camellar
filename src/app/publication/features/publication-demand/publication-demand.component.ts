@@ -84,7 +84,7 @@ export default class PublicationDemandComponent {
   @HostListener('window:scroll', ['$event'])
   onScroll(): void {
     // Verificar si estamos cerca del final de la página
-    const threshold = 100;
+    const threshold = window.innerHeight * 0.8;
     const position = window.pageYOffset + window.innerHeight;
     const height = document.documentElement.scrollHeight;
 
@@ -239,7 +239,9 @@ export default class PublicationDemandComponent {
     this.actionPublication = ActionPublicationEnum.CREATE;
     this.mostrarModalCrear = true;
   }
-
+  /**
+   * cierra el modal de editar o crear publicación sin genera acción
+   */
   cerrarModalCrearPublicacion(): void {
     this.analyticsService.logCustomEvent('close-modal-ṕublication', {
       pubication: this.userData().id,
