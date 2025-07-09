@@ -163,7 +163,6 @@ export default class RegisterComponent implements OnInit, AfterViewInit {
         }) /// pongale algo para que tenga un guard si aún no ha inicado sesión
       )
       .subscribe((state) => {
-        console.log(state); // Ojo esta logica debe sí o sí ser reemplazada por guards
         if (state) {
           this.router.navigate(['/auth/sign-in']);
         }

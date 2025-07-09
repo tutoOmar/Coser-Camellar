@@ -13,11 +13,9 @@ import { SateliteUser } from '../models/satelite.model';
 import { WorkerUser } from '../models/worker.model';
 import { TallerUSer } from '../models/talleres.model';
 import { CommonModule } from '@angular/common';
-import CardPositionComponent from '../../../shared/ui/card-position/card-position.component';
 import StartsCalificationComponent from '../../../shared/ui/starts-calification/starts-calification.component';
 import { PositionsService } from '../../services/positions.service';
 import { toast } from 'ngx-sonner';
-import { Position, StatusPositionEnum } from '../models/position.model';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import LoadingComponent from '../../../shared/ui/loading/loading.component';
 import { AnalyticsService } from '../../../shared/data-access/analytics.service';
@@ -34,7 +32,6 @@ import { OwnPublicationsComponent } from './own-publications/own-publications.co
   standalone: true,
   imports: [
     CommonModule,
-    CardPositionComponent,
     RouterModule,
     StartsCalificationComponent,
     FormsModule,
@@ -87,7 +84,6 @@ export default class ProfileComponent implements OnInit, AfterViewInit {
           }
         }),
         tap((userFound) => {
-          console.log('usario', userFound);
           if (
             userFound &&
             userFound.length &&
@@ -181,53 +177,6 @@ export default class ProfileComponent implements OnInit, AfterViewInit {
         return 'Error en genero';
     }
   }
-  /**
-   *
-   */
-  deletePosition(positionId: string) {
-    const user = this.businessSignal();
-    const typeUser = user?.typeUSer;
-    if (user && typeUser) {
-      this.positionService.deletePosition(typeUser, user, positionId);
-    }
-  }
-  /**
-   *
-   */
-  onToggleChange(event: Event, positionId: string): void {
-    const checked = (event.target as HTMLInputElement).checked;
-    const user = this.businessSignal();
-    const userType = user?.typeUSer;
-    if (user && userType) {
-      user.positions.forEach((position: Position) => {
-        if (position.id === positionId) {
-          position.statusPosition = checked
-            ? StatusPositionEnum.ACTIVO
-            : StatusPositionEnum.INACTIVO;
-        }
-      });
-      // Actualiza el signal para notificar el cambio a Angular
-      this.businessSignal.set({ ...user });
-      //ToDo: Toca analizar porque al conectar el backend molesta el estado
-      this.positionService
-        .updateStatusPosition(userType, user)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe();
-    }
-  }
-  /**
-   *
-   * @param position
-   * @returns
-   */
-  isPositionActive(position: Position): boolean {
-    return position.statusPosition === StatusPositionEnum.ACTIVO;
-  }
-  /**
-   *
-   * @param user
-   */
-  goToEditUser(user: WorkerUser | SateliteUser | TallerUSer | null) {}
   /**
    *
    */

@@ -87,14 +87,6 @@
         >
           Editar perfil
         </button>
-        <button
-          type="button"
-          [routerLink]="['/works/positions/new']"
-          class="w-64 text-white bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
-        >
-          Crear un nueva oferta laboral
-        </button>
-
         <div
           *ngIf="businessSignal()?.average_score as userScore"
           class="mt-5 ml-4"
@@ -155,65 +147,6 @@
             </p>
           </div>
         </div>
-
-        <ng-container *ngIf="businessSignal() as signal">
-          <div
-            class="positions"
-            *ngIf="
-              signal.positions && signal.positions.length > 0;
-              else noPosition
-            "
-          >
-            <h1 class="text-2xl ml-5">Ofertas laborales activas:</h1>
-            <div class="cards-positions">
-              <div
-                class="ml-5 position-card"
-                *ngFor="let position of signal.positions"
-              >
-                <div class="status">
-                  <label class="inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      class="sr-only peer"
-                      [checked]="isPositionActive(position)"
-                      (change)="onToggleChange($event, position.id)"
-                    />
-                    <div
-                      class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 checked"
-                    ></div>
-                    <span
-                      class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300"
-                    >
-                      {{ isPositionActive(position) ? "Activa" : "Inactiva" }}
-                    </span>
-                  </label>
-                </div>
-                <app-card-position [position]="position"> </app-card-position>
-                <div>
-                  <button
-                    class="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
-                    (click)="deletePosition(position.id)"
-                  >
-                    Borrar oferta laboral
-                  </button>
-                  <a
-                    [routerLink]="['/works/positions/edit', position.id]"
-                    class="text-blue-600 hover:underline text-sm font-medium"
-                  >
-                    Editar oferta
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-          <ng-template #noPosition>
-            <h1 class="text-2xl ml-5">Ofertas laborales activas:</h1>
-            <div class="ml-5">
-              No tienes ofertas laborales activas en este momento, da clic en
-              "Crear una nueva oferta laboral para buscar talento"
-            </div>
-          </ng-template>
-        </ng-container>
       </div>
     </div>
     <app-own-publications

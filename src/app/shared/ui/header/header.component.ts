@@ -51,6 +51,7 @@ export default class HeaderComponent {
    */
   toggleMenu() {
     this.isMenuOpen = !this.isMenuOpen;
+    console.log(this.isMenuOpen);
   }
   /**
    *
@@ -72,8 +73,31 @@ export default class HeaderComponent {
       this.closeMenu();
     }
   }
-
-  goToRegister() {
+  goToRegister2() {
     this._router.navigate(['/auth/sign-up']);
+  }
+
+  navigateTo(route: string): void {
+    console.log(`Navegando a: ${route}`);
+    // Aquí puedes implementar la navegación real con Angular Router
+    // this.router.navigate([route]);
+    this.closeMenu();
+  }
+
+  //====================
+  isMenuOpenSandwich = false;
+
+  /**
+   *
+   */
+  toggleMenuSandwich() {
+    this.isMenuOpenSandwich = !this.isMenuOpenSandwich;
+    console.log(this.isMenuOpenSandwich);
+  }
+  /**
+   *
+   */
+  closeMenuSandwich() {
+    this.isMenuOpenSandwich = false;
   }
 }

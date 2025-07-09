@@ -189,7 +189,6 @@ export class WorksService {
     );
     return collectionData(userQuery, { idField: 'id' }).pipe(
       catchError((error) => {
-        console.log('Hubo error');
         return of(null);
       }) // Si hay un error (usuario no encontrado), retorna null
     );
@@ -350,7 +349,6 @@ export class WorksService {
       | NaturalPersonUser,
     image: File | null
   ): Observable<any> {
-    console.log('Imagen', image);
     if (image) {
       // Si hay imagen, la subimos y luego creamos la noticia
       return this._imageService.uploadImage(image, 'users').pipe(
