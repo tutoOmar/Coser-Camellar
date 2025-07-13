@@ -3,6 +3,10 @@ import { privateGuard } from '../../core/auth.guard';
 
 export default [
   {
+    path: 'users',
+    loadComponent: () => import('./users-hub/users-hub.component'),
+  },
+  {
     path: 'main',
     loadComponent: () => import('./main/main.component'),
   },
@@ -48,6 +52,18 @@ export default [
     path: 'worker/:id',
     loadComponent: () =>
       import('./worker-individual/worker-individual.component'),
+  },
+  {
+    path: 'empresa/:id',
+    loadComponent: () =>
+      import('./empresa-individual/empresa-individual.component'),
+  },
+  {
+    path: 'naturalPerson/:id',
+    loadComponent: () =>
+      import(
+        './persona-natural-individual/persona-natural-individual.component'
+      ),
   },
   {
     path: 'profile',
@@ -98,6 +114,7 @@ export default [
   },
   {
     path: '**',
-    loadComponent: () => import('./main/main.component'),
+    redirectTo: 'users',
+    pathMatch: 'full',
   },
 ] as Routes;

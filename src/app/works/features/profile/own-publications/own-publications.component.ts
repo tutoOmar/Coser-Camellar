@@ -80,12 +80,9 @@ export class OwnPublicationsComponent implements OnInit, OnChanges {
     private reportService: ReportsService,
     private analyticsService: AnalyticsService
   ) {}
-  ngOnInit(): void {
-    console.log('Aquí llego on int');
-  }
+  ngOnInit(): void {}
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['userId'] && changes['userId'].currentValue) {
-      console.log('Aquí llego', this.userId);
       this.loadPublications();
     }
   }
@@ -96,14 +93,12 @@ export class OwnPublicationsComponent implements OnInit, OnChanges {
   /***========== Functions ============== */
   private loadPublications() {
     if (this.userId) {
-      console.log('Por aca paso?');
       this.userService
         .getUserByUserIdAndCollection(this.userId, 'users')
         .pipe(
           takeUntil(this.destroy$),
           map((userInfo) => {
             this.userData.set(userInfo[0]);
-            console.log('data', this.userData());
             return userInfo[0];
           }),
           switchMap(() => {
@@ -118,12 +113,9 @@ export class OwnPublicationsComponent implements OnInit, OnChanges {
         )
         .subscribe({
           next: (publications: Publication[]) => {
-            console.log('Publications:', publications);
             this.publicationsData = publications;
           },
-          error: (erro) => {
-            console.error(erro);
-          },
+          error: (erro) => {},
         });
     }
   }

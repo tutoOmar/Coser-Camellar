@@ -179,13 +179,6 @@ export class PublicationCardComponent implements OnInit {
     // Ejemplo con alert (reemplaza por tu sistema de notificaciones)
     alert(`No se pudo abrir ${contactType}. Por favor, inténtalo de nuevo.`);
   }
-
-  // Método para guardar la publicación
-  guardar(): void {
-    console.log('Guardar publicación', this.publicacion.id);
-    // Aquí iría la lógica para guardar la publicación
-  }
-
   /**
    * Funciones para el slider carrusel
    */
@@ -253,8 +246,6 @@ export class PublicationCardComponent implements OnInit {
     //   contact_method: eventType,
     //   phone_number: this.publicacion.phone
     // });
-
-    console.log(`Evento de contacto registrado: ${eventType}`);
   }
   /**
    * Comparte en Facebook con mejor manejo y loading state

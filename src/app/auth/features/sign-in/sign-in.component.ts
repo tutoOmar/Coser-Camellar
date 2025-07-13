@@ -128,7 +128,6 @@ export default class SignInComponent implements OnInit, AfterViewInit {
       toast.success('Inicio de sesión exitosa');
       this.router.navigate(['/works']);
     } catch (error: any) {
-      console.log(error.code);
       if (error.code === 'auth/account-exists-with-different-credential') {
         toast.error('Ya existe una cuenta con esta cuenta de Facebook');
       } else {

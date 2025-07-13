@@ -20,6 +20,7 @@ import { toast } from 'ngx-sonner';
 import { AnalyticsService } from '../../../shared/data-access/analytics.service';
 import { TypeUser } from '../models/type-user.model';
 
+const PATH_USERS = 'users';
 @Component({
   selector: 'app-satelite-individual',
   standalone: true,
@@ -28,7 +29,6 @@ import { TypeUser } from '../models/type-user.model';
     RouterModule,
     FormsModule,
     ReactiveFormsModule,
-    CardPositionComponent,
     WaButtonComponent,
   ],
   templateUrl: './satelite-individual.component.html',
@@ -67,7 +67,7 @@ export default class SateliteIndividualComponent {
   ngOnInit(): void {
     this.sateliteId = this.route.snapshot.paramMap.get('id');
     if (this.sateliteId) {
-      this.loadWorker('satelite', this.sateliteId);
+      this.loadWorker(PATH_USERS, this.sateliteId);
     }
     this.initializeForm();
     this.paginateComments(); // Cargar los primeros comentarios
@@ -114,7 +114,11 @@ export default class SateliteIndividualComponent {
     if (this.commentForm.valid) {
       const idCurrentUser = this.authState.currentUser?.uid;
 
-      if (idCurrentUser && this.sateliteId) {
+      if (
+        idCurrentUser &&
+        this.sateliteId &&
+        idCurrentUser !== this.sateliteId
+      ) {
         const newComment: Comment = {
           comment: this.commentForm.value.comment,
           id_person: idCurrentUser, // Puedes reemplazar esto con el id de la persona actual
@@ -135,7 +139,7 @@ export default class SateliteIndividualComponent {
               this.countAverageScore(sateliteUserData.comments).toFixed(2)
             );
             this.worksService.addComment(
-              'satelite',
+              PATH_USERS,
               sateliteUserData,
               this.sateliteId
             );
@@ -146,6 +150,8 @@ export default class SateliteIndividualComponent {
             );
           }
         }
+      } else if (idCurrentUser === this.sateliteId) {
+        toast.error('No puedes calificarte a ti mismo 😅');
       } else {
         toast.error('No puedes calificar sin iniciar sesión');
       }

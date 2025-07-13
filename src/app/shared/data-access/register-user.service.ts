@@ -98,7 +98,6 @@ export class RegisterUserService {
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         },
         (error) => {
-          console.error('Error al cargar el archivo', error);
           observer.error(error);
         },
         async () => {
@@ -190,7 +189,6 @@ export class RegisterUserService {
       | Omit<NaturalPersonUser, 'id'>,
     image: File | null
   ): Observable<any> {
-    console.log('colection', collectionSelected, 'user', user, 'image', image);
     if (image) {
       // Si hay imagen, la subimos y luego actualizamos el usuario
       return this._imageService.uploadImage(image).pipe(
@@ -200,7 +198,6 @@ export class RegisterUserService {
             photo: imageUrl,
             userId: this._authState.currentUser?.uid,
           };
-          console.log('Se sube la imagen', imageUrl, userWithImage);
           return this.updateUserByUserId(collectionSelected, userWithImage);
         })
       );
@@ -227,13 +224,11 @@ export class RegisterUserService {
     const _collection = collection(this._firestore, collectionSelected);
     // Crear query para buscar por userId
     const q = query(_collection, where('userId', '==', user.userId));
-    console.log('User', user, 'Colection', collectionSelected);
     return from(getDocs(q)).pipe(
       switchMap((querySnapshot) => {
         if (querySnapshot.empty) {
           throw new Error('No se encontró ningún usuario con ese userId');
         }
-        console.log('Pasó esto');
         // Obtener el primer documento que coincida
         const docSnap = querySnapshot.docs[0];
         const docRef = doc(this._firestore, collectionSelected, docSnap.id);

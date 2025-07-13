@@ -44,7 +44,7 @@
 .main-container {
   flex-direction: row;
   justify-content: space-between;
-  align-items: center;
+  // align-items: center;
 }
 .logo {
   width: 10px;
@@ -54,6 +54,10 @@
 * Para celulares muy pequeños 
 */
 @media (max-width: 470px) {
+  .div-pc {
+    display: none;
+  }
+
   .icon {
     width: 25px;
     height: 25px;
@@ -138,6 +142,9 @@
  * Para celulares pequeños 
  **/
 @media (max-width: 375px) {
+  .div-pc {
+    display: none;
+  }
   .icon-button-menu {
     span {
       font-size: 0.7rem;
@@ -146,5 +153,18 @@
   .icon {
     width: 20px;
     height: 20px;
+  }
+}
+/** Vistas para tables*/
+@media (min-width: 471px) and (max-width: 1023px) {
+  .div-mobile {
+    display: none;
+  }
+}
+
+/** Vistas para tables*/
+@media (min-width: 1024px) {
+  .div-mobile {
+    display: none;
   }
 }

@@ -105,7 +105,6 @@ export class PublicationDemandService {
         }
         // Para cada post, obtener el autor
         const postsWithAuthor$ = posts.map((post) => {
-          console.log('Ahhh', post);
           const userQuery = query(
             collection(this.firestore, PATH_USER),
             where('userId', '==', post.autorId),
@@ -116,8 +115,6 @@ export class PublicationDemandService {
               const authorDoc =
                 querySnapshot.docs.length > 0 ? querySnapshot.docs[0] : null;
               const authorData = authorDoc ? authorDoc.data() : null;
-              console.log('Querysanpshot', authorData);
-
               return {
                 ...post,
                 autor: authorData
@@ -153,10 +150,8 @@ export class PublicationDemandService {
         where('autorId', '==', userId), // Corregido: autorId en lugar de userId
         orderBy('timestamp', 'desc')
       );
-      console.log('Por acá si llego?', userId);
       return from(getDocs(q)).pipe(
         switchMap((snapshot) => {
-          console.log('snapshot', snapshot);
           // Si no hay publicaciones, retornar array vacío
           if (snapshot.docs.length === 0) {
             return of([]);
@@ -172,8 +167,6 @@ export class PublicationDemandService {
                   docSnap.data()['timestamp'],
               } as PublicationDB)
           );
-          console.log('post', posts);
-
           // Obtener el tipo de autor de la primera publicación
           // (todas tendrán el mismo autorId y autorType)
           const firstPost = posts[0];

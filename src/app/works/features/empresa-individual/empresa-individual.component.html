@@ -1,34 +1,30 @@
 <div class="worker-details-container">
-  <div *ngIf="sateliteSignal()" class="flex flex-col">
+  <div *ngIf="empresaSignal()" class="flex flex-col">
     <!-- Estructura principal en pantallas pequeñas -->
     <div class="worker-header-complete">
       <div class="worker-header">
-        <div class="worker-photo">
+        <div class="worker-photo" *ngIf="empresaSignal()?.photo">
           <img
             class="p-8 rounded-t-lg image"
-            [src]="
-              sateliteSignal()?.photo
-                ? sateliteSignal()?.photo
-                : 'https://firebasestorage.googleapis.com/v0/b/tu-chamba-cf127.appspot.com/o/talleresPhotos%2FmachineLogo.png?alt=media&token=4c581607-d6dd-4816-a3ae-e8357fd69694'
-            "
-            alt="Foto de {{ sateliteSignal()?.name }}"
+            [src]="empresaSignal()?.photo"
+            alt="Foto de {{ empresaSignal()?.name }}"
           />
         </div>
         <div class="worker-info">
-          <h2 class="mt-2">{{ sateliteSignal()?.name }}</h2>
+          <h2 class="mt-2">{{ empresaSignal()?.name }}</h2>
           <p class="text-sm text-black-500 dark:text-black-400">
-            <strong>Responsable: </strong>{{ sateliteSignal()?.responsible }}
+            <strong>Responsable: </strong>{{ empresaSignal()?.responsable }}
           </p>
           <p class="mt-2">
-            {{ sateliteSignal()?.city }}, {{ sateliteSignal()?.country }}
+            {{ empresaSignal()?.city }}, {{ empresaSignal()?.country }}
           </p>
           <p class="text-sm text-black-500 dark:text-black-400">
-            <strong>Ubicación: </strong> {{ sateliteSignal()?.neighborhood }}
+            <strong>Ubicación: </strong> {{ empresaSignal()?.neighborhood }}
           </p>
           <p class="mt-2" *ngIf="authStateService.isAuthenticated$ | async">
-            <strong>Teléfono:</strong> {{ sateliteSignal()?.phone }}
+            <strong>Teléfono:</strong> {{ empresaSignal()?.phone }}
             <app-wa-button
-              [phoneNumber]="sateliteSignal()?.phone"
+              [phoneNumber]="empresaSignal()?.phone"
               (buttonClicked)="handleWaButton()"
             ></app-wa-button>
           </p>
@@ -37,19 +33,14 @@
       <div class="detalles mt-3 ml-2">
         <p class="mt-2">
           <strong>Especialidades:</strong>
-          {{ removeHyphens(sateliteSignal()?.specialty) }}
+          {{ removeHyphens(empresaSignal()?.specialties) }}
         </p>
-        <p class="mt-2">
-          <strong>Máquinas que maneja:</strong>
-          {{ removeHyphens(sateliteSignal()?.machines) }}
-        </p>
-        <p class="mt-2">
+        <p class="mt-2" *ngIf="empresaSignal()?.website">
           <strong>Experiencia:</strong>
-          {{ removeHyphens(sateliteSignal()?.experience) }}
+          <a>{{ empresaSignal()?.website }}</a>
         </p>
         <p class="text-black-500 dark:text-black-400 mb-3">
-          <strong>Número colaboradores o empleados: </strong
-          >{{ sateliteSignal()?.numberEmployees }}
+          <strong>¿Qué busca?: </strong>{{ empresaSignal()?.busca }}
         </p>
       </div>
     </div>
@@ -80,8 +71,8 @@
       </div>
       <button
         *ngIf="
-          sateliteSignal()?.comments &&
-          (sateliteSignal()?.comments)!.length >
+          empresaSignal()?.comments &&
+          (empresaSignal()?.comments)!.length >
             currentCommentPage * commentsPerPage
         "
         (click)="nextCommentsPage()"
@@ -93,7 +84,7 @@
 
     <!-- Formulario para agregar un nuevo comentario -->
     <div class="add-comment-form">
-      <h3>¿Trabajaste con {{ sateliteSignal()?.name }}? Deja tu comentario</h3>
+      <h3>¿Trabajaste con {{ empresaSignal()?.name }}? Deja tu comentario</h3>
       <form [formGroup]="commentForm" (ngSubmit)="addComment()">
         <div class="form-group">
           <textarea

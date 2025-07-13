@@ -189,7 +189,6 @@ export class WorksService {
     );
     return collectionData(userQuery, { idField: 'id' }).pipe(
       catchError((error) => {
-        console.log('Hubo error');
         return of(null);
       }) // Si hay un error (usuario no encontrado), retorna null
     );
@@ -298,7 +297,12 @@ export class WorksService {
   // Método para actualizar el comentario en la base de datos de fireStore
   addComment(
     collectionSelected: string,
-    user: WorkerUser | TallerUSer | SateliteUser,
+    user:
+      | WorkerUser
+      | TallerUSer
+      | SateliteUser
+      | EmpresaUser
+      | NaturalPersonUser,
     idUser: string
   ): Observable<any> {
     const _collection = collection(this.firestore, collectionSelected);
@@ -350,7 +354,6 @@ export class WorksService {
       | NaturalPersonUser,
     image: File | null
   ): Observable<any> {
-    console.log('Imagen', image);
     if (image) {
       // Si hay imagen, la subimos y luego creamos la noticia
       return this._imageService.uploadImage(image, 'users').pipe(

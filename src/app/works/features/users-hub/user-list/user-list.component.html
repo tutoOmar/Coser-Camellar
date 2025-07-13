@@ -1,0 +1,41 @@
+<div class="user-grid">
+  <div *ngFor="let user of users" class="user-card">
+    <!-- Card genérica que se adapta según el tipo -->
+    <ng-container [ngSwitch]="userType">
+      <div *ngSwitchCase="'trabajadores'">
+        <app-card-calification
+          [worker]="user"
+          (viewMoreComments)="onUserSelected(user.id)"
+        ></app-card-calification>
+      </div>
+
+      <div *ngSwitchCase="'satelite'">
+        <app-card-satelite
+          [satelite]="user"
+          (viewMoreComments)="onUserSelected(user.id)"
+        ></app-card-satelite>
+      </div>
+
+      <div *ngSwitchCase="'talleres'">
+        <app-card-satelite
+          [satelite]="user"
+          (viewMoreComments)="onUserSelected(user.id)"
+        ></app-card-satelite>
+      </div>
+
+      <div *ngSwitchCase="'empresa'">
+        <app-card-empresa
+          [empresa]="user"
+          (viewMoreComments)="onUserSelected(user.id)"
+        ></app-card-empresa>
+      </div>
+
+      <div *ngSwitchCase="'persona-natural'">
+        <app-card-natural-person
+          [naturalPerson]="user"
+          (viewMoreComments)="onUserSelected(user.id)"
+        ></app-card-natural-person>
+      </div>
+    </ng-container>
+  </div>
+</div>
