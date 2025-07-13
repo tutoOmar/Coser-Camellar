@@ -33,7 +33,8 @@
                 "input": "public"
               },
               "src/_redirects",
-              "src/google066555050eeb7de5.html"
+              "src/google066555050eeb7de5.html",
+              "src/robots.txt"
             ],
             "styles": ["src/styles.scss"],
             "scripts": [],
