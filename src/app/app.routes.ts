@@ -31,7 +31,7 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: '/works',
+    redirectTo: '/publication',
     pathMatch: 'full',
   },
 ];

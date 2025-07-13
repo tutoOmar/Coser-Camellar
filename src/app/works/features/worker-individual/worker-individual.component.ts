@@ -17,6 +17,7 @@ import { AuthStateService } from '../../../shared/data-access/auth-state.service
 import { toast } from 'ngx-sonner';
 import { TypeUser } from '../models/type-user.model';
 
+const PATH_USERS = 'users';
 @Component({
   selector: 'app-worker-individual',
   standalone: true,
@@ -63,7 +64,7 @@ export default class WorkerIndividualComponent implements OnInit {
   ngOnInit(): void {
     this.workerId = this.route.snapshot.paramMap.get('id');
     if (this.workerId) {
-      this.loadWorker('trabajadores', this.workerId);
+      this.loadWorker(PATH_USERS, this.workerId);
     }
     this.authState.isAuthenticated$
       .pipe(
@@ -117,7 +118,7 @@ export default class WorkerIndividualComponent implements OnInit {
     if (this.commentForm.valid) {
       const idCurrentUser = this.authState.currentUser?.uid;
 
-      if (idCurrentUser && this.workerId) {
+      if (idCurrentUser && this.workerId && idCurrentUser !== this.workerId) {
         const newComment: Comment = {
           comment: this.commentForm.value.comment,
           id_person: idCurrentUser, // Puedes reemplazar esto con el id de la persona actual
@@ -138,7 +139,7 @@ export default class WorkerIndividualComponent implements OnInit {
               this.countAverageScore(workerUserData.comments).toFixed(2)
             );
             this.worksService
-              .addComment('trabajadores', workerUserData, this.workerId)
+              .addComment(PATH_USERS, workerUserData, this.workerId)
               .pipe(takeUntil(this.destroy$))
               .subscribe({
                 next: (res) => res,
@@ -152,6 +153,8 @@ export default class WorkerIndividualComponent implements OnInit {
             );
           }
         }
+      } else if (idCurrentUser === this.workerId) {
+        toast.error('No puedes calificarte a ti mismo 😅');
       } else {
         toast.error('No puedes calificar sin iniciar sesión');
       }

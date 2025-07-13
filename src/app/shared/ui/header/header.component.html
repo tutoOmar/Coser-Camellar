@@ -263,8 +263,8 @@
               >
                 Configuración
               </h3>
-              <ul class="space-y-2" *ngIf="userState()">
-                <li>
+              <ul class="space-y-2">
+                <li *ngIf="userState()">
                   <a
                     class="flex items-center p-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-200"
                     [routerLink]="['/works/profile']"
@@ -429,7 +429,7 @@
           <div
             #workersMenuButton
             class="workers-icon"
-            [routerLink]="['/works']"
+            [routerLink]="['/works/users']"
           >
             <div
               class="flex items-center space-x-3 rtl:space-x-reverse flex-col icon-button"
@@ -493,6 +493,84 @@
                 </svg>
               </button>
               <span class="text-black dark:text-white">Trabajo sí hay</span>
+            </div>
+          </div>
+          <div class="works" *ngIf="!_authState.currentUser">
+            <div
+              class="flex items-center space-x-3 rtl:space-x-reverse flex-col icon-button"
+              [routerLink]="['/auth/sign-up']"
+            >
+              <button class="text-gray-500 focus:outline-none">
+                <svg
+                  class="icon items-center w-5 h-5 mr-3"
+                  fill="#000000"
+                  viewBox="0 0 24 24"
+                  id="log-in-double-arrow"
+                  data-name="Flat Line"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="icon flat-line"
+                >
+                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                  <g
+                    id="SVGRepo_tracerCarrier"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  ></g>
+                  <g id="SVGRepo_iconCarrier">
+                    <polyline
+                      id="primary"
+                      points="14 9 17 12 14 15"
+                      style="
+                        fill: none;
+                        stroke: #0171ff;
+                        stroke-linecap: round;
+                        stroke-linejoin: round;
+                        stroke-width: 2;
+                      "
+                    ></polyline>
+                    <polyline
+                      id="primary-2"
+                      data-name="primary"
+                      points="9 9 12 12 9 15"
+                      style="
+                        fill: none;
+                        stroke: #0171ff;
+                        stroke-linecap: round;
+                        stroke-linejoin: round;
+                        stroke-width: 2;
+                      "
+                    ></polyline>
+                    <line
+                      id="primary-3"
+                      data-name="primary"
+                      x1="12"
+                      y1="12"
+                      x2="3"
+                      y2="12"
+                      style="
+                        fill: none;
+                        stroke: #0171ff;
+                        stroke-linecap: round;
+                        stroke-linejoin: round;
+                        stroke-width: 2;
+                      "
+                    ></line>
+                    <path
+                      id="primary-4"
+                      data-name="primary"
+                      d="M10,5V4a1,1,0,0,1,1-1h9a1,1,0,0,1,1,1V20a1,1,0,0,1-1,1H11a1,1,0,0,1-1-1V19"
+                      style="
+                        fill: none;
+                        stroke: #0171ff;
+                        stroke-linecap: round;
+                        stroke-linejoin: round;
+                        stroke-width: 2;
+                      "
+                    ></path>
+                  </g>
+                </svg>
+              </button>
+              <span class="text-black dark:text-white">Quiero registrarme</span>
             </div>
           </div>
         </div>

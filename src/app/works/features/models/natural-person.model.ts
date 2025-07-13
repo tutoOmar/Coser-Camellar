@@ -1,4 +1,5 @@
 import { TypeUser } from './type-user.model';
+import { Comment } from './comment.model';
 
 export interface NaturalPersonUser {
   id: string;
@@ -14,5 +15,6 @@ export interface NaturalPersonUser {
   typeUSer: TypeUser.PERSONA_NATURAL;
   userId?: string;
   countProfileVisits?: number;
+  comments?: Comment[]; // Comentarios de las personas
   countContactViaWa?: number;
 }

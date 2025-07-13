@@ -3,57 +3,43 @@
 >
   <a>
     <img
-      *ngIf="worker()?.gender === 'female' || worker()?.gender === 'other'"
+      *ngIf="naturalPerson()?.photo"
       class="p-8 rounded-t-lg w-full image object-cover"
-      [src]="
-        worker()?.photo
-          ? worker()?.photo
-          : 'https://firebasestorage.googleapis.com/v0/b/tu-chamba-cf127.appspot.com/o/avataWoman.png?alt=media&token=0543d8bd-17a9-41b6-87f1-52579642c271'
-      "
-      alt="Foto de {{ worker()?.name }}"
-    />
-    <img
-      *ngIf="worker()?.gender === 'male'"
-      class="p-8 rounded-t-lg w-full image h- object-cover"
-      [src]="
-        worker()?.photo
-          ? worker()?.photo
-          : 'https://firebasestorage.googleapis.com/v0/b/tu-chamba-cf127.appspot.com/o/avatarMan.png?alt=media&token=0df1900c-9055-4310-8fd9-6486c922bf50'
-      "
-      alt="Foto de {{ worker()?.name }}"
+      [src]="naturalPerson()?.photo"
+      alt="Foto de {{ naturalPerson()?.name }}"
     />
   </a>
   <div class="px-5 pb-5">
-    <a [routerLink]="authState ? ['/works/worker', worker()?.id] : null">
+    <a
+      [routerLink]="
+        authState ? ['/works/naturalPerson', naturalPerson()?.id] : null
+      "
+    >
       <h5
         class="text-xl font-semibold tracking-tight text-gray-900 dark:text-white"
       >
-        {{ worker()?.name }}
+        {{ naturalPerson()?.name }}
       </h5>
     </a>
     <p class="text-sm text-gray-500 dark:text-gray-400">
-      {{ worker()?.city }}, {{ worker()?.country }}
+      {{ naturalPerson()?.city }}, {{ naturalPerson()?.country }}
     </p>
     <app-wa-button
       (buttonClicked)="handleWaButton()"
-      [phoneNumber]="worker()?.phone"
+      [phoneNumber]="naturalPerson()?.phone"
     ></app-wa-button>
-    <p class="text-gray-700 dark:text-gray-300">
-      <strong>Especialidades:</strong>
-      {{ removeHyphens(worker()?.specialty) }}
-    </p>
     <div class="flex items-center mt-2.5 mb-5">
       <div
         class="flex items-center space-x-1 rtl:space-x-reverse"
-        *ngIf="worker()?.average_score"
+        *ngIf="naturalPerson()?.average_score"
       >
         <ng-container *ngFor="let star of [].constructor(5); let i = index">
           <svg
             class="w-4 h-4"
             [ngClass]="{
-              'text-yellow-300': i < (worker()?.average_score ?? 0),
+              'text-yellow-300': i < (naturalPerson()?.average_score ?? 0),
               'text-gray-200 dark:text-gray-600':
-                i >= (worker()?.average_score ?? 0)
+                i >= (naturalPerson()?.average_score ?? 0)
             }"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
@@ -68,18 +54,10 @@
       </div>
       <span
         class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800 ms-3"
-        >{{ worker()?.average_score }}</span
+        >{{ naturalPerson()?.average_score }}</span
       >
     </div>
     <div class="flex items-center justify-between">
-      <span
-        class="text-sm font-semibold text-gray-900 dark:text-white"
-        [ngClass]="{
-          'text-green-500': worker()?.status === 'libre',
-          'text-red-500': worker()?.status === 'ocupado'
-        }"
-        >{{ worker()?.status === "libre" ? "Disponible" : "Ocupado" }}</span
-      >
       <button
         (click)="toggleShowMore()"
         class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
@@ -89,23 +67,21 @@
     </div>
   </div>
   <div *ngIf="showMoreSignal" class="px-5 pt-3">
-    <p class="text-gray-700 dark:text-gray-300">
-      <strong>Máquinas que maneja: </strong
-      >{{ removeHyphens(worker()?.machines) }}
-    </p>
     <p class="text-gray-700 dark:text-gray-300 mt-2">
-      <strong>Experiencia: </strong> {{ worker()?.experience?.join(", ") }}
+      <strong>Descripción: </strong> {{ naturalPerson()?.description }}
     </p>
     <p *ngIf="authState" class="text-gray-700 dark:text-gray-300 mt-2">
-      <strong>Teléfono:</strong> {{ worker()?.phone }}
+      <strong>Teléfono:</strong> {{ naturalPerson()?.phone }}
     </p>
-    <a
+    <!-- Aún no se ha implementado comentarios para este usuario.  -->
+    <!-- <a 
       (click)="onViewMoreComments()"
       class="text-blue-500 hover:underline text-xl"
       >Agregar comentario</a
     >
-    <div class="bg-gray-100 rounded-lg p-4 shadow-sm mt-2 mb-2">
-      <div *ngFor="let comment of worker()?.comments?.slice(0, 2)" class="mb-4">
+     -->
+    <!-- <div class="bg-gray-100 rounded-lg p-4 shadow-sm mt-2 mb-2">
+      <div *ngFor="let comment of naturalPerson()?.comments?.slice(0, 2)" class="mb-4">
         <p class="text-gray-700 dark:text-gray-900">
           <strong>Comentario:</strong> {{ comment.comment }}
         </p>
@@ -133,5 +109,6 @@
         </div>
       </div>
     </div>
+  </div> -->
   </div>
 </div>

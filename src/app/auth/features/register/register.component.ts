@@ -217,7 +217,6 @@ export default class RegisterComponent implements OnInit, AfterViewInit {
             this.router.navigate(['/works']);
           },
           error: (error) => {
-            console.log('Este errors', error);
             toast.error('Hubo un problema en el registro');
             this.loading.set(false);
           },
@@ -523,7 +522,6 @@ export default class RegisterComponent implements OnInit, AfterViewInit {
   // Métodos para manejar formsSumit de los dos nuevos componentes
   imageFromFormsEmpresaOrNaturalUser!: File;
   onSubmitForm1(form: Omit<EmpresaUser, 'id'> | Omit<NaturalPersonUser, 'id'>) {
-    console.log('NeoForm', form);
     this.loading.set(true);
     if (form) {
       form.phone = `${form.phone}`;
@@ -552,7 +550,6 @@ export default class RegisterComponent implements OnInit, AfterViewInit {
       this.loading.set(false);
       toast.error('Debes llenar todos los campos');
     }
-    console.log(this.imageFromFormsEmpresaOrNaturalUser);
   }
   onImage(event: ImagenSeleccionada) {
     this.imageFromFormsEmpresaOrNaturalUser = event.file;

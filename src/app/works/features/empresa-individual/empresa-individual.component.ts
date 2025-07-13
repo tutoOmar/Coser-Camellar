@@ -1,85 +1,83 @@
-import { Component, inject, signal } from '@angular/core';
-import { first, Subject, switchMap, takeUntil, tap } from 'rxjs';
-import { WorksService } from '../../services/works.service';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { TallerUSer } from '../models/talleres.model';
+import { Component, inject, signal } from '@angular/core';
 import {
+  FormsModule,
+  ReactiveFormsModule,
   FormGroup,
   FormBuilder,
   Validators,
-  FormsModule,
-  ReactiveFormsModule,
 } from '@angular/forms';
-import { WorkerUser } from '../models/worker.model';
-import { Comment } from '../models/comment.model';
-import WaButtonComponent from '../../../shared/ui/wa-button/wa-button.component';
-import CardPositionComponent from '../../../shared/ui/card-position/card-position.component';
-import { AuthStateService } from '../../../shared/data-access/auth-state.service';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { toast } from 'ngx-sonner';
+import { Subject, first, takeUntil, tap, switchMap, take } from 'rxjs';
 import { AnalyticsService } from '../../../shared/data-access/analytics.service';
+import { AuthStateService } from '../../../shared/data-access/auth-state.service';
+import WaButtonComponent from '../../../shared/ui/wa-button/wa-button.component';
+import { WorksService } from '../../services/works.service';
 import { TypeUser } from '../models/type-user.model';
+import { Comment } from '../models/comment.model';
+import { EmpresaUser } from '../models/empresa.model';
 
-const COLLECTION_DATA = 'users';
-
+const PATH_USERS = 'users';
 @Component({
-  selector: 'app-taller-individual',
+  selector: 'app-empresa-individual',
   standalone: true,
   imports: [
-    CardPositionComponent,
     CommonModule,
     RouterModule,
     FormsModule,
     ReactiveFormsModule,
     WaButtonComponent,
   ],
-  templateUrl: './taller-individual.component.html',
-  styleUrl: './taller-individual.component.scss',
+  templateUrl: './empresa-individual.component.html',
+  styleUrl: './empresa-individual.component.scss',
 })
-export default class TallerIndividualComponent {
-  // Services
+export default class EmpresaIndividualComponent {
+  // inyeccion de servicios
   private authState = inject(AuthStateService);
   private analyticsService = inject(AnalyticsService);
 
   // Crear signal para guardar el usuario individual
-  tallerSignal = signal<TallerUSer | null>(null);
+  empresaSignal = signal<EmpresaUser | null>(null);
   //
   private destroy$: Subject<void> = new Subject<void>();
   /**  */
   currentCommentPage: number = 1;
   commentsPerPage: number = 5;
   paginatedComments: Comment[] = [];
-  tallerId!: string | null;
-  satelite!: WorkerUser;
+  empresaId!: string | null;
+  empresa!: EmpresaUser;
   // Formulario para agregar un nuevo comentario
   commentForm!: FormGroup;
-  /**
-   *
-   * @param route
+  /** =========================================
+   * Ng functions
    */
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder,
-    private worksService: WorksService
+    private worksService: WorksService,
+    public authStateService: AuthStateService
   ) {}
-  /**
-   *
-   */
   ngOnInit(): void {
-    this.tallerId = this.route.snapshot.paramMap.get('id');
-    if (this.tallerId) {
-      this.loadWorker(COLLECTION_DATA, this.tallerId);
+    this.empresaId = this.route.snapshot.paramMap.get('id');
+    if (this.empresaId) {
+      this.loadWorker(PATH_USERS, this.empresaId);
     }
     this.initializeForm();
     this.paginateComments(); // Cargar los primeros comentarios
   }
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+  /** =================   Functions   ======================= */
   // Método para paginar los comentarios en grupos de 5
   paginateComments() {
     setTimeout(() => {
-      if (this.tallerSignal() && this.tallerSignal()?.comments) {
+      if (this.empresaSignal() && this.empresaSignal()?.comments) {
         const startIndex = (this.currentCommentPage - 1) * this.commentsPerPage;
         const endIndex = this.currentCommentPage * this.commentsPerPage;
-        const comments = this.tallerSignal()?.comments;
+        const comments = this.empresaSignal()?.comments;
         if (comments) {
           this.paginatedComments = comments.slice(startIndex, endIndex);
         }
@@ -90,8 +88,9 @@ export default class TallerIndividualComponent {
   // Avanzar a la siguiente página de comentarios
   nextCommentsPage() {
     if (
+      this.empresa.comments &&
       this.currentCommentPage * this.commentsPerPage <
-      this.satelite.comments.length
+        this.empresa.comments.length
     ) {
       this.currentCommentPage++;
       this.paginateComments();
@@ -111,11 +110,11 @@ export default class TallerIndividualComponent {
 
   // Agregar un nuevo comentario
   addComment() {
-    this.tallerId = this.route.snapshot.paramMap.get('id');
+    this.empresaId = this.route.snapshot.paramMap.get('id');
     if (this.commentForm.valid) {
       const idCurrentUser = this.authState.currentUser?.uid;
 
-      if (idCurrentUser && this.tallerId && idCurrentUser !== this.tallerId) {
+      if (idCurrentUser && this.empresaId && idCurrentUser !== this.empresaId) {
         const newComment: Comment = {
           comment: this.commentForm.value.comment,
           id_person: idCurrentUser, // Puedes reemplazar esto con el id de la persona actual
@@ -123,22 +122,22 @@ export default class TallerIndividualComponent {
         };
         this.paginateComments(); // Volvemos a paginar los comentarios
         this.commentForm.reset(); // Reiniciar el formulario
-        const tallerUserData = this.tallerSignal();
-        if (tallerUserData) {
+        const empresaData = this.empresaSignal();
+        if (empresaData && empresaData.comments) {
           //VAlidamos que este usario no haya comentado
           if (
-            !tallerUserData.comments.some(
+            !empresaData.comments.some(
               (comment) => comment.id_person === idCurrentUser
             )
           ) {
-            tallerUserData.comments.push(newComment);
-            tallerUserData.average_score = Number(
-              this.countAverageScore(tallerUserData.comments).toFixed(2)
+            empresaData.comments.push(newComment);
+            empresaData.average_score = Number(
+              this.countAverageScore(empresaData.comments).toFixed(2)
             );
             this.worksService.addComment(
-              COLLECTION_DATA,
-              tallerUserData,
-              this.tallerId
+              PATH_USERS,
+              empresaData,
+              this.empresaId
             );
             toast.success('Calificación hecho con éxito ');
           } else {
@@ -147,7 +146,7 @@ export default class TallerIndividualComponent {
             );
           }
         }
-      } else if (idCurrentUser === this.tallerId) {
+      } else if (idCurrentUser === this.empresaId) {
         toast.error('No puedes calificarte a ti mismo 😅');
       } else {
         toast.error('No puedes calificar sin iniciar sesión');
@@ -171,30 +170,31 @@ export default class TallerIndividualComponent {
   /**
    *
    * @param collectionName
-   * @param tallerId
+   * @param empresaId
    */
-  loadWorker(collectionName: string, tallerId: string) {
+  loadWorker(collectionName: string, empresaId: string) {
     this.worksService
-      .getUserByIdAndCollection(tallerId, collectionName)
+      .getUserByIdAndCollection(empresaId, collectionName)
       .pipe(
         first(),
         takeUntil(this.destroy$),
-        tap((taller: any) => {
-          const validationUSer = taller as TallerUSer;
-          this.tallerSignal.set(validationUSer);
+        tap((empresa: any) => {
+          const validationUSer = empresa as EmpresaUser;
+          this.empresaSignal.set(validationUSer);
+          this.empresa = empresa;
           this.analyticsService.logCustomEvent('page-visit', {
-            page: 'taller-individual',
-            sateliteData: validationUSer,
+            page: 'empresa-individual',
+            empresaData: validationUSer,
           });
           this.paginateComments();
         }),
-        switchMap((taller: TallerUSer) => {
-          if (taller.countProfileVisits) {
-            taller.countProfileVisits++;
+        switchMap((empresa: EmpresaUser) => {
+          if (empresa.countProfileVisits) {
+            empresa.countProfileVisits++;
           } else {
-            taller.countProfileVisits = 1;
+            empresa.countProfileVisits = 1;
           }
-          return this.worksService.updateUser(TypeUser.TALLER, taller, null);
+          return this.worksService.updateUser(TypeUser.EMPRESA, empresa, null);
         })
       )
       .subscribe();
@@ -217,13 +217,26 @@ export default class TallerIndividualComponent {
    * @param position
    */
   countPosition(position: any[] | undefined) {
-    //console.log(position);
+    // console.log(position);
   }
   /**
-   *
+   * Acción de clic en el botón de WA
+   * Se aumenta un conteo de clic para saber a quienes
+   * buscan más seguido
    */
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
+  handleWaButton() {
+    const empresaData = this.empresaSignal();
+    const typeUser = empresaData?.typeUSer;
+    if (empresaData && typeUser) {
+      if (empresaData.countContactViaWa) {
+        empresaData.countContactViaWa++;
+      } else {
+        empresaData.countContactViaWa = 1;
+      }
+      this.worksService
+        .updateUser(typeUser, empresaData, null)
+        .pipe(takeUntil(this.destroy$), take(1))
+        .subscribe();
+    }
   }
 }

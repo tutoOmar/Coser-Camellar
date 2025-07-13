@@ -51,7 +51,6 @@ export default class HeaderComponent {
    */
   toggleMenu() {
     this.isMenuOpen = !this.isMenuOpen;
-    console.log(this.isMenuOpen);
   }
   /**
    *
@@ -78,7 +77,6 @@ export default class HeaderComponent {
   }
 
   navigateTo(route: string): void {
-    console.log(`Navegando a: ${route}`);
     // Aquí puedes implementar la navegación real con Angular Router
     // this.router.navigate([route]);
     this.closeMenu();
@@ -92,7 +90,6 @@ export default class HeaderComponent {
    */
   toggleMenuSandwich() {
     this.isMenuOpenSandwich = !this.isMenuOpenSandwich;
-    console.log(this.isMenuOpenSandwich);
   }
   /**
    *

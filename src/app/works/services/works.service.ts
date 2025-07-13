@@ -297,7 +297,12 @@ export class WorksService {
   // Método para actualizar el comentario en la base de datos de fireStore
   addComment(
     collectionSelected: string,
-    user: WorkerUser | TallerUSer | SateliteUser,
+    user:
+      | WorkerUser
+      | TallerUSer
+      | SateliteUser
+      | EmpresaUser
+      | NaturalPersonUser,
     idUser: string
   ): Observable<any> {
     const _collection = collection(this.firestore, collectionSelected);
