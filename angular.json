@@ -32,7 +32,8 @@
                 "glob": "**/*",
                 "input": "public"
               },
-              "src/_redirects"
+              "src/_redirects",
+              "src/google066555050eeb7de5.html"
             ],
             "styles": ["src/styles.scss"],
             "scripts": [],
