@@ -1,1 +1,6 @@
-/*  /index.csr.html 200
+# Servir archivos estáticos antes que las rutas de Angular
+/robots.txt    /robots.txt    200
+/sitemap.xml   /sitemap.xml   200
+
+# Todas las demás rutas van a Angular
+/*    /index.csr.html   200
