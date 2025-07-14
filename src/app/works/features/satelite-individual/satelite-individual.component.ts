@@ -197,11 +197,7 @@ export default class SateliteIndividualComponent {
           } else {
             satelite.countProfileVisits = 1;
           }
-          return this.worksService.updateUser(
-            TypeUser.SATELITE,
-            satelite,
-            null
-          );
+          return this.worksService.updateUser(PATH_USERS, satelite, null);
         })
       )
       .subscribe();

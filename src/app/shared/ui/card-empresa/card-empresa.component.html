@@ -4,7 +4,7 @@
   <a>
     <img
       *ngIf="empresa()?.photo"
-      class="p-8 rounded-t-lg w-full image object-cover"
+      class="p-8 image w-full h-48 object-contain"
       [src]="empresa()?.photo"
       alt="Foto de {{ empresa()?.name }}"
     />

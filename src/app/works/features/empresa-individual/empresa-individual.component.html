@@ -40,7 +40,12 @@
           <a>{{ empresaSignal()?.website }}</a>
         </p>
         <p class="text-black-500 dark:text-black-400 mb-3">
-          <strong>¿Qué busca?: </strong>{{ empresaSignal()?.busca }}
+          <strong>¿Qué busca?: </strong
+          >{{
+            empresaSignal()?.busca == "ambos"
+              ? "Talleres y trabajadores"
+              : empresaSignal()?.busca
+          }}
         </p>
       </div>
     </div>

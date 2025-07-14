@@ -196,11 +196,7 @@ export default class WorkerIndividualComponent implements OnInit {
           } else {
             worker.countProfileVisits = 1;
           }
-          return this.worksService.updateUser(
-            TypeUser.TRABAJADOR,
-            worker,
-            null
-          );
+          return this.worksService.updateUser(PATH_USERS, worker, null);
         })
       )
       .subscribe();
