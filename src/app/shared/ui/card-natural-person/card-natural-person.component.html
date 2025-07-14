@@ -4,7 +4,7 @@
   <a>
     <img
       *ngIf="naturalPerson()?.photo"
-      class="p-8 rounded-t-lg w-full image object-cover"
+      class="p-8 w-full h-48 object-contain image"
       [src]="naturalPerson()?.photo"
       alt="Foto de {{ naturalPerson()?.name }}"
     />

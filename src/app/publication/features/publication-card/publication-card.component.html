@@ -3,27 +3,31 @@
 >
   <!-- Encabezado con información del autor -->
   <div class="px-4 py-3 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <div
-        class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center"
-      >
-        <img
-          [src]="publicacion.autor.imageAvatarUrl"
-          alt="Avatar del autor"
-          class="w-full h-full object-cover"
-        />
-      </div>
-      <div class="flex flex-col">
-        <div class="font-semibold text-gray-900 text-sm">
-          {{ publicacion.autor.name }}
+    <a (click)="goToProfile()" class="cursor-pointer">
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center"
+        >
+          <img
+            [src]="
+              publicacion.autor.imageAvatarUrl ||
+              'https://firebasestorage.googleapis.com/v0/b/tu-chamba-cf127.appspot.com/o/avatarNormal.png?alt=media&token=e99bcd5b-0f98-40ba-a662-c50042122a7d'
+            "
+            alt="Avatar del autor"
+            class="w-full h-full object-cover"
+          />
         </div>
-        <div class="text-gray-500 text-xs flex items-center gap-1">
-          <span>{{ getTiempoTranscurrido() }}</span>
-          <span>•</span>
+        <div class="flex flex-col">
+          <div class="font-semibold text-gray-900 text-sm">
+            {{ publicacion.autor.name }}
+          </div>
+          <div class="text-gray-500 text-xs flex items-center gap-1">
+            <span>{{ getTiempoTranscurrido() }}</span>
+            <span>•</span>
+          </div>
         </div>
       </div>
-    </div>
-
+    </a>
     <!-- Menú de opciones -->
     <div class="relative">
       <button class="text-gray-500 text-xl font-bold" (click)="toggleMenu()">

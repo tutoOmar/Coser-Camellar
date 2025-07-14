@@ -194,7 +194,7 @@ export default class EmpresaIndividualComponent {
           } else {
             empresa.countProfileVisits = 1;
           }
-          return this.worksService.updateUser(TypeUser.EMPRESA, empresa, null);
+          return this.worksService.updateUser(PATH_USERS, empresa, null);
         })
       )
       .subscribe();

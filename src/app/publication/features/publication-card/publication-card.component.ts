@@ -7,7 +7,7 @@ import {
   Output,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Publication } from '../../models/publication.model';
 import { WhatsAppService } from '../../../shared/data-access/whats-app.service';
 import { CallService } from '../../../shared/data-access/call.service';
@@ -17,10 +17,11 @@ import { AuthService } from '../../../auth/data-access/auth.service';
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
 import { CallButtonComponent } from '../../../shared/ui/call-button/call-button.component';
 import { AnalyticsService } from '../../../shared/data-access/analytics.service';
+import { TypeUser } from '../../../works/features/models/type-user.model';
 @Component({
   selector: 'app-publication-card',
   standalone: true,
-  imports: [CommonModule, WaButtonComponent, CallButtonComponent],
+  imports: [CommonModule, RouterModule, WaButtonComponent, CallButtonComponent],
   templateUrl: './publication-card.component.html',
   styleUrl: './publication-card.component.scss',
 })
@@ -44,7 +45,8 @@ export class PublicationCardComponent implements OnInit {
     private callService: CallService,
     private socialShareService: SocialShareService,
     private userAuthService: AuthStateService,
-    private analyticsService: AnalyticsService
+    private analyticsService: AnalyticsService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -398,10 +400,33 @@ export class PublicationCardComponent implements OnInit {
     this.edit.emit(this.publicacion);
   }
   /**
-   *
+   * Emite para generar un reporte
    */
   onReport() {
     this.mostrarMenu = !this.mostrarMenu;
     this.report.emit(this.publicacion);
+  }
+  /**
+   * ToDo no puedo hacer esto porque no tengo el id original el usuario, esto sirve si se tiene un id y no un userId, evaluar como hacerlo
+   */
+  goToProfile() {
+    if (this.isLogged) {
+      switch (this.publicacion.autorType) {
+        case TypeUser.TRABAJADOR:
+          //this.router.navigate(['/aplication/marketplace']);
+
+          break;
+        case TypeUser.SATELITE:
+          break;
+        case TypeUser.TALLER:
+          break;
+        case TypeUser.EMPRESA:
+          break;
+        case TypeUser.PERSONA_NATURAL:
+          break;
+        default:
+          break;
+      }
+    }
   }
 }

@@ -40,6 +40,7 @@ export default class PersonaNaturalIndividualComponent {
 
   // Crear signal para guardar el usuario individual
   naturalPersonSignal = signal<NaturalPersonUser | null>(null);
+  stateAuth = signal<boolean>(false);
   //
   private destroy$: Subject<void> = new Subject<void>();
   /**  */
@@ -66,6 +67,18 @@ export default class PersonaNaturalIndividualComponent {
     }
     this.initializeForm();
     this.paginateComments(); // Cargar los primeros comentarios
+    this.authStateService.isAuthenticated$
+      .pipe(
+        takeUntil(this.destroy$),
+        tap((isLogged) => {
+          if (isLogged) {
+            this.stateAuth.set(true);
+          } else {
+            this.stateAuth.set(false);
+          }
+        })
+      )
+      .subscribe();
   }
   ngOnDestroy() {
     this.destroy$.next();
@@ -200,7 +213,7 @@ export default class PersonaNaturalIndividualComponent {
             naturalPersonal.countProfileVisits = 1;
           }
           return this.worksService.updateUser(
-            TypeUser.PERSONA_NATURAL,
+            PATH_USERS,
             naturalPersonal,
             null
           );
@@ -220,13 +233,6 @@ export default class PersonaNaturalIndividualComponent {
       count = count + comment.score;
     });
     return count / sizeComments;
-  }
-  /**
-   *
-   * @param position
-   */
-  countPosition(position: any[] | undefined) {
-    // console.log(position);
   }
   /**
    * Acción de clic en el botón de WA

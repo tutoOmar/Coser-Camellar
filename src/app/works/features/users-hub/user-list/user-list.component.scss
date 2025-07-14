@@ -1,0 +1,11 @@
+/* Opción 1: CSS Grid con auto-fit (Recomendado) */
+.user-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.user-card {
+  width: 100%;
+}

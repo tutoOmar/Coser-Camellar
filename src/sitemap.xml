@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Página principal (se redirige a /publication) -->
+  <url>
+    <loc>https://coserycamellar.netlify.app/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <!-- Página principal de publicaciones de empleo públicos-->
+  <url>
+    <loc>https://coserycamellar.netlify.app/publication/job-offers</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  
+  <!-- Directorio de trabajadores -->
+  <url>
+    <loc>https://coserycamellar.netlify.app/works/users</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+    <!-- Directorio de trabajadores -->
+  <url>
+    <loc>https://coserycamellar.netlify.app/works/politicas</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+    <!-- Página noticias -->
+  <url>
+    <loc>https://coserycamellar.netlify.app/aplication</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+    <!-- Página marketplace -->
+  <url>
+    <loc>https://coserycamellar.netlify.app/aplication/marketplace</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <!-- Página comercial -->
+  <url>
+    <loc>https://coserycamellar.netlify.app/comercial/us</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+</urlset>

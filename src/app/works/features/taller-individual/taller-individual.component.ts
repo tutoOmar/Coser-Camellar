@@ -26,7 +26,6 @@ const COLLECTION_DATA = 'users';
   selector: 'app-taller-individual',
   standalone: true,
   imports: [
-    CardPositionComponent,
     CommonModule,
     RouterModule,
     FormsModule,
@@ -194,7 +193,7 @@ export default class TallerIndividualComponent {
           } else {
             taller.countProfileVisits = 1;
           }
-          return this.worksService.updateUser(TypeUser.TALLER, taller, null);
+          return this.worksService.updateUser(COLLECTION_DATA, taller, null);
         })
       )
       .subscribe();
