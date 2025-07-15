@@ -1,10 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { UsersService } from '../../../shared/data-access/users.service';
 import {
   debounceTime,
   distinctUntilChanged,
+  of,
   Subject,
   switchMap,
+  take,
   takeUntil,
   tap,
 } from 'rxjs';
@@ -13,6 +15,10 @@ import { UserListComponent } from './user-list/user-list.component';
 import { TypeUser } from '../models/type-user.model';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AnalyticsService } from '../../../shared/data-access/analytics.service';
+import { AuthStateService } from '../../../shared/data-access/auth-state.service';
+import Swal from 'sweetalert2';
+import { Router } from '@angular/router';
+import { WorksService } from '../../services/works.service';
 
 @Component({
   selector: 'app-users-hub',
@@ -21,7 +27,7 @@ import { AnalyticsService } from '../../../shared/data-access/analytics.service'
   templateUrl: './users-hub.component.html',
   styleUrl: './users-hub.component.scss',
 })
-export default class UsersHubComponent implements OnInit {
+export default class UsersHubComponent implements OnInit, AfterViewInit {
   searchControl = new FormControl('');
   private destroy$ = new Subject<void>();
   /** Variables */
@@ -39,13 +45,19 @@ export default class UsersHubComponent implements OnInit {
   /** Ng Functions */
   constructor(
     private userService: UsersService,
-    private analyticsService: AnalyticsService
+    private analyticsService: AnalyticsService,
+    private authStateService: AuthStateService,
+    private router: Router,
+    private workesService: WorksService
   ) {}
   ngOnInit(): void {
     this.initializeData();
     this.filterUsers();
     this.setupFormControlSearch();
     this.analyticsService.logPageVisit('user-hub');
+  }
+  ngAfterViewInit(): void {
+    this.openModalRegister();
   }
   ngOnDestroy() {
     this.destroy$.next();
@@ -153,5 +165,50 @@ export default class UsersHubComponent implements OnInit {
   /** Calcula la cantidad de usuarios por tipo de usuario */
   getUserCount(typeUser: string) {
     return this.userService.getCountUserByType(typeUser);
+  }
+  /**
+   * Abre el modal en caso de no tener perfil el usuario
+   */
+  openModalRegister() {
+    this.authStateService.authState$
+      .pipe(
+        takeUntil(this.destroy$),
+        take(1),
+        switchMap((user) => {
+          if (user && user.uid) {
+            return this.workesService.getUserByUserIdAndCollection(
+              user.uid,
+              'users'
+            );
+          } else {
+            return of(null);
+          }
+        })
+      )
+      .subscribe({
+        next: (user) => {
+          if (
+            user &&
+            user[0] &&
+            user[0].typeUSer &&
+            user[0].typeUSer === TypeUser.NO_PROFILE
+          ) {
+            Swal.fire({
+              title: '¡Completa tu perfil!',
+              text: 'Para que tu perfil sea visible te recomendamos completarlo y así poder aparecer en las busquedas de otras personas.  ',
+              icon: 'info',
+              showConfirmButton: true,
+              confirmButtonText: 'Completar perfil', // Texto del botón de confirmación
+              cancelButtonText: 'Luego lo completo', // Texto del botón de cancelar
+              showCancelButton: true,
+            }).then((result) => {
+              if (result.isConfirmed) {
+                this.router.navigate(['/auth/register']);
+              }
+            });
+          }
+        },
+        error: () => {},
+      });
   }
 }

@@ -2,7 +2,7 @@ import { Component, HostListener, signal, Signal } from '@angular/core';
 import { PublicationCardComponent } from '../publication-card/publication-card.component';
 import { CommonModule } from '@angular/common';
 import { Publication } from '../../models/publication.model';
-import { Subject, takeUntil, finalize, tap, switchMap, map } from 'rxjs';
+import { Subject, takeUntil, finalize, tap, switchMap, map, take } from 'rxjs';
 import { PublicationDemandService } from '../../services/publication-demand.services';
 import { TypeUser } from '../../../works/features/models/type-user.model';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -73,6 +73,7 @@ export default class PublicationDemandComponent {
     this.analyticsService.logCustomEvent('page-visit', {
       page: 'publication-demand',
     });
+    this.openModalRegister();
   }
 
   ngOnDestroy(): void {
@@ -590,5 +591,45 @@ export default class PublicationDemandComponent {
   private onReporteError(error: any): void {
     this.enviandoReporte = false;
     toast.error('Error al enviar el reporte');
+  }
+  /**
+   * Abre el modal en caso de no tener perfil el usuario
+   */
+  openModalRegister() {
+    this.authStateService.authState$
+      .pipe(
+        takeUntil(this.destroy$),
+        take(1),
+        switchMap((user) => {
+          return this.userService.getUserByUserIdAndCollection(
+            user.uid,
+            'users'
+          );
+        })
+      )
+      .subscribe({
+        next: (user) => {
+          if (
+            user[0] &&
+            user[0].typeUSer &&
+            user[0].typeUSer === TypeUser.NO_PROFILE
+          ) {
+            Swal.fire({
+              title: '¡Completa tu perfil!',
+              text: 'Para que tu perfil sea visible te recomendamos completarlo y así poder aparecer en las busquedas de otras personas.  ',
+              icon: 'info',
+              showConfirmButton: true,
+              confirmButtonText: 'Completar perfil', // Texto del botón de confirmación
+              cancelButtonText: 'Luego lo completo', // Texto del botón de cancelar
+              showCancelButton: true,
+            }).then((result) => {
+              if (result.isConfirmed) {
+                this._router.navigate(['/auth/register']);
+              }
+            });
+          }
+        },
+        error: () => {},
+      });
   }
 }
