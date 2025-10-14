@@ -31,6 +31,7 @@ import { RegisterNaturalPersonComponent } from '../register-natural-person/regis
 import { EmpresaUser } from '../../../works/features/models/empresa.model';
 import { NaturalPersonUser } from '../../../works/features/models/natural-person.model';
 import { ImagenSeleccionada } from '../../../shared/models/imagen-seleccionada.model';
+import { COLOMBIAN_CITIES } from '../../../shared/models/cities-harcode';
 
 @Component({
   selector: 'app-register',
@@ -81,28 +82,7 @@ export default class RegisterComponent implements OnInit, AfterViewInit {
   // Datos prefedinidos para paise sy ciudades
   //ToDo esto deberá estar vacio cuando nos conectemos a un API
   countries: any[] = [{ name: 'Colombia', code: 'CO' }];
-  cities: any[] = [
-    'Bogotá',
-    'Medellín',
-    'Cali',
-    'Barranquilla',
-    'Cartagena',
-    'Cúcuta',
-    'Bucaramanga',
-    'Pereira',
-    'Santa Marta',
-    'Ibagué',
-    'Soacha',
-    'Chía',
-    'Cota',
-    'Villavicencio',
-    'Manizales',
-    'Pasto',
-    'Montería',
-    'Neiva',
-    'Armenia',
-    'Sincelejo',
-  ];
+  cities = COLOMBIAN_CITIES;
   // variables para manejar la imagenes
   selectedImage: File | null = null;
   imagePreview: string | ArrayBuffer | null = null;

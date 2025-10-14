@@ -22,6 +22,7 @@ import { toast } from 'ngx-sonner';
 import { Status } from '../../models/status.model';
 import { TallerUSer } from '../../models/talleres.model';
 import { SateliteUser } from '../../models/satelite.model';
+import { COLOMBIAN_CITIES } from '../../../../shared/models/cities-harcode';
 
 @Component({
   selector: 'app-edit-profile-business',
@@ -46,28 +47,7 @@ export default class EditProfileBusinessComponent implements OnInit {
   // Datos prefedinidos para paise sy ciudades
   //ToDo esto deberá estar vacio cuando nos conectemos a un API
   countries: any[] = [{ name: 'Colombia', code: 'CO' }];
-  cities: any[] = [
-    'Bogotá',
-    'Medellín',
-    'Cali',
-    'Barranquilla',
-    'Cartagena',
-    'Cúcuta',
-    'Bucaramanga',
-    'Pereira',
-    'Santa Marta',
-    'Ibagué',
-    'Soacha',
-    'Chía',
-    'Cota',
-    'Villavicencio',
-    'Manizales',
-    'Pasto',
-    'Montería',
-    'Neiva',
-    'Armenia',
-    'Sincelejo',
-  ];
+  cities = COLOMBIAN_CITIES;
   // variables para manejar la imagenes
   selectedImage: File | null = null;
   isUploading: boolean = false;
