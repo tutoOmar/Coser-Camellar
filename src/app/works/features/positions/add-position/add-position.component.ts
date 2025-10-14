@@ -31,6 +31,7 @@ import { TallerUSer } from '../../models/talleres.model';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { PositionsService } from '../../../services/positions.service';
 import { AnalyticsService } from '../../../../shared/data-access/analytics.service';
+import { COLOMBIAN_CITIES } from '../../../../shared/models/cities-harcode';
 @Component({
   selector: 'app-add-position',
   standalone: true,
@@ -58,28 +59,7 @@ export default class AddPositionComponent implements OnInit, AfterViewInit {
   imagePreview: string | ArrayBuffer | null = null;
   isUploading: boolean = false;
   //ToDo esto deberá estar vacio cuando nos conectemos a un API
-  cities: any[] = [
-    'Bogotá',
-    'Medellín',
-    'Cali',
-    'Barranquilla',
-    'Cartagena',
-    'Cúcuta',
-    'Bucaramanga',
-    'Pereira',
-    'Santa Marta',
-    'Ibagué',
-    'Soacha',
-    'Chía',
-    'Cota',
-    'Villavicencio',
-    'Manizales',
-    'Pasto',
-    'Montería',
-    'Neiva',
-    'Armenia',
-    'Sincelejo',
-  ];
+  cities = COLOMBIAN_CITIES;
 
   constructor(private fb: FormBuilder, private router: Router) {
     this.positionForm = this.fb.group({

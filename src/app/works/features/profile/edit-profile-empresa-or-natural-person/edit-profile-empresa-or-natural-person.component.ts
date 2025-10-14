@@ -11,6 +11,7 @@ import Swal from 'sweetalert2';
 import { NaturalPersonUser } from '../../models/natural-person.model';
 import { TypeUser } from '../../models/type-user.model';
 import { RegisterNaturalPersonComponent } from '../../../../auth/features/register-natural-person/register-natural-person.component';
+import { COLOMBIAN_CITIES } from '../../../../shared/models/cities-harcode';
 
 @Component({
   selector: 'app-edit-profile-empresa-or-natural-person',
@@ -37,28 +38,7 @@ export default class EditProfileEmpresaOrNaturalPersonComponent
   // Datos prefedinidos para paise sy ciudades
   //ToDo esto deberá estar vacio cuando nos conectemos a un API
   countries: any[] = [{ name: 'Colombia', code: 'CO' }];
-  cities: any[] = [
-    'Bogotá',
-    'Medellín',
-    'Cali',
-    'Barranquilla',
-    'Cartagena',
-    'Cúcuta',
-    'Bucaramanga',
-    'Pereira',
-    'Santa Marta',
-    'Ibagué',
-    'Soacha',
-    'Chía',
-    'Cota',
-    'Villavicencio',
-    'Manizales',
-    'Pasto',
-    'Montería',
-    'Neiva',
-    'Armenia',
-    'Sincelejo',
-  ];
+  cities = COLOMBIAN_CITIES;
   //=============     ng Functions =========================
   constructor(
     private router: Router,

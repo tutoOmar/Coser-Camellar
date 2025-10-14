@@ -21,6 +21,7 @@ import { WorksService } from '../../../services/works.service';
 import { toast } from 'ngx-sonner';
 import { Status } from '../../models/status.model';
 import { UploadImagesService } from '../../../../shared/data-access/upload-images.service';
+import { COLOMBIAN_CITIES } from '../../../../shared/models/cities-harcode';
 @Component({
   selector: 'app-edit-profile-worker',
   standalone: true,
@@ -44,28 +45,7 @@ export default class EditProfileWorkerComponent implements OnInit {
   // Datos prefedinidos para paise sy ciudades
   //ToDo esto deberá estar vacio cuando nos conectemos a un API
   countries: any[] = [{ name: 'Colombia', code: 'CO' }];
-  cities: any[] = [
-    'Bogotá',
-    'Medellín',
-    'Cali',
-    'Barranquilla',
-    'Cartagena',
-    'Cúcuta',
-    'Bucaramanga',
-    'Pereira',
-    'Santa Marta',
-    'Ibagué',
-    -'Soacha',
-    'Chía',
-    'Cota',
-    'Villavicencio',
-    'Manizales',
-    'Pasto',
-    'Montería',
-    'Neiva',
-    'Armenia',
-    'Sincelejo',
-  ];
+  cities = COLOMBIAN_CITIES;
   // variables para manejar la imagenes
   selectedImage: File | null = null;
   isUploading: boolean = false;
