@@ -1,27 +1,130 @@
-# TuChamba
+# 🧵 Coser & Camellar
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.8.
+**Coser & Camellar** es una plataforma que conecta **empresas del sector confección** con **costureros, satélites y talleres** que buscan oportunidades laborales reales y constantes.
 
-## Development server
+Nace como respuesta a un problema muy común en el sector textil:  
+talento disponible, pero **poca visibilidad, desorden en la información y falta de confianza** en los canales actuales (grupos de Facebook, WhatsApp, etc.).
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+---
 
-## Code scaffolding
+## 🚀 Propuesta de valor
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+- Dar **visibilidad** a costureros, satélites y talleres.
+- Facilitar **conexiones confiables** con empresas medianas y marcas.
+- Reducir tiempos muertos sin trabajo.
+- Centralizar información clara: capacidades, ubicación, experiencia y disponibilidad.
+- Construir **reputación** dentro de la plataforma.
 
-## Build
+---
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+## 🎯 Problema que resolvemos
 
-## Running unit tests
+Actualmente el sector se mueve principalmente en grupos informales donde:
+- No hay reputación ni validación.
+- Las publicaciones son incompletas o poco claras.
+- Se pierde información rápidamente.
+- Es difícil filtrar por capacidades reales.
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+**Coser & Camellar** organiza, valida y profesionaliza estas conexiones.
 
-## Running end-to-end tests
+---
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+## 🧩 Solución
 
-## Further help
+Una plataforma (inicialmente web y comunidades, luego app móvil) que ofrece:
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- Publicaciones estructuradas de oferta y demanda.
+- Perfiles de costureros, satélites y talleres.
+- Conexiones directas entre empresas y talento.
+- Opciones premium para empresas:
+  - Publicaciones destacadas
+  - Membresías
+  - Conexiones prioritarias
+
+---
+
+## 💰 Modelo de monetización
+
+- Empresas medianas del sector confección.
+- Servicios pagos como:
+  - Publicaciones destacadas
+  - Membresías mensuales
+  - Acceso a conexiones premium
+  - Activaciones en eventos
+
+Para costureros y talleres, el acceso base es **gratuito**.
+
+---
+
+## 📦 Estado del proyecto
+
+- MVP en desarrollo.
+- Validación inicial con comunidad real.
+- Uso actual de:
+  - Facebook
+  - WhatsApp
+- En proceso de:
+  - Desarrollo de app móvil (Android)
+  - Diseño UX/UI
+  - Alianzas y eventos presenciales
+
+---
+
+## 🎪 Eventos
+
+### Coser & Conectar
+Evento presencial que conecta:
+- Empresas
+- Operarios
+- Satélites
+- Talleres
+
+Incluye networking, formación, lanzamientos y activaciones de marcas aliadas.
+
+---
+
+## 🛠️ Tecnologías (actual / planeadas)
+
+- Frontend: Flutter
+- Backend: (por definir)
+- Base de datos: (por definir)
+- Comunicación inicial: WhatsApp / Facebook
+- Futuro:
+  - App Android
+  - Sistema de reputación
+  - Dashboard para empresas
+
+---
+
+## 🤝 Cómo contribuir
+
+Actualmente el proyecto está en etapa temprana.  
+Si quieres aportar en:
+
+- UX / UI
+- Desarrollo móvil o backend
+- Marketing
+- Estrategia de negocio
+- Sector confección / textil
+
+Puedes abrir un issue o contactar al equipo.
+
+---
+
+## 📍 Visión
+
+Convertir a **Coser & Camellar** en la plataforma de referencia del sector confección en Latinoamérica, profesionalizando el acceso al trabajo y reduciendo la informalidad.
+
+---
+
+## 👤 Autor
+
+**Omar**  
+Ingeniero | Emprendedor  
+Fundador de Coser & Camellar
+
+---
+
+## 📄 Licencia
+
+Este proyecto está bajo una licencia por definir.
