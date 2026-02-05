@@ -12,6 +12,7 @@ export interface Position {
   neighborhood: string;
   phone: string;
   statusPosition: StatusPositionEnum;
+  countVisitsPosition?: number;
 }
 
 export enum PaymentEnum {

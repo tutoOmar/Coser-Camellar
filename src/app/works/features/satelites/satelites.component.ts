@@ -1,10 +1,17 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { WorksService } from '../../services/works.service';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import CardSateliteComponent from '../../../shared/ui/card-satelite/card-satelite.component';
 import { SateliteUser } from '../models/satelite.model';
+import { AnalyticsService } from '../../../shared/data-access/analytics.service';
 
 const COLLECTION_DATA = 'satelite';
 
@@ -15,8 +22,10 @@ const COLLECTION_DATA = 'satelite';
   templateUrl: './satelites.component.html',
   styleUrl: './satelites.component.scss',
 })
-export default class SatelitesComponent {
+export default class SatelitesComponent implements AfterViewInit {
   service = inject(WorksService);
+  private analyticsService = inject(AnalyticsService);
+
   //Inyecciones importantes
   private _router = inject(Router);
   private searchSubject = new Subject<string>();
@@ -68,6 +77,12 @@ export default class SatelitesComponent {
       .subscribe((searchValue) => {
         this.searchValueSignal.set(searchValue);
       });
+  }
+  /**
+   *
+   */
+  ngAfterViewInit() {
+    this.analyticsService.logPageVisit('satelites');
   }
   /**
    *

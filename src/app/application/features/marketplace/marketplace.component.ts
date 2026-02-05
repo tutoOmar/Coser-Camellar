@@ -1,60 +1,170 @@
-import { Component, computed, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-
+import { Product } from '../../models/product.model';
+import { MarketplaceService } from '../../services/marketplace.service';
+import {
+  forkJoin,
+  map,
+  merge,
+  of,
+  Subject,
+  switchMap,
+  takeUntil,
+  tap,
+} from 'rxjs';
+import { StateProductEnum } from '../../models/state-product.enum';
+import { Router, RouterModule } from '@angular/router';
+import LoadingComponent from '../../../shared/ui/loading/loading.component';
+import WaButtonComponent from '../../../shared/ui/wa-button/wa-button.component';
+import { WorksService } from '../../../works/services/works.service';
+import { AnalyticsService } from '../../../shared/data-access/analytics.service';
+import { AuthStateService } from '../../../shared/data-access/auth-state.service';
+interface ProductWithPhone extends Product {
+  userPhone: string | null; // null si no hay usuario asociado
+}
 @Component({
   selector: 'app-marketplace',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule, LoadingComponent, WaButtonComponent],
   templateUrl: './marketplace.component.html',
   styleUrl: './marketplace.component.scss',
+  providers: [MarketplaceService],
 })
-export default class MarketplaceComponent {
-  // Simula los datos obtenidos del JSON
-  private fakeData = signal<any[]>([]);
+export default class MarketplaceComponent implements AfterViewInit {
+  private destroy$ = new Subject<void>();
+  // Inyección de servicios
+  private productService = inject(MarketplaceService);
+  private userService = inject(WorksService);
+  private analyticsService = inject(AnalyticsService);
+  private authService = inject(AuthStateService);
 
+  // Datos de los productos
+  private products = signal<ProductWithPhone[]>([]);
   // Computed signal para filtrar y procesar productos si es necesario
-  filteredItems = computed(() => this.fakeData());
+  isLoadingPage = signal<boolean>(true);
+  isLoginUser = signal<boolean>(false);
+  filteredItems = computed(() => this.products());
+  selectedImage: string | null = null;
 
   constructor() {}
 
   ngOnInit(): void {
     // Simula la carga de datos desde un archivo JSON
-    this.loadFakeData();
-  }
+    this.loadProducts();
 
-  private loadFakeData() {
-    // Aquí puedes reemplazar por una llamada HTTP en el futuro
-    this.fakeData.set([
-      {
-        id: 1,
-        title: 'Máquina de Coser Industrial Juki',
-        description: 'Máquina robusta ideal para costura pesada.',
-        price: 1500000,
-        image:
-          'https://maicoser.com/wp-content/uploads/2023/06/Juki-LZ-2280A-Maquina-Zigzadora-Usada.jpeg',
-        category: 'Máquinas de Coser',
+    this.authService.isAuthenticated$.pipe(takeUntil(this.destroy$)).subscribe({
+      next: (state) => {
+        if (state) {
+          this.isLoginUser.set(true);
+        }
       },
-      {
-        id: 2,
-        title: 'Maquina de corte 10 pulgadas de segunda',
-        description: 'Máquina especializada en corte',
-        price: 700000,
-        image:
-          'https://dcdn.mitiendanube.com/stores/001/068/511/products/511-64863e2314087a93af15906070959494-640-0.jpg',
-        category: 'Maquina de corte',
+      error: (error) => {
+        //this.loading.set(false);
+        console.error(error);
       },
-      {
-        id: 3,
-        title: 'Máquina de coser mecatronica',
-        description: 'Marca Jintex',
-        price: 3000000,
-        image: 'https://gavicoser.com/wp-content/uploads/2020/09/IMG_E3428.jpg',
-        category: 'Maquina de coser',
-      },
-    ]);
+    });
   }
-
-  onBuy(itemId: number) {
-    console.log(`Producto con ID ${itemId} comprado.`);
+  /**
+   *
+   */
+  ngAfterViewInit() {
+    this.analyticsService.logPageVisit('marketplace');
+  }
+  /**
+   * Funcion para abrir la imagen en grande
+   * @param image
+   */
+  openImage(image: string): void {
+    this.selectedImage = image;
+  }
+  /**
+   *  Cierra la imagen
+   */
+  closeImage(): void {
+    this.selectedImage = null;
+  }
+  /**
+   * Cargar productos completos del market place
+   */
+  loadProducts() {
+    this.productService
+      .loadProducts()
+      .pipe(
+        takeUntil(this.destroy$),
+        tap(() => this.isLoadingPage.set(false)),
+        switchMap((products) => {
+          if (!products || products.length === 0) {
+            return of();
+          }
+          const uniqueUserIds: string[] = Array.from(
+            new Set(
+              products
+                .map((product: Product) => product.userId)
+                .filter(
+                  (id: any): id is string => typeof id === 'string' && id !== ''
+                )
+            )
+          );
+          return this.userService.getUsersByIds(uniqueUserIds).pipe(
+            map((users) => {
+              // Crea un Map para una búsqueda eficiente de usuarios por userId
+              const userMap = new Map(users.map((user) => [user.userId, user]));
+              // Asocia cada producto con el teléfono del usuario correspondiente
+              const productsWithPhone = products.map((product: Product) => {
+                const user = userMap.get(product.userId); // Busca al usuario directamente por userId
+                return {
+                  ...product,
+                  userPhone: user ? user.phone : null, // Agrega el teléfono del usuario o null si no se encuentra
+                };
+              });
+              return productsWithPhone; // Devuelve el arreglo actualizado
+            })
+          );
+        }),
+        /**
+         * Se setter la signal con los productos pero ahora con el telfono del usuario
+         */
+        tap((productWithPhone) => {
+          this.products.set(productWithPhone);
+        })
+        //Se quita la pantalla de carga
+      )
+      .subscribe();
+  }
+  // Traducir state
+  translateState(stateProduct: string): string {
+    switch (stateProduct) {
+      case StateProductEnum.NEW:
+        return 'Nuevo';
+      case StateProductEnum.SECOND_HAND:
+        return 'De segunda';
+      default:
+        return '';
+    }
+  }
+  /**
+   * Mensaje personalizado de WhatsApp
+   */
+  personalizeMessage(title: string): string {
+    return (
+      'Hola vi que ofrecias el siguiente producto en Coser & Camellar: ' +
+      '*' +
+      title +
+      '*' +
+      '. Quisiera obtener más información por favor.'
+    );
+  }
+  /**
+   * Destruir el componete destruye susbcripciones
+   */
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

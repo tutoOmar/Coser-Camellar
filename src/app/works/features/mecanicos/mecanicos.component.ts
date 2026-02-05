@@ -1,9 +1,16 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import CardCalificationComponent from '../../../shared/ui/card-calification/card-calification.component';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { WorksService } from '../../services/works.service';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { AnalyticsService } from '../../../shared/data-access/analytics.service';
 
 const COLLECTION_DATA = 'trabajadores';
 const CONCEPT_FILTER = 'arreglo';
@@ -15,12 +22,14 @@ const CONCEPT_FILTER = 'arreglo';
   templateUrl: './mecanicos.component.html',
   styleUrl: './mecanicos.component.scss',
 })
-export default class MecanicosComponent {
+export default class MecanicosComponent implements AfterViewInit {
   //Inyecciones importantes
   private _router = inject(Router);
   private searchSubject = new Subject<string>();
   // Signal que recibe la lista de trabajadores desde el servicio
   workersListSignal = inject(WorksService).getWorkersSignal(COLLECTION_DATA);
+  private analyticsService = inject(AnalyticsService);
+
   // Debounce value for the search input
   searchValueSignal = signal<string>('');
   // Signal computada que filtra los trabajadores por alguna característica
@@ -65,6 +74,12 @@ export default class MecanicosComponent {
       .subscribe((searchValue) => {
         this.searchValueSignal.set(searchValue);
       });
+  }
+  /**
+   *
+   */
+  ngAfterViewInit() {
+    this.analyticsService.logPageVisit('mecanicos-maquinas');
   }
   /**
    *

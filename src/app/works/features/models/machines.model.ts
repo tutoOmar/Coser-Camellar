@@ -7,7 +7,11 @@ export enum Machines {
   DOS_AGUJAS = 'dos-agujas',
   DE_POSTE = 'de-poste',
   PLANA_MECATRONICA = 'plana-mecatronica',
+  FILETEADORA_MECATRONICA = 'fileteadora-mecatronica',
+  COLLARIN_MECATRONICA = 'collarin-mecatronica',
   PLANA_ELECTRONICA = 'plana-electronica',
+  FILETEADORA_ELECTRONICA = 'fileteadora-electronica',
+  COLLARIN_ELECTRONICA = 'collarin-electronica',
   RIBETEADORA = 'ribeteadora',
   PRESILLADORA = 'presilladora',
   CERRADORA = 'cerradora',
@@ -22,4 +26,5 @@ export enum Machines {
   CORTADORA_BANANA = 'cortadora-banana',
   CORTADORA_CIRCULAR = 'cortadora-circular',
   CORTADORA_INDUSTRIAL = 'cortadora-industrial',
+  CUCHILLA_DE_CORTE = 'cuchilla-de-corte',
 }

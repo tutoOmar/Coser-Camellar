@@ -1,0 +1,161 @@
+<!-- Card inicial para crear publicación -->
+<div
+  class="bg-white rounded-lg shadow-md overflow-hidden max-w-2xl mx-auto mb-6"
+  *ngIf="userData() as user"
+>
+  <div class="px-4 py-4">
+    <div
+      class="flex items-center gap-3 cursor-pointer"
+      (click)="abrirModalCrearPublicacion()"
+    >
+      <!-- Avatar del usuario actual -->
+      <div
+        class="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center"
+      >
+        <img
+          [src]="
+            user.photo ||
+            'https://firebasestorage.googleapis.com/v0/b/tu-chamba-cf127.appspot.com/o/avatarNormal.png?alt=media&token=e99bcd5b-0f98-40ba-a662-c50042122a7d'
+          "
+          alt="Tu avatar"
+          class="w-full h-full object-cover"
+        />
+      </div>
+
+      <!-- Input simulado -->
+      <div
+        class="flex-1 bg-gray-100 rounded-full px-4 py-3 text-gray-500 hover:bg-gray-200 transition-colors"
+      >
+        ¿Qué servicio ofreces hoy?
+      </div>
+
+      <!-- Botón de imagen -->
+      <button
+        class="p-3 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
+        (click)="$event.stopPropagation(); abrirModalCrearPublicacion()"
+      >
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path
+            d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"
+          />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+<!-- Modal para crear o editar publicación -->
+<app-publicaction-modal-register
+  [mostrar]="mostrarModalCrear || mostrarModalEditar"
+  [usuarioActual]="userData()"
+  [isSaving]="estaCreandoPublicacion || estaEditandoPublicacion"
+  [publicationToEdit]="this.publicationToEdit"
+  [actionPublicationModal]="actionPublication"
+  (cerrar)="cerrarModalCrearPublicacion()"
+  (crearOEditar)="crearOEditarPublicacion($event)"
+></app-publicaction-modal-register>
+<!-- Modal de Reporte --->
+<app-publication-report-modal
+  [mostrar]="mostrarModalReporte"
+  [publicacion]="publicacionAReportar"
+  [isSubmitting]="enviandoReporte"
+  [usuarioActual]="userData()"
+  (cerrar)="cerrarModalReporte()"
+  (enviar)="procesarReporte($event)"
+></app-publication-report-modal>
+<!-- Resto de publicaciones existentes -->
+<div class="grid grid-cols-1 md:grid-cols-1 gap-4 p-4">
+  <app-publication-card
+    *ngFor="let pub of publications"
+    [publicacion]="pub"
+    (eliminate)="eliminatePublication($event)"
+    (edit)="editPublication($event)"
+    (report)="reportPublication($event)"
+  ></app-publication-card>
+
+  <!-- Loading indicator -->
+  <div class="flex justify-center items-center py-8" *ngIf="loading">
+    <div class="flex items-center space-x-2">
+      <svg
+        class="animate-spin h-5 w-5 text-blue-600"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          class="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+        ></circle>
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        ></path>
+      </svg>
+      <p class="text-blue-600 font-medium">Cargando publicaciones...</p>
+    </div>
+  </div>
+
+  <!-- No more publications message -->
+  <div
+    class="text-center py-8"
+    *ngIf="!hasMore && publications.length > 0 && !loading"
+  >
+    <div class="bg-gray-50 rounded-lg p-6">
+      <svg
+        class="mx-auto h-12 w-12 text-gray-400 mb-4"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+      <p class="text-gray-600 font-medium">
+        ¡Has visto todas las publicaciones!
+      </p>
+      <p class="text-gray-500 text-sm mt-1">No hay más contenido disponible</p>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div
+    class="text-center py-16"
+    *ngIf="publications.length === 0 && !loading && !initialLoading"
+  >
+    <div class="bg-gray-50 rounded-lg p-8">
+      <svg
+        class="mx-auto h-16 w-16 text-gray-400 mb-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+        />
+      </svg>
+      <h3 class="text-lg font-semibold text-gray-900 mb-2">
+        No hay publicaciones disponibles
+      </h3>
+      <p class="text-gray-600 mb-6">
+        Sé el primero en compartir algo con la comunidad
+      </p>
+      <button
+        (click)="refreshPublications()"
+        class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+      >
+        Actualizar
+      </button>
+    </div>
+  </div>
+</div>

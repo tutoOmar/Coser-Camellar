@@ -1,17 +1,12 @@
-import {
-  Component,
-  inject,
-  input,
-  OnInit,
-  output,
-  WritableSignal,
-} from '@angular/core';
+import { Component, inject, input, output } from '@angular/core';
 import { WorkerUser } from '../../../works/features/models/worker.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import WaButtonComponent from '../wa-button/wa-button.component';
 import { AuthStateService } from '../../data-access/auth-state.service';
+import { WorksService } from '../../../works/services/works.service';
+import { Subject, take, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-card-calification',
@@ -21,6 +16,8 @@ import { AuthStateService } from '../../data-access/auth-state.service';
   styleUrl: './card-calification.component.scss',
 })
 export default class CardCalificationComponent {
+  private destroy$: Subject<void> = new Subject<void>();
+
   // Validamos el estado
   public authState = inject(AuthStateService).currentUser;
   // LLega la información del trabajador
@@ -32,7 +29,10 @@ export default class CardCalificationComponent {
   // Signal para el estado interno
   showMoreSignal = false;
   //
-  constructor(public authStateService: AuthStateService) {}
+  constructor(
+    public authStateService: AuthStateService,
+    private workService: WorksService
+  ) {}
   /**
    *
    */
@@ -65,5 +65,32 @@ export default class CardCalificationComponent {
     } else {
       return '';
     }
+  }
+  /**
+   * Acción de clic en el botón de WA
+   * Se aumenta un conteo de clic para saber a quienes
+   * buscan más seguido
+   */
+  handleWaButton() {
+    const workerData = this.worker();
+    const typeUser = workerData?.typeUSer;
+    if (workerData && typeUser) {
+      if (workerData.countContactViaWa) {
+        workerData.countContactViaWa++;
+      } else {
+        workerData.countContactViaWa = 1;
+      }
+      this.workService
+        .updateUser(typeUser, workerData, null)
+        .pipe(takeUntil(this.destroy$), take(1))
+        .subscribe();
+    }
+  }
+  /**
+   *
+   */
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

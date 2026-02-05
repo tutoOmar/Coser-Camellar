@@ -1,4 +1,10 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { TallerUSer } from '../models/talleres.model';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
@@ -6,23 +12,21 @@ import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import CardCalificationComponent from '../../../shared/ui/card-calification/card-calification.component';
 import CardSateliteComponent from '../../../shared/ui/card-satelite/card-satelite.component';
 import { WorksService } from '../../services/works.service';
+import { AnalyticsService } from '../../../shared/data-access/analytics.service';
 
 const COLLECTION_DATA = 'talleres';
 
 @Component({
   selector: 'app-talleres',
   standalone: true,
-  imports: [
-    CardCalificationComponent,
-    CardSateliteComponent,
-    CommonModule,
-    RouterModule,
-  ],
+  imports: [CardSateliteComponent, CommonModule, RouterModule],
   templateUrl: './talleres.component.html',
   styleUrl: './talleres.component.scss',
 })
-export default class TalleresComponent {
+export default class TalleresComponent implements AfterViewInit {
   service = inject(WorksService);
+  private analyticsService = inject(AnalyticsService);
+
   //Inyecciones importantes
   private _router = inject(Router);
   private searchSubject = new Subject<string>();
@@ -74,6 +78,12 @@ export default class TalleresComponent {
       .subscribe((searchValue) => {
         this.searchValueSignal.set(searchValue);
       });
+  }
+  /**
+   *
+   */
+  ngAfterViewInit() {
+    this.analyticsService.logPageVisit('talleres');
   }
   /**
    *

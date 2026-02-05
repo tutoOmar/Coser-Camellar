@@ -21,6 +21,8 @@ export interface WorkerUser {
   gender: GenderEnum;
   typeUSer?: TypeUser.TRABAJADOR;
   userId?: string;
+  countProfileVisits?: number;
+  countContactViaWa?: number;
 }
 //
 export enum GenderEnum {

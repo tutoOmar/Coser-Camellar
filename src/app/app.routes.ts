@@ -16,9 +16,18 @@ export const routes: Routes = [
     loadChildren: () => import('./application/features/application.routes'),
   },
   {
+    path: 'publication',
+    loadComponent: () => import('./shared/ui/header/header.component'),
+    loadChildren: () => import('./publication/publication.routes'),
+  },
+  {
     path: 'works',
     loadComponent: () => import('./shared/ui/header/header.component'),
     loadChildren: () => import('./works/features/works.routes'),
+  },
+  {
+    path: 'comercial',
+    loadChildren: () => import('./comercial/comercial.routes'),
   },
   {
     path: '**',

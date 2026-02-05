@@ -24,4 +24,6 @@ export interface TallerUSer {
   positions: Position[];
   typeUSer?: TypeUser.TALLER;
   userId?: string;
+  countProfileVisits?: number;
+  countContactViaWa?: number;
 }

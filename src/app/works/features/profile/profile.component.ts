@@ -1,36 +1,27 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import {
+  AfterViewInit,
+  Component,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { WorksService } from '../../services/works.service';
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
-import {
-  catchError,
-  of,
-  forkJoin,
-  map,
-  filter,
-  switchMap,
-  tap,
-  EMPTY,
-  mergeMap,
-  Observable,
-  Subject,
-  takeUntil,
-  mergeAll,
-  concatMap,
-  first,
-  from,
-} from 'rxjs';
+import { of, switchMap, tap, Subject, takeUntil } from 'rxjs';
 import { SateliteUser } from '../models/satelite.model';
 import { WorkerUser } from '../models/worker.model';
 import { TallerUSer } from '../models/talleres.model';
 import { CommonModule } from '@angular/common';
 import CardPositionComponent from '../../../shared/ui/card-position/card-position.component';
-import { user } from '@angular/fire/auth';
 import StartsCalificationComponent from '../../../shared/ui/starts-calification/starts-calification.component';
 import { PositionsService } from '../../services/positions.service';
 import { toast } from 'ngx-sonner';
 import { Position, StatusPositionEnum } from '../models/position.model';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import LoadingComponent from '../../../shared/ui/loading/loading.component';
+import { AnalyticsService } from '../../../shared/data-access/analytics.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-profile',
@@ -42,11 +33,12 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     StartsCalificationComponent,
     FormsModule,
     ReactiveFormsModule,
+    LoadingComponent,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
 })
-export default class ProfileComponent implements OnInit {
+export default class ProfileComponent implements OnInit, AfterViewInit {
   // Señal donde guardaremos el tipo de usuario para mostrar
   typeUser = signal<string>('');
   //
@@ -56,14 +48,16 @@ export default class ProfileComponent implements OnInit {
   // Señal donde guardaremos si es un satelite o un taller
   businessSignal = signal<TallerUSer | SateliteUser | null>(null);
   positionStatus = signal<boolean>(false);
+  isLoadingPage = signal<boolean>(true);
+  createProfileButton = signal<boolean>(false);
   //
   userId!: string | undefined;
-  COLLECTION_OPTIONS = ['satelite', 'trabajadores', 'talleres'];
   // Inyecciones de  servicios y otros necesarios
   private _auth = inject(AuthStateService);
-  private currentRoute = inject(ActivatedRoute);
   private userService = inject(WorksService);
   private positionService = inject(PositionsService);
+  private analyticsService = inject(AnalyticsService);
+  private _router = inject(Router);
   /**
    *
    */
@@ -74,7 +68,7 @@ export default class ProfileComponent implements OnInit {
         switchMap((state: any) => {
           if (state && state.uid) {
             const userId = state.uid;
-            return this.loadWorker(this.COLLECTION_OPTIONS, userId);
+            return this.loadWorker(userId);
           } else {
             return of(null);
           }
@@ -88,11 +82,28 @@ export default class ProfileComponent implements OnInit {
                 this.typeUser.set(typeUser);
               }
               if (typeUser == 'trabajadores') {
+                this.isLoadingPage.set(false);
                 this.workerSignal.set(user);
               } else if (typeUser == 'satelite' || typeUser == 'talleres') {
                 this.businessSignal.set(user);
+                this.isLoadingPage.set(false);
               }
             }
+          } else {
+            Swal.fire({
+              title: '¡Completa tu perfil!',
+              text: 'Para que tu perfil sea visible te recomendamos completarlo y así poder aparecer en las busquedas de otras personas.  ',
+              icon: 'info',
+              showCancelButton: true, // Muestra el botón de cancelar
+              confirmButtonText: 'Completar perfil', // Texto del botón de confirmación
+              cancelButtonText: 'Luego lo completo', // Texto del botón de cancelar
+            }).then((result) => {
+              if (result.isConfirmed) {
+                this._router.navigate(['/auth/register']);
+              } else if (result.isDismissed) {
+                Swal.close();
+              }
+            });
           }
         })
       )
@@ -100,11 +111,17 @@ export default class ProfileComponent implements OnInit {
   }
   /**
    *
+   */
+  ngAfterViewInit() {
+    this.analyticsService.logPageVisit('profile');
+  }
+  /**
+   *
    * @param collections
    * @param userId
    * @returns
    */
-  loadWorker(collections: string[], userId: string) {
+  loadWorker(userId: string) {
     return this.userService.getUserByUserIdInAnyCollection(userId);
   }
   /**Remueve guiónes de las palabras que normalmente las lleva*/
@@ -155,7 +172,6 @@ export default class ProfileComponent implements OnInit {
     if (user && userType) {
       user.positions.forEach((position: Position) => {
         if (position.id === positionId) {
-          console.log(checked);
           position.statusPosition = checked
             ? StatusPositionEnum.ACTIVO
             : StatusPositionEnum.INACTIVO;
@@ -166,12 +182,17 @@ export default class ProfileComponent implements OnInit {
       //ToDo: Toca analizar porque al conectar el backend molesta el estado
       this.positionService
         .updateStatusPosition(userType, user)
-        .pipe(
-          takeUntil(this.destroy$),
-          tap((res) => console.log('resouesta', res))
-        )
+        .pipe(takeUntil(this.destroy$))
         .subscribe();
     }
+  }
+  /**
+   *
+   * @param position
+   * @returns
+   */
+  isPositionActive(position: Position): boolean {
+    return position.statusPosition === StatusPositionEnum.ACTIVO;
   }
   /**
    *

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { AfterViewInit, Component, inject, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -13,6 +13,8 @@ import { Router, RouterLink } from '@angular/router';
 import { GoogleButtonComponent } from '../../ui/google-button/google-button.component';
 import { Subject, takeUntil } from 'rxjs';
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
+import { FacebookButtonComponent } from '../../ui/facebook-button/facebook-button.component';
+import { AnalyticsService } from '../../../shared/data-access/analytics.service';
 
 interface FormSignIn {
   email: FormControl<string | null>;
@@ -22,17 +24,24 @@ interface FormSignIn {
 @Component({
   selector: 'app-sign-in',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, GoogleButtonComponent],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    GoogleButtonComponent,
+    FacebookButtonComponent,
+  ],
   templateUrl: './sign-in.component.html',
   styles: ``,
 })
-export default class SignInComponent implements OnInit {
+export default class SignInComponent implements OnInit, AfterViewInit {
   // subject para destruir el componente
   private destroy$ = new Subject<void>(); // Controlador de destrucción
   //
   private _formBuilder = inject(NonNullableFormBuilder);
-  // Estado actual
+  // Servicios
   private authState = inject(AuthStateService);
+  private analyticsService = inject(AnalyticsService);
+
   /**
    *
    * @param field
@@ -66,9 +75,15 @@ export default class SignInComponent implements OnInit {
       .pipe(takeUntil(this.destroy$))
       .subscribe((state) => {
         if (state) {
-          this.router.navigate(['/auth/register']);
+          this.router.navigate(['/works']);
         }
       });
+  }
+  /**
+   *
+   */
+  ngAfterViewInit() {
+    this.analyticsService.logPageVisit('login');
   }
   /**
    * funcion que se encarga de manejar eventos del submit
@@ -87,7 +102,7 @@ export default class SignInComponent implements OnInit {
         email: email,
       });
       toast.success('Hola nuevamente!');
-      this.router.navigate(['/auth/register']);
+      this.router.navigate(['/works']);
     } catch (error) {
       toast.error('contraseña y/o correo invalida');
     }
@@ -97,11 +112,28 @@ export default class SignInComponent implements OnInit {
    */
   async submitWithGoogle() {
     try {
-      await this.authService.signWithGoogle();
+      await this.authService.signInWithGoogle();
       toast.success('Inicio de sesión exitosa');
-      this.router.navigate(['/auth/register']);
+      this.router.navigate(['/works']);
     } catch (error) {
       toast.error('ocurrio un error');
+    }
+  }
+  /**
+   *  funcion que se encarga de manejar eventos del inicio de sesión con cuenta de facebook
+   */
+  async submitWithFacebook() {
+    try {
+      await this.authService.signInWithFacebook();
+      toast.success('Inicio de sesión exitosa');
+      this.router.navigate(['/works']);
+    } catch (error: any) {
+      console.log(error.code);
+      if (error.code === 'auth/account-exists-with-different-credential') {
+        toast.error('Ya existe una cuenta con esta cuenta de Facebook');
+      } else {
+        toast.error('ocurrio un error');
+      }
     }
   }
   // Método OnDestroy para completar el Subject cuando el componente se destruya

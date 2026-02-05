@@ -1,0 +1,87 @@
+<h1 class="text-3xl text-blue-700 ml-6 mb-4 font-semibold">
+  Tus productos en venta
+</h1>
+<button
+  class="m-5 text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+  [routerLink]="['/aplication/marketplace/add']"
+>
+  + Vender un producto
+</button>
+
+<div
+  class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mx-6"
+  *ngIf="filteredItems().length > 0; else noWorkers"
+>
+  <div
+    *ngFor="let item of filteredItems(); let i = index"
+    class="border rounded-lg shadow-md p-4"
+  >
+    <img
+      [src]="item.image"
+      alt="{{ item.title }}"
+      class="w-full h-48 object-cover rounded-md mb-4 cursor-pointer"
+      (click)="openImage(item.image)"
+    />
+    <h2 class="text-lg font-semibold mb-2">{{ item.title }}</h2>
+    <div class="mb-2">
+      <p class="text-gray-600">
+        {{ getDisplayDescription(item.description, i) }}
+      </p>
+      <button
+        *ngIf="item.description.length > 100"
+        (click)="toggleDescription(i)"
+        class="text-blue-500 text-sm hover:underline"
+      >
+        {{ expandedDescriptions[i] ? "Ver menos" : "Ver más" }}
+      </button>
+    </div>
+    <p class="text-blue-600 font-bold text-lg mb-2">
+      $ {{ item.price | number : "1.0-0" }}
+    </p>
+    <p class="text-sm font-medium mb-4">
+      Estado: {{ translateState(item.state) }}
+    </p>
+    <div class="flex flex-row">
+      <button
+        [routerLink]="['/aplication/marketplace/edit', item.id]"
+        class="mr-3 bg-blue-500 text-white px-3 py-2 rounded-md hover:bg-blue-600"
+      >
+        Editar producto
+      </button>
+      <button
+        class="bg-red-500 text-white px-3 py-2 rounded-md hover:bg-red-600"
+        (click)="deleteProduct(item.id)"
+      >
+        Eliminar producto
+      </button>
+    </div>
+  </div>
+</div>
+
+<ng-template #noWorkers>
+  <div
+    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mx-6"
+  >
+    No tienes productos en venta actualmente
+  </div></ng-template
+>
+<!-- Modal -->
+<div
+  *ngIf="selectedImage"
+  class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+  (click)="closeImage()"
+>
+  <div class="relative" (click)="$event.stopPropagation()">
+    <img
+      [src]="selectedImage"
+      alt="Full Image"
+      class="max-w-full max-h-screen rounded-md"
+    />
+    <button
+      (click)="closeImage()"
+      class="absolute top-2 right-2 bg-blue-600 text-white rounded-full p-2 hover:bg-red-600"
+    >
+      Cerrar <span class="text-red-400">X</span>
+    </button>
+  </div>
+</div>

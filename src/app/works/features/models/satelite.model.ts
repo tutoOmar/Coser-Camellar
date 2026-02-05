@@ -24,4 +24,6 @@ export interface SateliteUser {
   positions: Position[];
   typeUSer?: TypeUser.SATELITE;
   userId?: string;
+  countProfileVisits?: number;
+  countContactViaWa?: number;
 }

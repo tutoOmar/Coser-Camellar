@@ -21,15 +21,11 @@ import {
 import {
   catchError,
   combineLatest,
-  first,
-  forkJoin,
   from,
   map,
-  merge,
   Observable,
   of,
   switchMap,
-  tap,
 } from 'rxjs';
 import { WorkerUser } from '../features/models/worker.model';
 import { AuthStateService } from '../../shared/data-access/auth-state.service';
@@ -49,7 +45,11 @@ export class WorksService {
   private _auth = inject(AuthStateService);
   private firestore = inject(Firestore);
 
-  // Método para subir un archivo (imagen)
+  /**
+   * Método para subir imagenes incialmente, aunque como está programado se puede subir de todo en el momento
+   * @param file
+   * @returns
+   */
   private uploadImage(file: File): Observable<string> {
     const filepath = `news/${file.name}`;
     const fileRef = ref(this.storage, filepath);
@@ -182,9 +182,9 @@ export class WorksService {
       where('userId', '==', userId),
       limit(1) // Limita a solo un documento
     );
-
     return collectionData(userQuery, { idField: 'id' }).pipe(
       catchError((error) => {
+        console.log('Hubo error');
         return of(null);
       }) // Si hay un error (usuario no encontrado), retorna null
     );
@@ -204,11 +204,9 @@ export class WorksService {
     const tallerQuery = this.getUserByUserIdAndCollection(userId, 'talleres');
     const sateliteQuery = this.getUserByUserIdAndCollection(userId, 'satelite');
     return combineLatest([workerQuery, tallerQuery, sateliteQuery]).pipe(
-      map(([workers, tallers, satelites]) => [
-        ...workers,
-        ...tallers,
-        ...satelites,
-      ]),
+      map(([workers, tallers, satelites]) => {
+        return [...workers, ...tallers, ...satelites];
+      }),
       catchError((error) => {
         return of([]);
       })
@@ -225,11 +223,32 @@ export class WorksService {
     const workerQuery = this.getUserByIdAndCollection(userId, 'trabajadores');
     const tallerQuery = this.getUserByIdAndCollection(userId, 'talleres');
     const sateliteQuery = this.getUserByIdAndCollection(userId, 'satelite');
-    return merge(
-      workerQuery.pipe(map((worker) => worker as WorkerUser[])),
-      tallerQuery.pipe(map((taller) => taller as TallerUSer[])),
-      sateliteQuery.pipe(map((satelite) => satelite as SateliteUser[]))
-    ).pipe(catchError(() => of([])));
+    return combineLatest([workerQuery, tallerQuery, sateliteQuery]).pipe(
+      map(([workers, tallers, satelites]) => {
+        return [...workers, ...tallers, ...satelites];
+      }),
+      catchError((error) => {
+        return of([]);
+      })
+    );
+  }
+  /**
+   * Obtiene usuarios únicos de las tres colecciones basado en sus IDs
+   * @param userIds Array de IDs de usuario
+   * @returns Observable de un array de usuarios combinados
+   */
+  getUsersByIds(
+    userIds: string[]
+  ): Observable<(WorkerUser | TallerUSer | SateliteUser)[]> {
+    const userObservables = userIds.map((userId) =>
+      this.getUserByUserIdInAnyCollection(userId).pipe(
+        map((users) => users?.[0] || null), // Selecciona el primer usuario encontrado o null
+        catchError(() => of(null)) // Maneja errores devolviendo null
+      )
+    );
+    return combineLatest(userObservables).pipe(
+      map((results) => results.filter((user) => user !== null)) // Filtra los usuarios no encontrados
+    );
   }
   /**
    * Se obtiene el signal de trabajadores
@@ -262,7 +281,10 @@ export class WorksService {
     const docRef = doc(_collection, idUser);
     return from(updateDoc(docRef, { ...user }));
   }
-  // Método para verificar si el usuario ya existe en alguna de las colecciones
+  /**
+   * Método para verificar si el usuario ya existe en alguna de las colecciones
+   * @returns TRue o false si el usuario ya tiene un perfil como trabajador o satelite o taller.
+   */
   checkUserExists(): Observable<boolean> {
     const currentUserId = this._auth.currentUser?.uid;
     if (!currentUserId) {

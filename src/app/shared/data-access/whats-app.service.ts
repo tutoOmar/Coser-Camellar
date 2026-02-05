@@ -3,7 +3,7 @@ import { AuthStateService } from './auth-state.service';
 import { Observable, Subject, switchMap, take } from 'rxjs';
 import { toast } from 'ngx-sonner';
 import { Router } from '@angular/router';
-
+import Swal from 'sweetalert2';
 @Injectable({
   providedIn: 'root',
 })
@@ -26,7 +26,13 @@ export class WhatsAppService {
               if (authState) {
                 this.openWhatsApp(phoneNumber, message);
               } else {
-                toast.error('¿Aún no tienes cuenta o has iniciado sesión?');
+                Swal.fire({
+                  title: '¿Quieres contactar a este trabajador(a)?',
+                  text: 'Regístrate ahora para enviarle mensajes por WhatsApp y empezar a trabajar juntos en tus proyectos de confección. ¡Es rápido y fácil! 😊',
+                  icon: 'warning', // Puedes usar 'success', 'error', 'warning', 'info', 'question'
+                  showConfirmButton: true, // Opcional: Oculta el botón de confirmación
+                  confirmButtonText: 'Registrarme ahora', // Personaliza el botón
+                });
                 this.router.navigate(['/auth/sign-up']);
               }
               return [];
@@ -46,7 +52,7 @@ export class WhatsAppService {
   }
 
   private openWhatsApp(phoneNumber: string, message: string) {
-    // Elimina todos los caracteres no numéricos
+    // Elimina todos los caracteres no numéricos-
     let formattedNumber = phoneNumber.trim().replace(/\D/g, '');
 
     // Agrega el prefijo "57" de Colombia si no está presente al inicio del número

@@ -1,0 +1,228 @@
+<!-- Modal de Reporte -->
+<div
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+  *ngIf="mostrar"
+  (click)="cerrarModal()"
+>
+  <div
+    class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Header del modal -->
+    <div class="flex items-center justify-between p-6 border-b border-gray-200">
+      <h3 class="text-lg font-semibold text-gray-900">Reportar Publicación</h3>
+      <button
+        (click)="cerrarModal()"
+        class="text-gray-400 hover:text-gray-600 transition-colors"
+      >
+        <svg
+          class="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          ></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Contenido del modal -->
+    <div class="p-6">
+      <!-- Información de la publicación -->
+      <div class="mb-6 p-4 bg-gray-50 rounded-lg" *ngIf="publicacion">
+        <p class="text-sm text-gray-600 mb-2">
+          Vas a reportar la publicación de:
+        </p>
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full bg-gray-200 overflow-hidden">
+            <img
+              [src]="publicacion.autor.imageAvatarUrl || avatarDefault"
+              alt="Avatar usuario"
+              class="w-full h-full object-cover"
+            />
+          </div>
+          <div>
+            <p class="font-medium text-gray-900">
+              {{ publicacion.autor.name }}
+            </p>
+            <p class="text-sm text-gray-500">{{ publicacion.number }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Razones predefinidas -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-3">
+          Selecciona la razón del reporte:
+        </label>
+        <div class="space-y-2">
+          <label class="flex items-center">
+            <input
+              type="radio"
+              name="razonReporte"
+              value="contenido-explicito"
+              [(ngModel)]="razonSeleccionada"
+              class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
+            />
+            <span class="ml-2 text-sm text-gray-700"
+              >Contenido explícito o sexual</span
+            >
+          </label>
+
+          <label class="flex items-center">
+            <input
+              type="radio"
+              name="razonReporte"
+              value="violencia"
+              [(ngModel)]="razonSeleccionada"
+              class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
+            />
+            <span class="ml-2 text-sm text-gray-700"
+              >Violencia o contenido perturbador</span
+            >
+          </label>
+
+          <label class="flex items-center">
+            <input
+              type="radio"
+              name="razonReporte"
+              value="derechos-autor"
+              [(ngModel)]="razonSeleccionada"
+              class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
+            />
+            <span class="ml-2 text-sm text-gray-700"
+              >Violación de derechos de autor</span
+            >
+          </label>
+
+          <label class="flex items-center">
+            <input
+              type="radio"
+              name="razonReporte"
+              value="spam"
+              [(ngModel)]="razonSeleccionada"
+              class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
+            />
+            <span class="ml-2 text-sm text-gray-700"
+              >Spam o contenido repetitivo</span
+            >
+          </label>
+
+          <label class="flex items-center">
+            <input
+              type="radio"
+              name="razonReporte"
+              value="informacion-falsa"
+              [(ngModel)]="razonSeleccionada"
+              class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
+            />
+            <span class="ml-2 text-sm text-gray-700"
+              >Información falsa o engañosa</span
+            >
+          </label>
+
+          <label class="flex items-center">
+            <input
+              type="radio"
+              name="razonReporte"
+              value="otro"
+              [(ngModel)]="razonSeleccionada"
+              class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
+            />
+            <span class="ml-2 text-sm text-gray-700">Otro motivo</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Textarea para detalles adicionales -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Describe el problema (opcional):
+        </label>
+        <textarea
+          [(ngModel)]="detallesReporte"
+          rows="4"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none"
+          placeholder="Proporciona más detalles sobre por qué estás reportando esta publicación..."
+          maxlength="500"
+        ></textarea>
+        <p class="text-xs text-gray-500 mt-1">
+          Máximo 500 caracteres ({{ contadorCaracteres }}/500)
+        </p>
+      </div>
+
+      <!-- Advertencia -->
+      <div class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <div class="flex">
+          <svg
+            class="w-5 h-5 text-yellow-400 mr-2 mt-0.5"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+              clip-rule="evenodd"
+            ></path>
+          </svg>
+          <div>
+            <p class="text-sm text-yellow-800 font-medium">Importante</p>
+            <p class="text-sm text-yellow-700 mt-1">
+              Los reportes falsos pueden resultar en la suspensión de tu cuenta.
+              Asegúrate de que el contenido realmente viola nuestras políticas.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer con botones -->
+    <div
+      class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3"
+    >
+      <button
+        (click)="cerrarModal()"
+        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+        [disabled]="isSubmitting"
+      >
+        Cancelar
+      </button>
+      <button
+        (click)="enviarReporte()"
+        class="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        [disabled]="!puedeEnviarReporte || isSubmitting"
+      >
+        <!-- Loading spinner -->
+        <span class="flex items-center" *ngIf="isSubmitting">
+          <svg
+            class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          Enviando...
+        </span>
+        <span *ngIf="!isSubmitting">Enviar Reporte</span>
+      </button>
+    </div>
+  </div>
+</div>

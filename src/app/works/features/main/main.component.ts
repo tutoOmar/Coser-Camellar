@@ -1,48 +1,59 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import CardCalificationComponent from '../../../shared/ui/card-calification/card-calification.component';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { WorksService } from '../../services/works.service';
-import {
-  Subject,
-  debounceTime,
-  distinctUntilChanged,
-  takeUntil,
-  tap,
-} from 'rxjs';
+import { Subject, catchError, filter, switchMap, takeUntil, tap } from 'rxjs';
 import { AuthStateService } from '../../../shared/data-access/auth-state.service';
+import LoadingComponent from '../../../shared/ui/loading/loading.component';
+import { AnalyticsService } from '../../../shared/data-access/analytics.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-main',
   standalone: true,
-  imports: [CardCalificationComponent, CommonModule, RouterModule],
+  imports: [
+    CardCalificationComponent,
+    CommonModule,
+    RouterModule,
+    LoadingComponent,
+  ],
   templateUrl: './main.component.html',
   styleUrl: './main.component.scss',
+  providers: [AnalyticsService],
 })
-export default class MainComponent implements OnInit {
+export default class MainComponent implements OnInit, AfterViewInit {
   private destroy$ = new Subject<void>();
+  private isComponentActive = true;
+  // Inyecciones
   private authState = inject(AuthStateService);
   private userService = inject(WorksService);
   private _router = inject(Router);
+  private analyticsService = inject(AnalyticsService);
+  workersListSignal = inject(WorksService).getWorkersSignal('trabajadores');
   readonly MAX_DISPLAY_COUNT = 5;
 
   currentStatusState = signal<boolean>(false);
   searchValueSignal = signal<string>('');
-  workersListSignal = inject(WorksService).getWorkersSignal('trabajadores');
-
+  isLoading = signal<boolean>(true);
   // Categorías disponibles
   categories = ['costura', 'corte', 'patinaje', 'arreglo', 'patronaje'];
 
-  // Trabajadores clasificados por categoría
   categorizedWorkersSignal = computed(() => {
     const workers = this.workersListSignal();
-    const searchValue = this.searchValueSignal().toLowerCase();
+    const searchValue = this.searchValueSignal().toLowerCase().trim();
 
     if (!workers) return {};
 
-    const categorizedWorkers: Record<string, any[]> = {};
-
     // Inicializar las categorías con listas vacías
+    const categorizedWorkers: Record<string, any[]> = {};
     this.categories.forEach((category) => {
       categorizedWorkers[category] = [];
     });
@@ -53,22 +64,25 @@ export default class MainComponent implements OnInit {
         firstSpecialty?.includes(category)
       );
 
-      if (matchingCategory) {
-        const matchesSearch = searchValue
-          ? worker.name.toLowerCase().includes(searchValue) ||
-            worker.city.toLowerCase().includes(searchValue) ||
-            worker.country.toLowerCase().includes(searchValue)
-          : true;
+      // Lógica de filtrado mejorada
+      const matchesSearch =
+        !searchValue ||
+        worker.name.toLowerCase().includes(searchValue) ||
+        worker.city.toLowerCase().includes(searchValue) ||
+        worker.country.toLowerCase().includes(searchValue) ||
+        firstSpecialty?.includes(searchValue);
 
-        if (
-          matchesSearch &&
-          categorizedWorkers[matchingCategory].length < this.MAX_DISPLAY_COUNT
-        ) {
-          categorizedWorkers[matchingCategory].push(worker);
-        }
+      if (matchingCategory && matchesSearch) {
+        categorizedWorkers[matchingCategory].push(worker);
       }
     });
-    return categorizedWorkers;
+
+    // Filtrar y retornar solo las categorías con trabajadores
+    return Object.fromEntries(
+      Object.entries(categorizedWorkers).filter(
+        ([, workers]) => workers.length > 0
+      )
+    );
   });
 
   constructor() {
@@ -79,9 +93,54 @@ export default class MainComponent implements OnInit {
     this.authState.isAuthenticated$
       .pipe(
         takeUntil(this.destroy$),
-        tap((authStatus) => this.currentStatusState.set(authStatus))
+        filter(() => this.isComponentActive),
+        tap((authStatus) => this.currentStatusState.set(authStatus)),
+        switchMap(() => {
+          return this.userService.checkUserExists();
+        }),
+        catchError((error) => {
+          console.error(
+            'Error al verificar autenticación o existencia de usuario:',
+            error
+          );
+          Swal.fire({
+            title: 'Error',
+            text: 'Hubo un problema al verificar tu autenticación. Por favor, intenta más tarde.',
+            icon: 'error',
+            confirmButtonText: 'Aceptar',
+          });
+          this.isLoading.set(false);
+          return []; // Devuelve un observable vacío para continuar con la ejecución
+        })
       )
-      .subscribe();
+      .subscribe((stateUserExist) => {
+        //Debemos validar que sí el status del usario en el registro está incompleto pero existe ya un usuario lo reenvie al register para que finalice su registro
+        if (!stateUserExist && this.currentStatusState()) {
+          /** Esto se hace para cuando se regist pero aun no haya ingresado datos no pueda ir, es mejor manejarlo con un guard */
+          // this._router.navigate(['/auth/register']);
+          Swal.fire({
+            title: '¡Completa tu perfil!',
+            text: 'Para que tu perfil sea visible te recomendamos completarlo y así poder aparecer en las busquedas de otras personas.  ',
+            icon: 'info',
+            showCancelButton: true, // Muestra el botón de cancelar
+            confirmButtonText: 'Completar perfil', // Texto del botón de confirmación
+            cancelButtonText: 'Luego lo completo', // Texto del botón de cancelar
+          }).then((result) => {
+            if (result.isConfirmed) {
+              this._router.navigate(['/auth/register']);
+            } else if (result.isDismissed) {
+              Swal.close();
+            }
+          });
+        }
+        this.isLoading.set(false);
+      });
+  }
+  /**
+   *
+   */
+  ngAfterViewInit() {
+    this.analyticsService.logPageVisit('worksAll');
   }
 
   onSearch(value: any) {
@@ -138,5 +197,13 @@ export default class MainComponent implements OnInit {
       default:
         return '';
     }
+  }
+  /**
+   * Destruir el componete destruye susbcripciones
+   */
+  ngOnDestroy() {
+    this.isComponentActive = false;
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

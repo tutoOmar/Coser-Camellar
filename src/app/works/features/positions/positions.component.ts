@@ -1,4 +1,10 @@
-import { Component, computed, signal, inject } from '@angular/core';
+import {
+  Component,
+  computed,
+  signal,
+  inject,
+  AfterViewInit,
+} from '@angular/core';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { WorksService } from '../../services/works.service';
 import { SateliteUser } from '../models/satelite.model';
@@ -8,6 +14,7 @@ import CardSateliteComponent from '../../../shared/ui/card-satelite/card-satelit
 import { TallerUSer } from '../models/talleres.model';
 import { Position } from '../models/position.model';
 import CardPositionComponent from '../../../shared/ui/card-position/card-position.component';
+import { AnalyticsService } from '../../../shared/data-access/analytics.service';
 
 const COLLECTION_DATA_TALLER = 'talleres';
 const COLLECTION_DATA_SATELITE = 'satelite';
@@ -19,11 +26,13 @@ const COLLECTION_DATA_SATELITE = 'satelite';
   templateUrl: './positions.component.html',
   styleUrl: './positions.component.scss',
 })
-export default class PositionsComponent {
+export default class PositionsComponent implements AfterViewInit {
   service = inject(WorksService);
   //Inyecciones importantes
   private _router = inject(Router);
   private searchSubject = new Subject<string>();
+  private analyticsService = inject(AnalyticsService);
+
   // Signal que recibe la lista de trabajadores desde el servicio
   sateliteListSignal = inject(WorksService).getSateliteSignal(
     COLLECTION_DATA_SATELITE
@@ -127,6 +136,12 @@ export default class PositionsComponent {
       .subscribe((searchValue) => {
         this.searchValueSignal.set(searchValue);
       });
+  }
+  /**
+   *
+   */
+  ngAfterViewInit() {
+    this.analyticsService.logPageVisit('ofertas-laborales');
   }
   /**
    *
